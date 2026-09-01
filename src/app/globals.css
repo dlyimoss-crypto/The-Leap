@@ -1,0 +1,150 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-karla);
+  --font-mono: var(--font-jetbrains-mono);
+  --font-heading: var(--font-sora);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-gold: var(--gold);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/*
+  The Leap brand tokens — from the visual-identity decision (ticket 05,
+  .scratch/the-leap-mvp/issues/05-visual-identity.md). Accent hues (primary,
+  gold, destructive, success) hold constant across light/dark by design;
+  only grounds and text invert.
+*/
+:root {
+  --background: #FBF7F0;
+  --foreground: #1A2030;
+  --card: #FFFFFF;
+  --card-foreground: #1A2030;
+  --popover: #FFFFFF;
+  --popover-foreground: #1A2030;
+  --primary: #DD7327;
+  --primary-foreground: #FFF8EF;
+  --secondary: #F1ECE1;
+  --secondary-foreground: #1A2030;
+  --muted: #F1ECE1;
+  --muted-foreground: #5B6178;
+  --accent: #F1ECE1;
+  --accent-foreground: #1A2030;
+  --destructive: #B4402A;
+  --destructive-foreground: #FFF8EF;
+  --success: #4C7A16;
+  --success-foreground: #FFF8EF;
+  --gold: #C98A1F;
+  --border: rgba(26, 32, 48, 0.13);
+  --input: rgba(26, 32, 48, 0.13);
+  --ring: #DD7327;
+  --chart-1: #DD7327;
+  --chart-2: #C98A1F;
+  --chart-3: #4C7A16;
+  --chart-4: #5B6178;
+  --chart-5: #B4402A;
+  --radius: 0.75rem;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #1A2030;
+  --sidebar-primary: #DD7327;
+  --sidebar-primary-foreground: #FFF8EF;
+  --sidebar-accent: #F1ECE1;
+  --sidebar-accent-foreground: #1A2030;
+  --sidebar-border: rgba(26, 32, 48, 0.13);
+  --sidebar-ring: #DD7327;
+}
+
+.dark {
+  --background: #10141F;
+  --foreground: #F2EFE7;
+  --card: #181F30;
+  --card-foreground: #F2EFE7;
+  --popover: #181F30;
+  --popover-foreground: #F2EFE7;
+  --primary: #DD7327;
+  --primary-foreground: #FFF8EF;
+  --secondary: #1F273A;
+  --secondary-foreground: #F2EFE7;
+  --muted: #1F273A;
+  --muted-foreground: #A6ACC0;
+  --accent: #1F273A;
+  --accent-foreground: #F2EFE7;
+  --destructive: #E68A76;
+  --destructive-foreground: #10141F;
+  --success: #9AD35C;
+  --success-foreground: #10141F;
+  --gold: #E7B44E;
+  --border: rgba(242, 239, 231, 0.14);
+  --input: rgba(242, 239, 231, 0.14);
+  --ring: #DD7327;
+  --chart-1: #DD7327;
+  --chart-2: #E7B44E;
+  --chart-3: #9AD35C;
+  --chart-4: #A6ACC0;
+  --chart-5: #E68A76;
+  --sidebar: #181F30;
+  --sidebar-foreground: #F2EFE7;
+  --sidebar-primary: #DD7327;
+  --sidebar-primary-foreground: #FFF8EF;
+  --sidebar-accent: #1F273A;
+  --sidebar-accent-foreground: #F2EFE7;
+  --sidebar-border: rgba(242, 239, 231, 0.14);
+  --sidebar-ring: #DD7327;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+}
