@@ -7,6 +7,7 @@ import {
   getJourneySession,
   type JourneySession,
 } from "@/lib/content/journeys";
+import { getScripture } from "@/lib/content/scripture";
 
 function Step({
   label,
@@ -39,6 +40,9 @@ export default async function JourneySessionPage(
   }
 
   const isLastDay = dayNumber >= journey.durationDays;
+  const passages = session.scriptureReference
+    .split(";")
+    .map((reference) => getScripture(reference.trim()));
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-10">
@@ -53,7 +57,30 @@ export default async function JourneySessionPage(
       </div>
 
       <div className="space-y-5 rounded-xl border bg-card p-5">
-        <Step label="Scripture">{session.scriptureReference}</Step>
+        <div className="space-y-3">
+          <p className="text-xs font-medium uppercase tracking-wide text-primary">
+            Scripture
+          </p>
+          {passages.map((passage, index) =>
+            passage ? (
+              <blockquote
+                key={passage.reference}
+                className="space-y-1 border-l-2 border-primary/30 pl-3"
+              >
+                <p className="text-foreground italic">
+                  &ldquo;{passage.text}&rdquo;
+                </p>
+                <cite className="block text-sm text-muted-foreground not-italic">
+                  {passage.reference} ({passage.translation})
+                </cite>
+              </blockquote>
+            ) : (
+              <p key={index} className="text-sm text-muted-foreground">
+                {session.scriptureReference.split(";")[index]?.trim()}
+              </p>
+            ),
+          )}
+        </div>
         <Step label="Explore">{session.explore}</Step>
         <Step label="Reflect">{session.reflect}</Step>
         {session.pray && <Step label="Pray">{session.pray}</Step>}
