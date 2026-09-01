@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { getScripture } from "./scripture";
+import { getScripture, getScripturePassages } from "./scripture";
 
 describe("getScripture", () => {
   test("returns the WEB text for a known reference", () => {
@@ -16,5 +16,23 @@ describe("getScripture", () => {
 
   test("returns null for a reference matching an Object.prototype key", () => {
     expect(getScripture("__proto__")).toBeNull();
+  });
+});
+
+describe("getScripturePassages", () => {
+  test("splits a semicolon-joined reference into individually looked-up passages", () => {
+    const result = getScripturePassages("John 1:14; Nonexistent 99:99");
+
+    expect(result).toEqual([
+      {
+        reference: "John 1:14",
+        passage: {
+          reference: "John 1:14",
+          translation: "WEB",
+          text: "The Word became flesh, and lived among us. We saw his glory, such glory as of the one and only Son of the Father, full of grace and truth.",
+        },
+      },
+      { reference: "Nonexistent 99:99", passage: null },
+    ]);
   });
 });

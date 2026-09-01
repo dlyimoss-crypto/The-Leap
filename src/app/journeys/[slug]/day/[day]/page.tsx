@@ -7,7 +7,7 @@ import {
   getJourneySession,
   type JourneySession,
 } from "@/lib/content/journeys";
-import { getScripture } from "@/lib/content/scripture";
+import { getScripturePassages } from "@/lib/content/scripture";
 
 function Step({
   label,
@@ -40,9 +40,7 @@ export default async function JourneySessionPage(
   }
 
   const isLastDay = dayNumber >= journey.durationDays;
-  const passages = session.scriptureReference
-    .split(";")
-    .map((reference) => getScripture(reference.trim()));
+  const passages = getScripturePassages(session.scriptureReference);
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-10">
@@ -61,10 +59,10 @@ export default async function JourneySessionPage(
           <p className="text-xs font-medium uppercase tracking-wide text-primary">
             Scripture
           </p>
-          {passages.map((passage, index) =>
+          {passages.map(({ reference, passage }) =>
             passage ? (
               <blockquote
-                key={passage.reference}
+                key={reference}
                 className="space-y-1 border-l-2 border-primary/30 pl-3"
               >
                 <p className="text-foreground italic">
@@ -75,8 +73,8 @@ export default async function JourneySessionPage(
                 </cite>
               </blockquote>
             ) : (
-              <p key={index} className="text-sm text-muted-foreground">
-                {session.scriptureReference.split(";")[index]?.trim()}
+              <p key={reference} className="text-sm text-muted-foreground">
+                {reference}
               </p>
             ),
           )}

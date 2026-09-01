@@ -35,3 +35,12 @@ export function getScripture(reference: string): ScripturePassage | null {
   }
   return { reference, translation: entry.translation, text: entry.text };
 }
+
+export function getScripturePassages(
+  combinedReference: string,
+): Array<{ reference: string; passage: ScripturePassage | null }> {
+  return combinedReference.split(";").map((raw) => {
+    const reference = raw.trim();
+    return { reference, passage: getScripture(reference) };
+  });
+}
