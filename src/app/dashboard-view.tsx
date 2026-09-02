@@ -32,6 +32,14 @@ export function DashboardView({
           >
             Prayer Room
           </Button>
+          <Button
+            render={<Link href="/community" />}
+            nativeButton={false}
+            variant="ghost"
+            size="sm"
+          >
+            Community
+          </Button>
           <form action={signOut}>
             <Button type="submit" variant="ghost" size="sm">
               Sign out

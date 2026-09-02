@@ -2,21 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { requireActiveUser, requireUser } from "@/lib/supabase/authorize";
 import { checkForCrisisLanguage } from "@/lib/crisis-detection";
-
-async function requireUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  return { supabase, user };
-}
 
 export async function postPrayerRequest(formData: FormData) {
   const body = String(formData.get("body") ?? "").trim();
@@ -27,18 +14,7 @@ export async function postPrayerRequest(formData: FormData) {
     redirect("/prayer-room");
   }
 
-  const { supabase, user } = await requireUser();
-
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("is_banned")
-    .eq("id", user.id)
-    .single();
-
-  // Fail closed: if we can't confirm the user isn't banned, don't post.
-  if (profileError || profile?.is_banned) {
-    redirect("/prayer-room");
-  }
+  const { supabase, user } = await requireActiveUser("/prayer-room");
 
   const { data: inserted, error } = await supabase
     .from("prayer_requests")
