@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -8,6 +7,7 @@ import {
   type JourneySession,
 } from "@/lib/content/journeys";
 import { getScripturePassages } from "@/lib/content/scripture";
+import { completeSession } from "./actions";
 
 function Step({
   label,
@@ -86,29 +86,29 @@ export default async function JourneySessionPage(
         <Step label="Connect">{session.connect}</Step>
       </div>
 
-      {isLastDay ? (
+      {isLastDay && (
         <div className="space-y-3 text-center">
           <h2 className="text-xl font-heading font-semibold">
             {journey.completionTitle}
           </h2>
-          <Button
-            render={<Link href="/" />}
-            nativeButton={false}
-            size="lg"
-            className="w-full"
-          >
-            Continue
-          </Button>
         </div>
-      ) : (
-        <Button
-          render={<Link href={`/journeys/${slug}/day/${dayNumber + 1}`} />}
-          nativeButton={false}
-          size="lg"
-        >
-          {session.nextTopic ? `Continue: ${session.nextTopic}` : "Continue"}
-        </Button>
       )}
+      <form
+        action={completeSession.bind(
+          null,
+          slug,
+          dayNumber,
+          journey.durationDays,
+        )}
+      >
+        <Button type="submit" size="lg" className="w-full">
+          {isLastDay
+            ? "Continue"
+            : session.nextTopic
+              ? `Continue: ${session.nextTopic}`
+              : "Continue"}
+        </Button>
+      </form>
     </main>
   );
 }

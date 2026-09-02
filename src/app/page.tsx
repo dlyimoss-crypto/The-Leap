@@ -1,40 +1,51 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { LeapMark } from "@/components/leap-mark";
+import { createClient } from "@/lib/supabase/server";
+import { getJourneyMeta, getJourneySession } from "@/lib/content/journeys";
+import { WelcomeView } from "./welcome-view";
+import { DashboardView } from "./dashboard-view";
 
-export default function WelcomePage() {
+// The only journey in V1 (ticket 07) — there's nothing yet to pick between.
+const JOURNEY_SLUG = "faith-in-christ";
+
+export default async function HomePage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return <WelcomeView />;
+  }
+
+  const journey = getJourneyMeta(JOURNEY_SLUG);
+  if (!journey) {
+    return <WelcomeView />;
+  }
+
+  const { data: progress, error: progressError } = await supabase
+    .from("journey_progress")
+    .select("current_session_number, completed_at")
+    .eq("user_id", user.id)
+    .eq("journey_slug", JOURNEY_SLUG)
+    .maybeSingle();
+
+  if (progressError) {
+    // Degrade to the "not started" view rather than a hard error page —
+    // but log it, since that view is misleading for a user who has
+    // actually made progress.
+    console.error("Failed to load journey progress", progressError);
+  }
+
+  const nextSessionTitle =
+    progress && !progress.completed_at
+      ? (getJourneySession(JOURNEY_SLUG, progress.current_session_number)
+          ?.title ?? null)
+      : null;
+
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-8 px-6 py-16 text-center">
-      <LeapMark className="h-16 w-16 text-primary" />
-
-      <div className="space-y-3">
-        <h1 className="text-4xl font-heading font-semibold tracking-tight text-balance">
-          Your journey matters.
-        </h1>
-        <p className="max-w-sm text-muted-foreground text-lg">
-          Life is a journey. Faith is a journey. You don&apos;t have to walk
-          it alone.
-        </p>
-      </div>
-
-      <div className="flex w-full max-w-xs flex-col items-center gap-3">
-        <Button
-          render={<Link href="/journeys/faith-in-christ" />}
-          nativeButton={false}
-          size="lg"
-          className="w-full"
-        >
-          Begin my journey
-        </Button>
-        <Button
-          render={<Link href="/sign-in" />}
-          nativeButton={false}
-          variant="ghost"
-          size="sm"
-        >
-          I already have an account
-        </Button>
-      </div>
-    </main>
+    <DashboardView
+      journey={journey}
+      progress={progress}
+      nextSessionTitle={nextSessionTitle}
+    />
   );
 }
