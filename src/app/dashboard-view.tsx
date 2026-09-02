@@ -23,11 +23,21 @@ export function DashboardView({
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-6 py-10">
       <div className="flex items-center justify-between">
         <LeapMark className="h-8 w-8 text-primary" />
-        <form action={signOut}>
-          <Button type="submit" variant="ghost" size="sm">
-            Sign out
+        <div className="flex items-center gap-1">
+          <Button
+            render={<Link href="/prayer-room" />}
+            nativeButton={false}
+            variant="ghost"
+            size="sm"
+          >
+            Prayer Room
           </Button>
-        </form>
+          <form action={signOut}>
+            <Button type="submit" variant="ghost" size="sm">
+              Sign out
+            </Button>
+          </form>
+        </div>
       </div>
 
       {!progress && (
