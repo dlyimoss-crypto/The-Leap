@@ -1,14 +1,11 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { SignInForm } from "./sign-in-form";
 
 export default function SignInPage() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-16 text-center">
-      <h1 className="text-2xl font-heading font-semibold">Sign in</h1>
-      <p className="max-w-sm text-muted-foreground">
-        Sign-in isn&apos;t wired up yet — it needs the Supabase project to be
-        connected first. Come back once that&apos;s set up.
-      </p>
+    <main className="flex flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
+      <SignInForm />
       <Button
         render={<Link href="/" />}
         nativeButton={false}
