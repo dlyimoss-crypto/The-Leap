@@ -34,3 +34,23 @@ export async function requireActiveUser(redirectTo: string) {
 
   return { supabase, user };
 }
+
+/**
+ * Like requireUser, but also redirects a non-admin away — for the /admin
+ * page and every action it exposes, so both enforce the same rule.
+ */
+export async function requireAdmin(redirectTo = "/") {
+  const { supabase, user } = await requireUser();
+
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (error || profile?.role !== "admin") {
+    redirect(redirectTo);
+  }
+
+  return { supabase, user };
+}

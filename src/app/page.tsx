@@ -21,12 +21,16 @@ export default async function HomePage() {
     return <WelcomeView />;
   }
 
-  const { data: progress, error: progressError } = await supabase
-    .from("journey_progress")
-    .select("current_session_number, completed_at")
-    .eq("user_id", user.id)
-    .eq("journey_slug", JOURNEY_SLUG)
-    .maybeSingle();
+  const [{ data: progress, error: progressError }, { data: profile }] =
+    await Promise.all([
+      supabase
+        .from("journey_progress")
+        .select("current_session_number, completed_at")
+        .eq("user_id", user.id)
+        .eq("journey_slug", JOURNEY_SLUG)
+        .maybeSingle(),
+      supabase.from("profiles").select("role").eq("id", user.id).single(),
+    ]);
 
   if (progressError) {
     // Degrade to the "not started" view rather than a hard error page —
@@ -46,6 +50,7 @@ export default async function HomePage() {
       journey={journey}
       progress={progress}
       nextSessionTitle={nextSessionTitle}
+      isAdmin={profile?.role === "admin"}
     />
   );
 }

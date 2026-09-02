@@ -14,10 +14,12 @@ export function DashboardView({
   journey,
   progress,
   nextSessionTitle,
+  isAdmin,
 }: {
   journey: JourneyMeta;
   progress: JourneyProgress | null;
   nextSessionTitle: string | null;
+  isAdmin: boolean;
 }) {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-6 py-10">
@@ -40,6 +42,16 @@ export function DashboardView({
           >
             Community
           </Button>
+          {isAdmin && (
+            <Button
+              render={<Link href="/admin" />}
+              nativeButton={false}
+              variant="ghost"
+              size="sm"
+            >
+              Admin
+            </Button>
+          )}
           <form action={signOut}>
             <Button type="submit" variant="ghost" size="sm">
               Sign out
