@@ -42,6 +42,14 @@ export function DashboardView({
           >
             Community
           </Button>
+          <Button
+            render={<Link href="/companion" />}
+            nativeButton={false}
+            variant="ghost"
+            size="sm"
+          >
+            Companion
+          </Button>
           {isAdmin && (
             <Button
               render={<Link href="/admin" />}
