@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { LeapMark } from "@/components/leap-mark";
+import { BrandMark } from "@/components/brand-mark";
 
 export default function NotFound() {
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-6 px-6 py-16 text-center">
-      <LeapMark className="h-10 w-10 text-primary" />
+      <BrandMark className="h-10 w-10" />
       <div className="space-y-2">
         <h1 className="text-2xl font-heading font-semibold">
           There&apos;s no next step here.

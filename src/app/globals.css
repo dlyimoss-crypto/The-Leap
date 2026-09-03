@@ -52,86 +52,87 @@
 }
 
 /*
-  The Leap brand tokens — from the visual-identity decision (ticket 05,
-  .scratch/the-leap-mvp/issues/05-visual-identity.md). Accent hues (primary,
-  gold, destructive, success) hold constant across light/dark by design;
-  only grounds and text invert.
+  The Leap brand tokens — from the brand refresh (public/brand/, two
+  forward-facing chevrons; orange #FF7A00 / charcoal #343434 / dark
+  background #242424 / white). Primary-foreground is charcoal (not white)
+  on both modes: white-on-#FF7A00 only reaches ~2.6:1 contrast, charcoal
+  reaches ~4.8:1 — the brief asked for accessible button states.
 */
 :root {
-  --background: #FBF7F0;
-  --foreground: #1A2030;
+  --background: #FAF7F2;
+  --foreground: #343434;
   --card: #FFFFFF;
-  --card-foreground: #1A2030;
+  --card-foreground: #343434;
   --popover: #FFFFFF;
-  --popover-foreground: #1A2030;
-  --primary: #DD7327;
-  --primary-foreground: #FFF8EF;
-  --secondary: #F1ECE1;
-  --secondary-foreground: #1A2030;
-  --muted: #F1ECE1;
-  --muted-foreground: #5B6178;
-  --accent: #F1ECE1;
-  --accent-foreground: #1A2030;
+  --popover-foreground: #343434;
+  --primary: #FF7A00;
+  --primary-foreground: #343434;
+  --secondary: #F0EDE7;
+  --secondary-foreground: #343434;
+  --muted: #F0EDE7;
+  --muted-foreground: #6B6B6B;
+  --accent: #F0EDE7;
+  --accent-foreground: #343434;
   --destructive: #B4402A;
-  --destructive-foreground: #FFF8EF;
+  --destructive-foreground: #FFFFFF;
   --success: #4C7A16;
-  --success-foreground: #FFF8EF;
+  --success-foreground: #FFFFFF;
   --gold: #C98A1F;
-  --border: rgba(26, 32, 48, 0.13);
-  --input: rgba(26, 32, 48, 0.13);
-  --ring: #DD7327;
-  --chart-1: #DD7327;
+  --border: rgba(52, 52, 52, 0.13);
+  --input: rgba(52, 52, 52, 0.13);
+  --ring: #FF7A00;
+  --chart-1: #FF7A00;
   --chart-2: #C98A1F;
   --chart-3: #4C7A16;
-  --chart-4: #5B6178;
+  --chart-4: #6B6B6B;
   --chart-5: #B4402A;
   --radius: 0.75rem;
   --sidebar: #FFFFFF;
-  --sidebar-foreground: #1A2030;
-  --sidebar-primary: #DD7327;
-  --sidebar-primary-foreground: #FFF8EF;
-  --sidebar-accent: #F1ECE1;
-  --sidebar-accent-foreground: #1A2030;
-  --sidebar-border: rgba(26, 32, 48, 0.13);
-  --sidebar-ring: #DD7327;
+  --sidebar-foreground: #343434;
+  --sidebar-primary: #FF7A00;
+  --sidebar-primary-foreground: #343434;
+  --sidebar-accent: #F0EDE7;
+  --sidebar-accent-foreground: #343434;
+  --sidebar-border: rgba(52, 52, 52, 0.13);
+  --sidebar-ring: #FF7A00;
 }
 
 .dark {
-  --background: #10141F;
-  --foreground: #F2EFE7;
-  --card: #181F30;
-  --card-foreground: #F2EFE7;
-  --popover: #181F30;
-  --popover-foreground: #F2EFE7;
-  --primary: #DD7327;
-  --primary-foreground: #FFF8EF;
-  --secondary: #1F273A;
-  --secondary-foreground: #F2EFE7;
-  --muted: #1F273A;
-  --muted-foreground: #A6ACC0;
-  --accent: #1F273A;
-  --accent-foreground: #F2EFE7;
+  --background: #242424;
+  --foreground: #FFFFFF;
+  --card: #2E2E2E;
+  --card-foreground: #FFFFFF;
+  --popover: #2E2E2E;
+  --popover-foreground: #FFFFFF;
+  --primary: #FF7A00;
+  --primary-foreground: #242424;
+  --secondary: #333333;
+  --secondary-foreground: #FFFFFF;
+  --muted: #333333;
+  --muted-foreground: #B3B3B3;
+  --accent: #333333;
+  --accent-foreground: #FFFFFF;
   --destructive: #E68A76;
-  --destructive-foreground: #10141F;
+  --destructive-foreground: #242424;
   --success: #9AD35C;
-  --success-foreground: #10141F;
+  --success-foreground: #242424;
   --gold: #E7B44E;
-  --border: rgba(242, 239, 231, 0.14);
-  --input: rgba(242, 239, 231, 0.14);
-  --ring: #DD7327;
-  --chart-1: #DD7327;
+  --border: rgba(255, 255, 255, 0.14);
+  --input: rgba(255, 255, 255, 0.14);
+  --ring: #FF7A00;
+  --chart-1: #FF7A00;
   --chart-2: #E7B44E;
   --chart-3: #9AD35C;
-  --chart-4: #A6ACC0;
+  --chart-4: #B3B3B3;
   --chart-5: #E68A76;
-  --sidebar: #181F30;
-  --sidebar-foreground: #F2EFE7;
-  --sidebar-primary: #DD7327;
-  --sidebar-primary-foreground: #FFF8EF;
-  --sidebar-accent: #1F273A;
-  --sidebar-accent-foreground: #F2EFE7;
-  --sidebar-border: rgba(242, 239, 231, 0.14);
-  --sidebar-ring: #DD7327;
+  --sidebar: #2E2E2E;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-primary: #FF7A00;
+  --sidebar-primary-foreground: #242424;
+  --sidebar-accent: #333333;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: rgba(255, 255, 255, 0.14);
+  --sidebar-ring: #FF7A00;
 }
 
 @layer base {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Sora, Karla, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
 import "./globals.css";
 
 const sora = Sora({
@@ -23,7 +24,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "The Leap",
-  description: "Your essential companion in Christ",
+  description: "Your Essential Companion in Christ",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -35,6 +36,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <div className="fixed top-3 right-3 z-50">
+            <ThemeToggle />
+          </div>
           {children}
         </ThemeProvider>
       </body>

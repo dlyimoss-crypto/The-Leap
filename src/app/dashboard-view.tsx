@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { LeapMark } from "@/components/leap-mark";
+import { BrandMark } from "@/components/brand-mark";
 import type { JourneyMeta } from "@/lib/content/journeys";
 import { signOut } from "./sign-in/actions";
 
@@ -24,7 +24,7 @@ export function DashboardView({
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-6 py-10">
       <div className="flex items-center justify-between">
-        <LeapMark className="h-8 w-8 text-primary" />
+        <BrandMark className="h-8 w-8" />
         <div className="flex items-center gap-1">
           <Button
             render={<Link href="/prayer-room" />}

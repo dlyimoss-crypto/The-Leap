@@ -1,20 +1,17 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { LeapMark } from "@/components/leap-mark";
+import { Logo } from "@/components/logo";
 
 export function WelcomeView() {
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-8 px-6 py-16 text-center">
-      <LeapMark className="h-16 w-16 text-primary" />
+      <Logo size="lg" />
 
-      <div className="space-y-3">
-        <h1 className="text-4xl font-heading font-semibold tracking-tight text-balance">
-          Your journey matters.
+      <div className="space-y-2">
+        <h1 className="text-lg font-medium text-foreground">
+          Your Essential Companion in Christ
         </h1>
-        <p className="max-w-sm text-muted-foreground text-lg">
-          Life is a journey. Faith is a journey. You don&apos;t have to walk
-          it alone.
-        </p>
+        <p className="text-muted-foreground">Take your next step with Christ.</p>
       </div>
 
       <div className="flex w-full max-w-xs flex-col items-center gap-3">
@@ -24,7 +21,7 @@ export function WelcomeView() {
           size="lg"
           className="w-full"
         >
-          Begin my journey
+          Get Started
         </Button>
         <Button
           render={<Link href="/sign-in" />}
