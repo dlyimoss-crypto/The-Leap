@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Sora, Karla, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { BottomNav } from "@/components/bottom-nav";
+import { createClient } from "@/lib/supabase/server";
 import "./globals.css";
 
 const sora = Sora({
@@ -27,7 +29,22 @@ export const metadata: Metadata = {
   description: "Your Essential Companion in Christ",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let isAdmin = false;
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    isAdmin = profile?.role === "admin";
+  }
+
   return (
     <html
       lang="en"
@@ -39,7 +56,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <div className="fixed top-3 right-3 z-50">
             <ThemeToggle />
           </div>
-          {children}
+          <div className={user ? "flex flex-1 flex-col pb-16" : "flex flex-1 flex-col"}>
+            {children}
+          </div>
+          {user && <BottomNav isAdmin={isAdmin} />}
         </ThemeProvider>
       </body>
     </html>

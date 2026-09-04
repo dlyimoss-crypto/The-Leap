@@ -1,3 +1,4 @@
+import { HeartHandshake } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -103,12 +104,7 @@ export default async function PrayerRoomPage(
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-heading font-semibold">Prayer Room</h1>
-        <Link href="/" className="text-sm text-muted-foreground">
-          Home
-        </Link>
-      </div>
+      <h1 className="text-2xl font-heading font-semibold">Prayer Room</h1>
 
       <div className="flex gap-4 border-b">
         {TABS.map(({ key, label }) => (
@@ -148,11 +144,14 @@ export default async function PrayerRoomPage(
 
       <div className="space-y-3">
         {requests.length === 0 && (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            {tab === "requests" && "No prayer requests yet — be the first."}
-            {tab === "testimonies" && "No testimonies yet."}
-            {tab === "mine" && "You haven't posted a prayer request yet."}
-          </p>
+          <div className="flex flex-col items-center gap-3 py-12 text-center">
+            <HeartHandshake className="size-8 text-muted-foreground/50" />
+            <p className="text-sm text-muted-foreground">
+              {tab === "requests" && "No prayer requests yet — be the first."}
+              {tab === "testimonies" && "No testimonies yet."}
+              {tab === "mine" && "You haven't posted a prayer request yet."}
+            </p>
+          </div>
         )}
         {requests.map((request) => (
           <PrayerRequestCard

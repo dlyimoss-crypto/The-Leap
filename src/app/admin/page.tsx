@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Inbox } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -39,12 +40,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-6 py-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-heading font-semibold">Admin</h1>
-        <Link href="/" className="text-sm text-muted-foreground">
-          Home
-        </Link>
-      </div>
+      <h1 className="text-2xl font-heading font-semibold">Admin</h1>
 
       <div className="flex gap-4 border-b">
         <Link
@@ -132,9 +128,10 @@ async function ModerationQueue() {
 
   if (rows.length === 0) {
     return (
-      <p className="py-8 text-center text-sm text-muted-foreground">
-        Nothing in the queue.
-      </p>
+      <div className="flex flex-col items-center gap-3 py-12 text-center">
+        <Inbox className="size-8 text-muted-foreground/50" />
+        <p className="text-sm text-muted-foreground">Nothing in the queue.</p>
+      </div>
     );
   }
 

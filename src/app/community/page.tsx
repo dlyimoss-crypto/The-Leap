@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Users } from "lucide-react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCommunityPrompt } from "@/lib/content/community-prompt";
@@ -88,12 +88,7 @@ export default async function CommunityPage(
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-heading font-semibold">Community</h1>
-        <Link href="/" className="text-sm text-muted-foreground">
-          Home
-        </Link>
-      </div>
+      <h1 className="text-2xl font-heading font-semibold">Community</h1>
 
       <Composer prompt={prompt} />
 
@@ -117,9 +112,12 @@ export default async function CommunityPage(
 
       <div className="space-y-3">
         {posts.length === 0 && (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            No posts yet — be the first to share.
-          </p>
+          <div className="flex flex-col items-center gap-3 py-12 text-center">
+            <Users className="size-8 text-muted-foreground/50" />
+            <p className="text-sm text-muted-foreground">
+              No posts yet — be the first to share.
+            </p>
+          </div>
         )}
         {posts.map((post) => (
           <PostCard key={post.id} post={post} currentUserId={user.id} />

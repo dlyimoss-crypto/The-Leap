@@ -22,17 +22,16 @@ export default async function HomePage() {
     return <WelcomeView />;
   }
 
-  const [{ progress, currentSession }, { data: profile }] = await Promise.all([
-    getCurrentJourneyState(supabase, user.id),
-    supabase.from("profiles").select("role").eq("id", user.id).single(),
-  ]);
+  const { progress, currentSession } = await getCurrentJourneyState(
+    supabase,
+    user.id,
+  );
 
   return (
     <DashboardView
       journey={journey}
       progress={progress}
       nextSessionTitle={currentSession?.title ?? null}
-      isAdmin={profile?.role === "admin"}
     />
   );
 }

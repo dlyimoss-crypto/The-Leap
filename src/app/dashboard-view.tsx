@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { BrandMark } from "@/components/brand-mark";
@@ -14,58 +15,25 @@ export function DashboardView({
   journey,
   progress,
   nextSessionTitle,
-  isAdmin,
 }: {
   journey: JourneyMeta;
   progress: JourneyProgress | null;
   nextSessionTitle: string | null;
-  isAdmin: boolean;
 }) {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-6 py-10">
       <div className="flex items-center justify-between">
         <BrandMark className="h-8 w-8" />
-        <div className="flex items-center gap-1">
+        <form action={signOut}>
           <Button
-            render={<Link href="/prayer-room" />}
-            nativeButton={false}
+            type="submit"
             variant="ghost"
-            size="sm"
+            size="icon"
+            aria-label="Sign out"
           >
-            Prayer Room
+            <LogOut className="size-4" />
           </Button>
-          <Button
-            render={<Link href="/community" />}
-            nativeButton={false}
-            variant="ghost"
-            size="sm"
-          >
-            Community
-          </Button>
-          <Button
-            render={<Link href="/companion" />}
-            nativeButton={false}
-            variant="ghost"
-            size="sm"
-          >
-            Companion
-          </Button>
-          {isAdmin && (
-            <Button
-              render={<Link href="/admin" />}
-              nativeButton={false}
-              variant="ghost"
-              size="sm"
-            >
-              Admin
-            </Button>
-          )}
-          <form action={signOut}>
-            <Button type="submit" variant="ghost" size="sm">
-              Sign out
-            </Button>
-          </form>
-        </div>
+        </form>
       </div>
 
       {!progress && (
