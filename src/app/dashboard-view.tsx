@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { LogOut } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { BrandMark } from "@/components/brand-mark";
 import type { JourneyMeta } from "@/lib/content/journeys";
 import { signOut } from "./sign-in/actions";
 
@@ -11,19 +11,36 @@ type JourneyProgress = {
   completed_at: string | null;
 };
 
+function greeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
 export function DashboardView({
   journey,
   progress,
   nextSessionTitle,
+  displayName,
 }: {
   journey: JourneyMeta;
   progress: JourneyProgress | null;
   nextSessionTitle: string | null;
+  displayName: string | null;
 }) {
+  const firstName = displayName?.split(" ")[0];
+
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-6 py-10">
-      <div className="flex items-center justify-between">
-        <BrandMark className="h-8 w-8" />
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <Avatar name={displayName} />
+          <p className="font-heading text-lg font-semibold">
+            {greeting()}
+            {firstName ? `, ${firstName}` : ""}
+          </p>
+        </div>
         <form action={signOut}>
           <Button
             type="submit"

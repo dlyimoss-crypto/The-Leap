@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { HandHeart, MessageCircle, ThumbsUp } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { blockUser, reportPost, toggleReaction } from "./actions";
 
@@ -40,15 +42,21 @@ export function PostCard({
   const authorLabel = post.displayName ?? "A member of the community";
 
   return (
-    <div className="space-y-2 rounded-xl border bg-card p-4">
-      <div className="flex items-baseline justify-between gap-2">
-        <span className="text-sm font-semibold">{authorLabel}</span>
-        <span className="font-mono text-[10.5px] text-muted-foreground">
-          {timeAgo(post.created_at)}
-        </span>
+    <div className="space-y-3 rounded-2xl border bg-card p-4 shadow-sm">
+      <div className="flex items-start gap-3">
+        <Avatar name={post.displayName} />
+        <div className="min-w-0 flex-1 space-y-0.5">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="truncate text-sm font-semibold">
+              {authorLabel}
+            </span>
+            <span className="shrink-0 font-mono text-[10.5px] text-muted-foreground">
+              {timeAgo(post.created_at)}
+            </span>
+          </div>
+          <p className="pt-0.5 text-sm">{post.body}</p>
+        </div>
       </div>
-
-      <p className="text-sm">{post.body}</p>
 
       <div className="flex flex-wrap items-center gap-2 pt-1">
         <form action={toggleReaction.bind(null, post.id, "encourage")}>
@@ -56,8 +64,9 @@ export function PostCard({
             type="submit"
             size="sm"
             variant={post.hasEncouraged ? "secondary" : "outline"}
+            className="rounded-full"
           >
-            Encourage · {post.encourageCount}
+            <ThumbsUp className="size-3.5" /> {post.encourageCount}
           </Button>
         </form>
         <form action={toggleReaction.bind(null, post.id, "pray")}>
@@ -65,8 +74,9 @@ export function PostCard({
             type="submit"
             size="sm"
             variant={post.hasPrayed ? "secondary" : "outline"}
+            className="rounded-full"
           >
-            Pray · {post.prayCount}
+            <HandHeart className="size-3.5" /> {post.prayCount}
           </Button>
         </form>
         <Button
@@ -74,22 +84,23 @@ export function PostCard({
           nativeButton={false}
           size="sm"
           variant="ghost"
+          className="rounded-full"
         >
-          {post.commentCount} comments
+          <MessageCircle className="size-3.5" /> {post.commentCount}
         </Button>
         {!isOwn && (
-          <>
+          <div className="ml-auto flex gap-1">
             <form action={reportPost.bind(null, post.id)}>
-              <Button type="submit" size="sm" variant="ghost">
+              <Button type="submit" size="xs" variant="ghost">
                 Report
               </Button>
             </form>
             <form action={blockUser.bind(null, post.user_id)}>
-              <Button type="submit" size="sm" variant="ghost">
-                Block {authorLabel}
+              <Button type="submit" size="xs" variant="ghost">
+                Block
               </Button>
             </form>
-          </>
+          </div>
         )}
       </div>
     </div>

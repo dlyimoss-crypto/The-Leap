@@ -22,16 +22,17 @@ export default async function HomePage() {
     return <WelcomeView />;
   }
 
-  const { progress, currentSession } = await getCurrentJourneyState(
-    supabase,
-    user.id,
-  );
+  const [{ progress, currentSession }, { data: profile }] = await Promise.all([
+    getCurrentJourneyState(supabase, user.id),
+    supabase.from("profiles").select("display_name").eq("id", user.id).single(),
+  ]);
 
   return (
     <DashboardView
       journey={journey}
       progress={progress}
       nextSessionTitle={currentSession?.title ?? null}
+      displayName={profile?.display_name ?? null}
     />
   );
 }

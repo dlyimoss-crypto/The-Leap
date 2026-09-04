@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -40,11 +41,11 @@ export function PrayerComposer() {
   return (
     <form
       action={postPrayerRequest}
-      className="space-y-3 rounded-xl border bg-card p-4"
+      className="space-y-3 rounded-2xl border bg-card p-4 shadow-sm"
     >
       <Textarea
         name="body"
-        placeholder="Ask the community to pray with you…"
+        placeholder="Share a prayer request…"
         required
         rows={2}
       />
@@ -69,8 +70,13 @@ export function PrayerComposer() {
         <TogglePill active={isAnonymous} onClick={() => setIsAnonymous(true)}>
           Anonymous
         </TogglePill>
-        <Button type="submit" size="sm" className="ml-auto">
-          Post
+        <Button
+          type="submit"
+          size="icon"
+          className="ml-auto rounded-full"
+          aria-label="Post prayer request"
+        >
+          <Send className="size-4" />
         </Button>
       </div>
     </form>

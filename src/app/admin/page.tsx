@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Inbox } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
@@ -145,19 +146,24 @@ async function ModerationQueue() {
 
         return (
           <div key={report.id} className="grid gap-3 p-4 sm:grid-cols-[1fr_auto]">
-            <div className="space-y-1.5">
-              <p className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
-                Reported {report.target_type.replace("_", " ")}
-                {content?.profiles?.display_name
-                  ? ` · ${content.profiles.display_name}`
-                  : ""}
-              </p>
-              <p className="text-sm">
-                {content?.body ?? "(content no longer available)"}
-              </p>
-              <Badge variant={isCrisis ? "secondary" : "destructive"}>
-                {isCrisis ? "Auto-flagged: crisis keywords" : "Reported by user"}
-              </Badge>
+            <div className="flex items-start gap-3">
+              <Avatar name={content?.profiles?.display_name ?? null} />
+              <div className="min-w-0 space-y-1.5">
+                <p className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+                  Reported {report.target_type.replace("_", " ")}
+                  {content?.profiles?.display_name
+                    ? ` · ${content.profiles.display_name}`
+                    : ""}
+                </p>
+                <p className="text-sm">
+                  {content?.body ?? "(content no longer available)"}
+                </p>
+                <Badge variant={isCrisis ? "secondary" : "destructive"}>
+                  {isCrisis
+                    ? "Auto-flagged: crisis keywords"
+                    : "Reported by user"}
+                </Badge>
+              </div>
             </div>
             <div className="flex flex-row gap-2 sm:flex-col sm:min-w-[110px]">
               <form
@@ -237,7 +243,12 @@ async function UsersList() {
         <tbody>
           {(profiles ?? []).map((p) => (
             <tr key={p.id} className="border-b last:border-0">
-              <td className="p-3">{p.display_name ?? "(no name)"}</td>
+              <td className="p-3">
+                <div className="flex items-center gap-2.5">
+                  <Avatar name={p.display_name} className="size-7 text-[10px]" />
+                  {p.display_name ?? "(no name)"}
+                </div>
+              </td>
               <td className="p-3">
                 <Badge variant={p.is_banned ? "destructive" : "secondary"}>
                   {p.is_banned ? "Banned" : "Active"}

@@ -1,3 +1,5 @@
+import { Heart } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -46,30 +48,36 @@ export function PrayerRequestCard({
     : (request.displayName ?? "A member of the community");
 
   return (
-    <div className="space-y-2 rounded-xl border bg-card p-4">
-      <div className="flex items-baseline justify-between gap-2">
-        <span className="text-sm font-semibold">
-          {authorLabel}
-          {request.is_anonymous && (
-            <Badge variant="outline" className="ml-1.5 align-middle text-[9px]">
-              hidden name
-            </Badge>
-          )}
-          {showManageActions && request.status !== "open" && (
-            <Badge variant="secondary" className="ml-1.5 align-middle text-[9px]">
-              {request.status}
-            </Badge>
-          )}
-        </span>
-        <span className="font-mono text-[10.5px] text-muted-foreground">
-          {timeAgo(request.created_at)}
-        </span>
+    <div className="space-y-3 rounded-2xl border bg-card p-4 shadow-sm">
+      <div className="flex items-start gap-3">
+        <Avatar name={request.is_anonymous ? null : request.displayName} />
+        <div className="min-w-0 flex-1 space-y-0.5">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className="truncate text-sm font-semibold">
+              {authorLabel}
+            </span>
+            <span className="shrink-0 font-mono text-[10.5px] text-muted-foreground">
+              {timeAgo(request.created_at)}
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-1">
+            {request.is_anonymous && (
+              <Badge variant="outline" className="text-[9px]">
+                hidden name
+              </Badge>
+            )}
+            {showManageActions && request.status !== "open" && (
+              <Badge variant="secondary" className="text-[9px]">
+                {request.status}
+              </Badge>
+            )}
+          </div>
+          <p className="pt-0.5 text-sm">{request.body}</p>
+        </div>
       </div>
 
-      <p className="text-sm">{request.body}</p>
-
       {request.testimony && (
-        <div className="mt-2 space-y-1 border-t border-dashed pt-2">
+        <div className="space-y-1 border-t border-dashed pt-2">
           <p className="font-mono text-[10px] font-medium uppercase tracking-wide text-primary">
             Testimony
           </p>
@@ -77,15 +85,20 @@ export function PrayerRequestCard({
         </div>
       )}
 
-      <div className="flex items-center gap-2 pt-1">
-        <form action={prayForRequest.bind(null, request.id)}>
+      <div className="flex items-center gap-3 pt-1">
+        <span className="flex items-center gap-1 text-sm text-muted-foreground">
+          <Heart className="size-4 fill-primary/20 text-primary" />
+          {request.prayedCount}
+        </span>
+        <form action={prayForRequest.bind(null, request.id)} className="ml-auto">
           <Button
             type="submit"
             size="sm"
-            variant={request.hasPrayed ? "secondary" : "outline"}
+            variant={request.hasPrayed ? "secondary" : "default"}
             disabled={request.hasPrayed}
+            className="rounded-full"
           >
-            {request.hasPrayed ? "Prayed" : "I Prayed"} · {request.prayedCount}
+            {request.hasPrayed ? "Prayed" : "Pray"}
           </Button>
         </form>
         {!isOwn && (
