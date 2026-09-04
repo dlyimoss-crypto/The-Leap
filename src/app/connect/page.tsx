@@ -1,0 +1,46 @@
+import { redirect } from "next/navigation";
+import { Users, HeartHandshake, Users2 } from "lucide-react";
+import { HubCard } from "@/components/hub-card";
+import { createClient } from "@/lib/supabase/server";
+
+export default async function ConnectPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/sign-in");
+  }
+
+  return (
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-10">
+      <div>
+        <h1 className="text-2xl font-heading font-semibold">Connect</h1>
+        <p className="text-sm text-muted-foreground">I belong.</p>
+      </div>
+
+      <div className="space-y-3">
+        <HubCard
+          href="/community"
+          icon={Users}
+          title="Community"
+          description="Encourage, share, and grow together."
+        />
+        <HubCard
+          href="/prayer-room"
+          icon={HeartHandshake}
+          title="Prayer Room"
+          description="Pray, support, and be prayed for."
+        />
+        <HubCard
+          href="/connect/groups"
+          icon={Users2}
+          title="Groups"
+          description="Connect with others around shared interests."
+          comingSoon
+        />
+      </div>
+    </main>
+  );
+}

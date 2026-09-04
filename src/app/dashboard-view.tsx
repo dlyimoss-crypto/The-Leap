@@ -1,15 +1,14 @@
 import Link from "next/link";
-import { LogOut } from "lucide-react";
+import { LogOut, BookOpen, Sparkles, MessageCircle } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type { JourneyMeta } from "@/lib/content/journeys";
+import type { JourneyProgressRow } from "@/lib/supabase/journey-progress";
+import { journeyContinueHref } from "@/lib/journey-nav";
 import { signOut } from "./sign-in/actions";
 
-type JourneyProgress = {
-  current_session_number: number;
-  completed_at: string | null;
-};
+type JourneyProgress = JourneyProgressRow;
 
 function greeting() {
   const hour = new Date().getHours();
@@ -62,7 +61,7 @@ export function DashboardView({
             <p className="text-muted-foreground">{journey.purpose}</p>
           </div>
           <Button
-            render={<Link href={`/journeys/${journey.slug}`} />}
+            render={<Link href={journeyContinueHref(journey.slug, progress)} />}
             nativeButton={false}
             size="lg"
             className="w-full max-w-xs"
@@ -97,9 +96,7 @@ export function DashboardView({
             </h2>
             <Button
               render={
-                <Link
-                  href={`/journeys/${journey.slug}/day/${progress.current_session_number}`}
-                />
+                <Link href={journeyContinueHref(journey.slug, progress)} />
               }
               nativeButton={false}
               size="lg"
@@ -120,7 +117,7 @@ export function DashboardView({
             You&apos;ve completed {journey.title}.
           </p>
           <Button
-            render={<Link href={`/journeys/${journey.slug}/day/1`} />}
+            render={<Link href={journeyContinueHref(journey.slug, progress)} />}
             nativeButton={false}
             variant="outline"
           >
@@ -128,6 +125,45 @@ export function DashboardView({
           </Button>
         </div>
       )}
+
+      <div className="space-y-3">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Today
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          <Link
+            href="/evolve/scripture"
+            className="flex flex-col items-center gap-1.5 rounded-xl border bg-card p-4 text-center hover:bg-muted/50"
+          >
+            <BookOpen className="size-5 text-primary" />
+            <p className="text-sm font-medium">Scripture</p>
+            <p className="text-xs text-muted-foreground">Read God&apos;s Word</p>
+          </Link>
+          <Link
+            href="/evolve/devotion"
+            className="flex flex-col items-center gap-1.5 rounded-xl border bg-card p-4 text-center hover:bg-muted/50"
+          >
+            <Sparkles className="size-5 text-primary" />
+            <p className="text-sm font-medium">Devotion</p>
+            <p className="text-xs text-muted-foreground">Grow daily</p>
+          </Link>
+        </div>
+      </div>
+
+      <Link
+        href="/companion"
+        className="flex items-center gap-3 rounded-xl border bg-card p-4 hover:bg-muted/50"
+      >
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+          <MessageCircle className="size-4" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold">Leap Companion</p>
+          <p className="text-xs text-muted-foreground">
+            Ask for help, prayer, or your next step.
+          </p>
+        </div>
+      </Link>
     </main>
   );
 }

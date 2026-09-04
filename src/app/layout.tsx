@@ -3,6 +3,7 @@ import { Sora, Karla, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { BottomNav } from "@/components/bottom-nav";
+import { CompanionLauncher } from "@/components/companion-launcher";
 import { createClient } from "@/lib/supabase/server";
 import "./globals.css";
 
@@ -59,6 +60,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <div className={user ? "flex flex-1 flex-col pb-16" : "flex flex-1 flex-col"}>
             {children}
           </div>
+          {user && <CompanionLauncher />}
           {user && <BottomNav isAdmin={isAdmin} />}
         </ThemeProvider>
       </body>

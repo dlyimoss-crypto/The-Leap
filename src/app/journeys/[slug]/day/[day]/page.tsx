@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Step } from "@/components/step";
 import {
   getJourneyMeta,
   getJourneySession,
@@ -8,23 +9,6 @@ import {
 } from "@/lib/content/journeys";
 import { getScripturePassages } from "@/lib/content/scripture";
 import { completeSession } from "./actions";
-
-function Step({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="space-y-1">
-      <p className="text-xs font-medium uppercase tracking-wide text-primary">
-        {label}
-      </p>
-      <p className="text-foreground">{children}</p>
-    </div>
-  );
-}
 
 export default async function JourneySessionPage(
   props: PageProps<"/journeys/[slug]/day/[day]">,

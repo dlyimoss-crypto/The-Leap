@@ -1,5 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { getScripture, getScripturePassages } from "./scripture";
+import {
+  getScripture,
+  getScripturePassages,
+  listCuratedReferences,
+} from "./scripture";
 
 describe("getScripture", () => {
   test("returns the WEB text for a known reference", () => {
@@ -34,5 +38,11 @@ describe("getScripturePassages", () => {
       },
       { reference: "Nonexistent 99:99", passage: null },
     ]);
+  });
+});
+
+describe("listCuratedReferences", () => {
+  test("includes known curated references", () => {
+    expect(listCuratedReferences()).toContain("John 1:1-5");
   });
 });

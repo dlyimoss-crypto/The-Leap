@@ -44,3 +44,8 @@ export function getScripturePassages(
     return { reference, passage: getScripture(reference) };
   });
 }
+
+// The curated per-journey dataset only — not a full Bible (ticket 12).
+export function listCuratedReferences(): string[] {
+  return Array.from(loadDataset().keys());
+}

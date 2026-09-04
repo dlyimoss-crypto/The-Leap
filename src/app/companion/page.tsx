@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/server";
+import { getCompanionIntent } from "@/lib/companion-intents";
 import { sendMessage } from "./actions";
 
 type MessageRow = {
@@ -33,6 +34,10 @@ export default async function CompanionPage(
 ) {
   const searchParams = await props.searchParams;
   const showCrisisBanner = searchParams.crisis === "1";
+  const intentParam = Array.isArray(searchParams.intent)
+    ? searchParams.intent[0]
+    : searchParams.intent;
+  const intent = getCompanionIntent(intentParam);
 
   const supabase = await createClient();
   const {
@@ -89,21 +94,34 @@ export default async function CompanionPage(
           <div className="flex flex-1 flex-col items-center justify-center gap-4 py-8 text-center">
             <Sparkles className="size-8 text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">
-              What would you like help with?
+              {intent ? intent.label : "What would you like help with?"}
             </p>
             <div className="w-full space-y-2">
-              {QUICK_PROMPTS.map(({ icon: Icon, label }) => (
-                <form key={label} action={sendMessage}>
-                  <input type="hidden" name="message" value={label} />
+              {intent ? (
+                <form action={sendMessage}>
+                  <input type="hidden" name="message" value={intent.message} />
                   <button
                     type="submit"
                     className="flex w-full items-center gap-2 rounded-xl border bg-card px-3 py-2.5 text-left text-sm hover:bg-muted"
                   >
-                    <Icon className="size-4 text-primary" />
-                    {label}
+                    <intent.icon className="size-4 text-primary" />
+                    {intent.message}
                   </button>
                 </form>
-              ))}
+              ) : (
+                QUICK_PROMPTS.map(({ icon: Icon, label }) => (
+                  <form key={label} action={sendMessage}>
+                    <input type="hidden" name="message" value={label} />
+                    <button
+                      type="submit"
+                      className="flex w-full items-center gap-2 rounded-xl border bg-card px-3 py-2.5 text-left text-sm hover:bg-muted"
+                    >
+                      <Icon className="size-4 text-primary" />
+                      {label}
+                    </button>
+                  </form>
+                ))
+              )}
             </div>
           </div>
         )}
