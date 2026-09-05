@@ -283,6 +283,7 @@ function churchFields(formData: FormData) {
   const memberCountRaw = String(
     formData.get("member_count_estimate") ?? "",
   ).trim();
+  const ratingRaw = String(formData.get("rating") ?? "").trim();
 
   return {
     name: String(formData.get("name") ?? "").trim(),
@@ -295,6 +296,7 @@ function churchFields(formData: FormData) {
     member_count_estimate: memberCountRaw
       ? Number.parseInt(memberCountRaw, 10)
       : null,
+    rating: ratingRaw ? Number.parseInt(ratingRaw, 10) : null,
   };
 }
 

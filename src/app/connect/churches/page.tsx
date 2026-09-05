@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, Church, Mail, MapPin, Users2 } from "lucide-react";
 import { CopyButton } from "@/components/copy-button";
+import { StarRating } from "@/components/star-rating";
 import { createClient } from "@/lib/supabase/server";
 
 type ChurchRow = {
@@ -14,6 +15,7 @@ type ChurchRow = {
   phone: string | null;
   email: string | null;
   member_count_estimate: number | null;
+  rating: number | null;
 };
 
 export default async function ChurchesPage(
@@ -36,7 +38,7 @@ export default async function ChurchesPage(
   const { data: churches } = await supabase
     .from("churches")
     .select(
-      "id, name, lead_pastor, mission, address, service_time, phone, email, member_count_estimate",
+      "id, name, lead_pastor, mission, address, service_time, phone, email, member_count_estimate, rating",
     )
     .order("name", { ascending: true })
     .returns<ChurchRow[]>();
@@ -142,6 +144,12 @@ export default async function ChurchesPage(
               </div>
             )}
           </div>
+
+          {church.rating != null && (
+            <div className="flex justify-end">
+              <StarRating rating={church.rating} />
+            </div>
+          )}
         </div>
       </main>
     );
