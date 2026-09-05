@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowLeft, Library, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Library, PenLine, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -181,28 +181,48 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
           {librarySection}
 
           {application?.status !== "rejected" && (
-            <Link
-              href="/evolve/books?apply=1"
-              className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4 hover:bg-primary/10"
-            >
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
-                <Sparkles className="size-5" />
+            <div className="space-y-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                    {application?.status === "pending"
+                      ? "Author Application"
+                      : "Become an Author"}
+                  </p>
+                  <h2 className="font-heading text-xl font-bold text-foreground text-balance">
+                    {application?.status === "pending"
+                      ? "Your application is under review"
+                      : application?.status === "more_info_requested"
+                        ? "We need a bit more from you"
+                        : "Publish your book with The Leap"}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {application?.status === "pending"
+                      ? "We'll let you know as soon as it's reviewed."
+                      : application?.status === "more_info_requested"
+                        ? "Pick up your application where you left off."
+                        : "Share your writing with our community — free or paid, your choice."}
+                  </p>
+                </div>
+                <div className="flex size-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5">
+                  <PenLine className="size-9 text-primary" />
+                </div>
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-primary">
-                  {application?.status === "pending"
-                    ? "Your author application is under review"
-                    : application?.status === "more_info_requested"
-                      ? "We need a bit more from you to continue"
-                      : "Do you want to publish your book with The Leap?"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {application?.status === "pending"
-                    ? "We'll let you know as soon as it's reviewed."
-                    : "Share your writing with our community — free or paid, your choice."}
-                </p>
-              </div>
-            </Link>
+
+              {application?.status !== "pending" && (
+                <Button
+                  render={<Link href="/evolve/books?apply=1" />}
+                  nativeButton={false}
+                  size="lg"
+                  className="w-full rounded-full"
+                >
+                  {application?.status === "more_info_requested"
+                    ? "Continue application"
+                    : "Apply now"}
+                  <ArrowRight className="size-4" />
+                </Button>
+              )}
+            </div>
           )}
 
           {application?.status === "rejected" && (
