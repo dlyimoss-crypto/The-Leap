@@ -6,6 +6,7 @@ import {
   MessageCircle,
   Mountain,
   ArrowRight,
+  Trophy,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -159,19 +160,40 @@ export function DashboardView({
       )}
 
       {progress?.completed_at && (
-        <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-          <h1 className="text-2xl font-heading font-semibold text-balance">
-            {journey.completionTitle}
-          </h1>
-          <p className="text-muted-foreground">
-            You&apos;ve completed {journey.title}.
-          </p>
+        <div className="space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Journey Complete
+              </p>
+              <h1 className="font-heading text-2xl font-bold text-foreground text-balance">
+                {journey.completionTitle}
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                You&apos;ve completed {journey.title}.
+              </p>
+            </div>
+            <div className="flex size-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5">
+              <Trophy className="size-9 text-primary" />
+            </div>
+          </div>
+
+          <div className="relative h-8 overflow-hidden rounded-full bg-muted">
+            <div className="absolute inset-0 rounded-full bg-primary" />
+            <div className="absolute inset-0 flex items-center justify-between px-3 text-[11px] font-medium">
+              <span className="text-primary-foreground">100% complete</span>
+              <span className="text-primary-foreground">Done</span>
+            </div>
+          </div>
+
           <Button
             render={<Link href={journeyContinueHref(journey.slug, progress)} />}
             nativeButton={false}
-            variant="outline"
+            size="lg"
+            className="w-full rounded-full"
           >
             Review the journey
+            <ArrowRight className="size-4" />
           </Button>
         </div>
       )}
