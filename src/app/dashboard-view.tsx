@@ -40,7 +40,7 @@ function JourneyProgressBar({
   const daysRemaining = Math.max(durationDays - (currentSessionNumber - 1), 0);
 
   return (
-    <div className="relative h-8 overflow-hidden rounded-full bg-muted">
+    <div className="relative h-8 overflow-hidden rounded-full bg-card">
       <div
         className="absolute inset-y-0 left-0 rounded-full bg-primary transition-[width]"
         style={{ width: `${percentComplete}%` }}
@@ -116,7 +116,7 @@ export function DashboardView({
       )}
 
       {progress && !progress.completed_at && (
-        <div className="space-y-4">
+        <div className="space-y-4 rounded-2xl bg-muted p-5">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 space-y-1">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -163,7 +163,7 @@ export function DashboardView({
       )}
 
       {progress?.completed_at && (
-        <div className="space-y-4">
+        <div className="space-y-4 rounded-2xl bg-muted p-5">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 space-y-1">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
