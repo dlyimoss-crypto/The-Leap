@@ -94,34 +94,21 @@ export default async function CompanionPage(
           <div className="flex flex-1 flex-col items-center justify-center gap-4 py-8 text-center">
             <Sparkles className="size-8 text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">
-              {intent ? intent.label : "What would you like help with?"}
+              What would you like help with?
             </p>
             <div className="w-full space-y-2">
-              {intent ? (
-                <form action={sendMessage}>
-                  <input type="hidden" name="message" value={intent.message} />
+              {QUICK_PROMPTS.map(({ icon: Icon, label }) => (
+                <form key={label} action={sendMessage}>
+                  <input type="hidden" name="message" value={label} />
                   <button
                     type="submit"
                     className="flex w-full items-center gap-2 rounded-xl border bg-card px-3 py-2.5 text-left text-sm hover:bg-muted"
                   >
-                    <intent.icon className="size-4 text-primary" />
-                    {intent.message}
+                    <Icon className="size-4 text-primary" />
+                    {label}
                   </button>
                 </form>
-              ) : (
-                QUICK_PROMPTS.map(({ icon: Icon, label }) => (
-                  <form key={label} action={sendMessage}>
-                    <input type="hidden" name="message" value={label} />
-                    <button
-                      type="submit"
-                      className="flex w-full items-center gap-2 rounded-xl border bg-card px-3 py-2.5 text-left text-sm hover:bg-muted"
-                    >
-                      <Icon className="size-4 text-primary" />
-                      {label}
-                    </button>
-                  </form>
-                ))
-              )}
+              ))}
             </div>
           </div>
         )}
@@ -143,6 +130,7 @@ export default async function CompanionPage(
         <Textarea
           name="message"
           placeholder="Ask the Companion…"
+          defaultValue={intent?.message}
           required
           rows={1}
           className="flex-1 rounded-full"

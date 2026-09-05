@@ -20,7 +20,10 @@ export default async function DevotionPage() {
     redirect("/sign-in");
   }
 
-  const { currentSession } = await getCurrentJourneyState(supabase, user.id);
+  const { progress, currentSession } = await getCurrentJourneyState(
+    supabase,
+    user.id,
+  );
   const journey = getJourneyMeta(JOURNEY_SLUG);
 
   return (
@@ -50,15 +53,33 @@ export default async function DevotionPage() {
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center gap-4 py-12 text-center">
           <Sparkles className="size-8 text-muted-foreground/50" />
-          <p className="text-sm text-muted-foreground">
-            Begin your journey to unlock today&apos;s devotion.
-          </p>
-          <Button
-            render={<Link href={`/journeys/${JOURNEY_SLUG}`} />}
-            nativeButton={false}
-          >
-            Begin my journey
-          </Button>
+          {progress?.completed_at ? (
+            <>
+              <p className="text-sm text-muted-foreground">
+                You&apos;ve completed your current journey — a new devotion
+                will be ready when your next journey begins.
+              </p>
+              <Button
+                render={<Link href={`/journeys/${JOURNEY_SLUG}/day/1`} />}
+                nativeButton={false}
+                variant="outline"
+              >
+                Review the journey
+              </Button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-muted-foreground">
+                Begin your journey to unlock today&apos;s devotion.
+              </p>
+              <Button
+                render={<Link href={`/journeys/${JOURNEY_SLUG}`} />}
+                nativeButton={false}
+              >
+                Begin my journey
+              </Button>
+            </>
+          )}
         </div>
       )}
     </main>

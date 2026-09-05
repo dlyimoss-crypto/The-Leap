@@ -111,18 +111,23 @@ export default async function ScripturePage(
             ))}
           </div>
 
-          <form action="/evolve/scripture" method="GET">
+          <form
+            action="/evolve/scripture"
+            method="GET"
+            className="flex items-center gap-2 rounded-full border bg-card px-3 py-2"
+          >
             <input type="hidden" name="tab" value="bible" />
-            <div className="flex items-center gap-2 rounded-full border bg-card px-3 py-2">
-              <Search className="size-4 shrink-0 text-muted-foreground" />
-              <input
-                type="text"
-                name="q"
-                defaultValue={q}
-                placeholder="Search today's curated passages…"
-                className="w-full bg-transparent text-sm outline-none"
-              />
-            </div>
+            <Search className="size-4 shrink-0 text-muted-foreground" />
+            <input
+              type="text"
+              name="q"
+              defaultValue={q}
+              placeholder="Search today's curated passages…"
+              className="w-full bg-transparent text-sm outline-none"
+            />
+            <Button type="submit" size="xs" variant="secondary">
+              Search
+            </Button>
           </form>
 
           <div className="space-y-1">
@@ -149,9 +154,7 @@ export default async function ScripturePage(
           {selectedPassage && (
             <div className="space-y-3 rounded-xl border bg-card p-4">
               <blockquote className="space-y-1 border-l-2 border-primary/30 pl-3">
-                <p className="text-foreground italic">
-                  &ldquo;{selectedPassage.text}&rdquo;
-                </p>
+                <p className="text-foreground italic">{selectedPassage.text}</p>
                 <cite className="block text-sm text-muted-foreground not-italic">
                   {selectedPassage.reference} ({selectedPassage.translation})
                 </cite>
@@ -213,7 +216,7 @@ export default async function ScripturePage(
                 </p>
                 {passage && (
                   <p className="text-sm text-muted-foreground italic">
-                    &ldquo;{passage.text}&rdquo;
+                    {passage.text}
                   </p>
                 )}
                 <form

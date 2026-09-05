@@ -49,9 +49,7 @@ export default async function JourneySessionPage(
                 key={reference}
                 className="space-y-1 border-l-2 border-primary/30 pl-3"
               >
-                <p className="text-foreground italic">
-                  &ldquo;{passage.text}&rdquo;
-                </p>
+                <p className="text-foreground italic">{passage.text}</p>
                 <cite className="block text-sm text-muted-foreground not-italic">
                   {passage.reference} ({passage.translation})
                 </cite>
