@@ -1,0 +1,33 @@
+# Author Publishing Platform — build plan
+
+## Destination
+
+A build-ready plan for letting the founder — and, potentially, other authors who join The Leap — publish books (free and premium) into the Evolve Hub's Books & Literature slot, and for the founder's team to publish ongoing Daily Devotion content that they write themselves, independent of the "Faith in Christ" Formation Journey. Covers the content/data model, author roles, a submission-and-review mechanism, and monetization — none of which the-leap-mvp map (or its tickets 11/15) was scoped to answer.
+
+## Notes
+
+- This effort **supersedes two things already decided in `.scratch/the-leap-mvp/`**:
+  - [Ticket 11 — Daily Devotion](../the-leap-mvp/issues/11-daily-devotion-nav.md): resolved (and implemented, shipped to production) as "Devotion reuses the current Journey day's Explore/Reflect content" — `/evolve/devotion` in the live app currently reads `getCurrentJourneyState()` and shows today's Session fields. That answer no longer holds once Devotion becomes independently-authored daily content; the shipped implementation will need rework once this effort resolves how authored Devotion content actually works.
+  - [Ticket 15 — Books & Literature content scope](../the-leap-mvp/issues/15-books-library-content-scope.md): closed there with a pointer to this effort, since "which content do we curate" was the wrong-shaped question once the real ask turned out to be a multi-author publishing platform with payments.
+- **Monetization is now explicitly in scope for this feature specifically** — this doesn't reverse the-leap-mvp map's "no monetization/payments in V1" decision for the rest of the product, only for Books/Devotion premium content. CONTEXT.md already names a `tier` concept ("Free / Leap+ / Leap Lead") that was reserved for exactly this and never designed — this is the first effort that actually needs to build it.
+- **Editorial/theological review is a founder decision, not an engineering one** — the-leap-mvp map's "Out of scope" section already filed "editorial/theological advisory board" and "mentor-verification *policy* authorship" as non-engineering work. That still holds: this map designs the *mechanism* (submission states, who can approve/reject, how a decision is recorded) the same way the-leap-mvp's ticket 08 built a moderation mechanism without deciding moderation policy — it does not decide *what* gets approved.
+- LEAP LEAD's leadership curriculum (The Real Edge) stays deferred per the-leap-mvp map — this effort is about book/devotional content publishing, not that separate initiative, even though both eventually touch monetization.
+- **Guiding principle** (ticket 04): separate *content ownership* (the author owns/submits the work) from *publishing authority* (Admin controls whether the platform publishes it) from *access* (the user controls whether they purchase it) from *distribution* (the platform controls the mechanism). Anyone can aspire to contribute; nobody can publish without review.
+- Consult `grilling` for grilling-type tickets, `research` for research-type tickets (e.g. payment-processor comparison, likely needed), `domain-modeling` for new vocabulary (e.g. "Author," "Submission," "Premium content" need CONTEXT.md entries once settled), per the standard wayfinder invocation.
+
+## Decisions so far
+
+- [Content model & authorship](./issues/01-content-model-and-authors.md): Devotion and Books are two separate systems, not one shared content pipeline — three content pillars total (Devotions, Books, pre-existing Formation Content). Books & Literature supports multiple authors from V1, gated entirely behind Admin review (Author ≠ Publisher) — no founder-only V1 limitation.
+- [Books submission & review workflow](./issues/02-books-submission-workflow.md): Draft → Pending Review → (Request Changes / Reject / Approve → Published), with Admin able to Unpublish. Full author-side and admin-side capability list in the ticket.
+- [Devotion content model](./issues/03-devotion-content-model.md): reuses the existing Admin role (new "Devotions" tab). Fields: title (required), Scripture reference (optional), body (required) — deliberately not the full Formation Loop template. Permanent archive, never "today only." Scheduling from V1 via a `publish_date` column and `draft/scheduled/published` statuses — write-ahead, auto-publish on date.
+- [Author onboarding & Books mechanics](./issues/04-author-onboarding-and-books-mechanics.md): self-serve author application, admin-approved (a gate separate from per-book approval). PDF/EPUB upload, download-only for V1 (in-app reader deferred to V2). Required, recorded rights attestation. Pricing is Free + one-time purchase per book for V1; Leap+ subscription deferred but the access model is architected as `FREE | PURCHASED | SUBSCRIPTION` to leave room for it. Author payouts tracked in the data model but paid manually outside the app for V1 — no payout automation yet.
+
+## Fog — questions raised but not yet charted as tickets
+
+- **Payment processor selection**: Q10 (ticket 04) settled the pricing *model* (one-time purchase), not which processor handles it. Worth a `research` ticket — same lens as the-leap-mvp's ticket 03 for Bible-text licensing (fees, compliance, payout/refund support) rather than a guess.
+- **Public catalog/browse UX for Books**: how a user actually discovers published books in the Evolve Hub slot — categories/tags as filters, search, sort by newest — now unblocked since pricing is simple (free/one-time purchase), not yet charted as its own ticket.
+
+## Out of scope
+
+- **Legal/organizational decisions**: publishing agreements/terms of service for third-party authors, regional pricing strategy, actual payment-processor account setup, the theological review *policy* itself (who approves what content, on what doctrinal basis). Real work, but not what this engineering map charts — carried forward from the-leap-mvp's own "Out of scope" section.
+- **LEAP LEAD / The Real Edge leadership curriculum** — separate initiative, stays deferred per the-leap-mvp map.
