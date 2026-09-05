@@ -54,3 +54,7 @@ THE LEAP
 
 **New follow-up ticket spun out of this round**: [14 — Navigation movement iconography](./14-nav-iconography.md). The mockups showed inconsistent icons per movement across screens (Commit as `+` vs. a cross; Engage as a grid-of-4 vs. a globe) — needs one canonical icon per movement, used consistently everywhere.
 
+## Comments
+
+Implemented and shipped to production (`leapgrow.app`). `BottomNav` rewritten with the five Home/Connect/Commit/Evolve/Engage tabs, each with an `activeMatch` predicate so Connect/Evolve highlight correctly from their nested sub-routes. `CompanionLauncher` mounted globally in the root layout as the floating cross-cutting entry point. Verified via live browser QA: nav renders correctly, Connect/Evolve hubs reachable, Companion floating button appears on the specified surfaces and its intent menu works. Commit/Engage/Practice remain placeholders per the fog noted above.
+

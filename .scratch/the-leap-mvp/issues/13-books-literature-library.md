@@ -20,3 +20,7 @@ Reviving it raises the same category of questions ticket 03 answered for Scriptu
 
 **Deliberately not resolved here**: content sourcing/licensing, format (in-app reader vs. PDF vs. curated external links), relationship to the ten Formation Domains, V1 content sizing, and the tension with CONTEXT.md's "not... a content library" framing. This round only locked the information-architecture slot the feature occupies — "we don't need to design the entire Books experience yet, but its IA position can be locked." Those remaining questions carry forward to [ticket 15](./15-books-library-content-scope.md).
 
+## Comments
+
+IA placement implemented and shipped: `/evolve/books` exists as the fourth Evolve Hub card, showing a "Coming soon" placeholder — no content behind it, per this ticket's own scoping. This ticket's placement question is fully closed; ticket 15 stays open for the actual content work.
+

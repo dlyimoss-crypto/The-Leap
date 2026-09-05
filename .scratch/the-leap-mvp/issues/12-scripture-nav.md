@@ -25,3 +25,7 @@ A standalone top-level "Scripture" nav item implies something bigger than that, 
 
 **Flagged, not resolved**: choosing a full read/search/study/save Scripture destination sits closer to "a Bible app" than CONTEXT.md's explicit framing ("not... a Bible app") anticipated. Worth building deliberately so Scripture here still serves formation — surfaced from and tied back to the Journey/Session flow, save/search framed around a person's own formation journey — rather than becoming a general-purpose Bible-app destination in its own right. Not re-opening the ticket over this, just making sure it's a seen tradeoff, not a silent one.
 
+## Comments
+
+Implemented as a **shell**, not the full reader this ticket describes — a deliberate scope call made at implementation time: `/evolve/scripture` ships on today's existing 24-verse curated dataset (not full WEB/KJV/ASV ingestion), with search/save/favorites working against that curated set, and the translation picker built extensibly (WEB active, KJV/ASV shown as "Coming soon") so the real full-reader build doesn't require a UI rewrite later. Full ingestion and a real `BibleProvider` remain a distinct, not-yet-scheduled follow-up — this ticket's "full reader" answer is the target, not what's live today. Verified live: search, save/unsave, and favorites all work correctly against the curated set; a rendering bug (double-wrapping already-quoted verse text) was found and fixed during QA.
+

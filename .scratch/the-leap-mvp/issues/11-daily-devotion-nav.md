@@ -25,3 +25,7 @@ This sits **alongside**, not in place of, Home's existing Next Step/Today surfac
 - Whether the Formation Loop's full internal sequence (Scripture → Explore → Reflect → Pray → Practice → Connect → Next Step → Engage) plays out when entered from the Devotion screen specifically, or whether Devotion is deliberately a shorter, single-sitting read distinct from working a full Session.
 - What the Devotion screen shows once a user finishes the current 7-day journey (next Formation Domain's content, or an empty/"between journeys" state).
 
+## Comments
+
+Implemented and shipped: `/evolve/devotion` shows today's Session `explore`/`reflect` fields via the shared `Step` component — the first open item above (Explore + Reflect only, not the full Pray/Practice/Connect sequence, which stays exclusive to the Session screen). The second open item (post-completion state) got resolved along the way during QA: a completed-journey user was seeing a misleading "Begin your journey" prompt; fixed to distinguish not-started from completed, showing "You've completed your current journey — a new devotion will be ready when your next journey begins" with a Review link. Verified live.
+
