@@ -20,7 +20,7 @@ export default async function ChurchesPage(
   props: PageProps<"/connect/churches">,
 ) {
   const searchParams = await props.searchParams;
-  const id = Array.isArray(searchParams.id)
+  const idParam = Array.isArray(searchParams.id)
     ? searchParams.id[0]
     : searchParams.id;
 
@@ -33,14 +33,23 @@ export default async function ChurchesPage(
     redirect("/sign-in");
   }
 
-  if (id) {
-    const { data: church } = await supabase
-      .from("churches")
-      .select(
-        "id, name, lead_pastor, mission, address, service_time, phone, email, member_count_estimate",
-      )
-      .eq("id", id)
-      .maybeSingle<ChurchRow>();
+  const { data: churches } = await supabase
+    .from("churches")
+    .select(
+      "id, name, lead_pastor, mission, address, service_time, phone, email, member_count_estimate",
+    )
+    .order("name", { ascending: true })
+    .returns<ChurchRow[]>();
+
+  const rows = churches ?? [];
+
+  // With only one church in the directory, skip the list entirely and show
+  // its card directly — a list-of-one adds a tap for no reason.
+  const selectedId = idParam ?? (rows.length === 1 ? rows[0].id : undefined);
+  const showBackLink = rows.length > 1;
+
+  if (selectedId) {
+    const church = rows.find((c) => c.id === selectedId);
 
     if (!church) {
       return (
@@ -61,13 +70,15 @@ export default async function ChurchesPage(
 
     return (
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-10">
-        <Link
-          href="/connect/churches"
-          className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="size-4" />
-          Back to Churches
-        </Link>
+        {showBackLink && (
+          <Link
+            href="/connect/churches"
+            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            <ArrowLeft className="size-4" />
+            Back to Churches
+          </Link>
+        )}
 
         <div className="space-y-4 rounded-xl border bg-card p-5">
           <div className="flex items-start gap-3">
@@ -135,16 +146,6 @@ export default async function ChurchesPage(
       </main>
     );
   }
-
-  const { data: churches } = await supabase
-    .from("churches")
-    .select(
-      "id, name, lead_pastor, mission, address, service_time, phone, email, member_count_estimate",
-    )
-    .order("name", { ascending: true })
-    .returns<ChurchRow[]>();
-
-  const rows = churches ?? [];
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-10">
