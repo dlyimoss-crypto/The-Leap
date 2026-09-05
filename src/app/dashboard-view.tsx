@@ -197,6 +197,7 @@ export function DashboardView({
           <Button
             render={<Link href={journeyContinueHref(journey.slug, progress)} />}
             nativeButton={false}
+            variant="outline"
             size="lg"
             className="w-full rounded-full"
           >
