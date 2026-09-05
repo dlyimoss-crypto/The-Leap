@@ -16,7 +16,7 @@ export function WelcomeView() {
 
       <div className="flex w-full max-w-xs flex-col items-center gap-3">
         <Button
-          render={<Link href="/journeys/faith-in-christ" />}
+          render={<Link href="/sign-in?mode=sign-up" />}
           nativeButton={false}
           size="lg"
           className="w-full"

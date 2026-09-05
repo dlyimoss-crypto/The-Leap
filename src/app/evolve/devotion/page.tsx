@@ -10,6 +10,7 @@ type DevotionRow = {
   body: string;
   reflection: string | null;
   prayer: string | null;
+  practice: string | null;
   publish_date: string;
 };
 
@@ -48,7 +49,7 @@ export default async function DevotionPage(
     const { data } = await supabase
       .from("devotions")
       .select(
-        "id, title, scripture_reference, body, reflection, prayer, publish_date",
+        "id, title, scripture_reference, body, reflection, prayer, practice, publish_date",
       )
       .eq("id", idParam)
       .maybeSingle<DevotionRow>();
@@ -57,7 +58,7 @@ export default async function DevotionPage(
     const { data: pastRows } = await supabase
       .from("devotions")
       .select(
-        "id, title, scripture_reference, body, reflection, prayer, publish_date",
+        "id, title, scripture_reference, body, reflection, prayer, practice, publish_date",
       )
       .lte("publish_date", today)
       .neq("id", idParam)
@@ -69,7 +70,7 @@ export default async function DevotionPage(
     const { data, error } = await supabase
       .from("devotions")
       .select(
-        "id, title, scripture_reference, body, reflection, prayer, publish_date",
+        "id, title, scripture_reference, body, reflection, prayer, practice, publish_date",
       )
       .lte("publish_date", today)
       .order("publish_date", { ascending: false })
@@ -137,6 +138,17 @@ export default async function DevotionPage(
               </p>
               <p className="whitespace-pre-line text-foreground">
                 {featured.prayer}
+              </p>
+            </div>
+          )}
+
+          {featured.practice && (
+            <div className="space-y-1">
+              <p className="text-base font-semibold uppercase tracking-wide text-primary">
+                Practice
+              </p>
+              <p className="whitespace-pre-line text-foreground">
+                {featured.practice}
               </p>
             </div>
           )}

@@ -51,6 +51,7 @@ type DevotionRow = {
   body: string;
   reflection: string | null;
   prayer: string | null;
+  practice: string | null;
   publish_date: string | null;
 };
 
@@ -429,7 +430,7 @@ async function DevotionsAdmin({ editId }: { editId: string | undefined }) {
   const { data: devotions, error } = await supabase
     .from("devotions")
     .select(
-      "id, title, scripture_reference, body, reflection, prayer, publish_date",
+      "id, title, scripture_reference, body, reflection, prayer, practice, publish_date",
     )
     .order("created_at", { ascending: false })
     .returns<DevotionRow[]>();
@@ -506,6 +507,15 @@ async function DevotionsAdmin({ editId }: { editId: string | undefined }) {
             name="prayer"
             rows={3}
             defaultValue={editing?.prayer ?? ""}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="practice">Practice (optional)</Label>
+          <Textarea
+            id="practice"
+            name="practice"
+            rows={3}
+            defaultValue={editing?.practice ?? ""}
           />
         </div>
         <div className="space-y-1.5">

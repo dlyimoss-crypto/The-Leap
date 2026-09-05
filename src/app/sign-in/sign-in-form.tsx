@@ -15,8 +15,12 @@ const initialState: AuthState = {};
 
 type Mode = "sign-in" | "sign-up";
 
-export function SignInForm() {
-  const [mode, setMode] = useState<Mode>("sign-in");
+export function SignInForm({
+  initialMode = "sign-in",
+}: {
+  initialMode?: Mode;
+}) {
+  const [mode, setMode] = useState<Mode>(initialMode);
   const isSignIn = mode === "sign-in";
 
   return (

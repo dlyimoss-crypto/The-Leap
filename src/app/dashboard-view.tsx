@@ -97,20 +97,37 @@ export function DashboardView({
       </div>
 
       {!progress && (
-        <div className="flex flex-1 flex-col items-center justify-center gap-6 text-center">
-          <div className="space-y-2">
-            <h1 className="text-2xl font-heading font-semibold text-balance">
-              Ready for your next step?
-            </h1>
-            <p className="text-muted-foreground">{journey.purpose}</p>
+        <div className="space-y-4 rounded-2xl bg-muted p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0 space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Welcome
+              </p>
+              <h1 className="font-heading text-2xl font-bold text-foreground text-balance">
+                Let&apos;s begin your journey
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                {journey.purpose}
+              </p>
+            </div>
+            <div className="size-20 shrink-0 overflow-hidden rounded-2xl bg-card">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/journey-trail.jpg"
+                alt=""
+                className="size-full object-cover"
+              />
+            </div>
           </div>
+
           <Button
             render={<Link href={journeyContinueHref(journey.slug, progress)} />}
             nativeButton={false}
             size="lg"
-            className="w-full max-w-xs"
+            className="w-full rounded-full"
           >
             Begin my journey
+            <ArrowRight className="size-4" />
           </Button>
         </div>
       )}
