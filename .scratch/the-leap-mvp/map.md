@@ -30,6 +30,7 @@ A build-ready V1 (MVP) implementation plan for The Leap — architecture/stack, 
 - [Books/Literature Library — IA placement](./issues/13-books-literature-library.md): reopens the deferral below; placed as the fourth Evolve Hub card. Content sourcing/format/sizing spun into a dedicated effort — see ticket 15 and [`.scratch/author-publishing/`](../author-publishing/map.md).
 - [Nav movement iconography](./issues/14-nav-iconography.md): Connect → `Users`, Commit → `Flag`, Evolve → `Sprout`, Engage → `Globe` — confirmed via a visual picker as the deliberate answer, matching what had already shipped as a placeholder.
 - [Books & Literature content scope](./issues/15-books-library-content-scope.md): wrong-shaped question, superseded. Turned out to be a request for a multi-author publishing platform with monetization (also reopening ticket 11's Daily Devotion answer) — spun into its own effort, [`.scratch/author-publishing/`](../author-publishing/map.md), rather than answered here.
+- **Groups fog resolved**: the mockup's "Groups" tab under Connect (flagged below as contradicting ticket 02's "no groups in V1") is replaced outright with a **Churches directory** instead — a curated, admin-only list of local churches (name, lead pastor, mission, address, service time, phone/email with copy-to-clipboard and mailto, member estimate) at `/connect/churches`. No groups concept was ever built; the contradiction is moot. This is a lightweight directory, not the deferred "church network" feature (Out of scope, below) — no inter-church or cross-user features, browsable list only, no user-to-church association yet.
 
 ## Not yet specified
 
@@ -37,7 +38,6 @@ A build-ready V1 (MVP) implementation plan for The Leap — architecture/stack, 
 
 ## Open questions
 
-- **Groups contradicts ticket 02**: the Connect-hub mockups used to resolve ticket 10 show a "Groups" tab and a "Join a Group" card, but ticket 02 (data model) explicitly decided *"one shared community space, no groups in V1"* (the `posts` table has no group concept). Not resolved either direction yet — could mean ticket 02's decision needs revisiting (groups back in scope, real data-model work), or the mockup's Groups tab is aspirational/post-V1 and shouldn't be built against yet. Flagging rather than assuming.
 - **Commit's contents**: what screens/features live under the Commit tab — open, not yet asked.
 - **Engage's contents**: what screens/features live under the Engage tab — open, not yet asked.
 - **Home's Practice shortcut**: where the fourth "Today" row item (Practice) leads — open, not yet asked.

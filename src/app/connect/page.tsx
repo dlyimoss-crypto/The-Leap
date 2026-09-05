@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { Users, HeartHandshake, Users2 } from "lucide-react";
+import { Users, HeartHandshake, Church } from "lucide-react";
 import { HubCard } from "@/components/hub-card";
 import { createClient } from "@/lib/supabase/server";
 
@@ -34,11 +34,10 @@ export default async function ConnectPage() {
           description="Pray, support, and be prayed for."
         />
         <HubCard
-          href="/connect/groups"
-          icon={Users2}
-          title="Groups"
-          description="Connect with others around shared interests."
-          comingSoon
+          href="/connect/churches"
+          icon={Church}
+          title="Churches"
+          description="Find a local church and connect with its community."
         />
       </div>
     </main>

@@ -278,3 +278,61 @@ export async function unpublishBook(bookId: string) {
 
   revalidatePath("/admin");
 }
+
+function churchFields(formData: FormData) {
+  const memberCountRaw = String(
+    formData.get("member_count_estimate") ?? "",
+  ).trim();
+
+  return {
+    name: String(formData.get("name") ?? "").trim(),
+    lead_pastor: String(formData.get("lead_pastor") ?? "").trim() || null,
+    mission: String(formData.get("mission") ?? "").trim() || null,
+    address: String(formData.get("address") ?? "").trim() || null,
+    service_time: String(formData.get("service_time") ?? "").trim() || null,
+    phone: String(formData.get("phone") ?? "").trim() || null,
+    email: String(formData.get("email") ?? "").trim() || null,
+    member_count_estimate: memberCountRaw
+      ? Number.parseInt(memberCountRaw, 10)
+      : null,
+  };
+}
+
+export async function createChurch(formData: FormData) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase.from("churches").insert(churchFields(formData));
+
+  if (error) {
+    console.error("Failed to create church", error);
+  }
+
+  revalidatePath("/admin");
+}
+
+export async function updateChurch(id: string, formData: FormData) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase
+    .from("churches")
+    .update(churchFields(formData))
+    .eq("id", id);
+
+  if (error) {
+    console.error("Failed to update church", error);
+  }
+
+  revalidatePath("/admin");
+}
+
+export async function deleteChurch(id: string) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase.from("churches").delete().eq("id", id);
+
+  if (error) {
+    console.error("Failed to delete church", error);
+  }
+
+  revalidatePath("/admin");
+}

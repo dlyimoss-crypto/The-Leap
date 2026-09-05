@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Inbox, Sparkles, BookOpen, Users2 } from "lucide-react";
+import { Inbox, Sparkles, BookOpen, Users2, Church } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,9 @@ import {
   approveAuthorApplication,
   approveBook,
   banUser,
+  createChurch,
   createDevotion,
+  deleteChurch,
   deleteDevotion,
   publishBook,
   rejectAuthorApplication,
@@ -23,10 +25,23 @@ import {
   resolveReport,
   unbanUser,
   unpublishBook,
+  updateChurch,
   updateDevotion,
 } from "./actions";
 
-type Tab = "queue" | "users" | "devotions" | "books";
+type Tab = "queue" | "users" | "devotions" | "books" | "churches";
+
+type ChurchRow = {
+  id: string;
+  name: string;
+  lead_pastor: string | null;
+  mission: string | null;
+  address: string | null;
+  service_time: string | null;
+  phone: string | null;
+  email: string | null;
+  member_count_estimate: number | null;
+};
 
 type DevotionRow = {
   id: string;
@@ -102,7 +117,9 @@ export default async function AdminPage(props: PageProps<"/admin">) {
         ? "devotions"
         : tabParam === "books"
           ? "books"
-          : "queue";
+          : tabParam === "churches"
+            ? "churches"
+            : "queue";
   const editIdParam = Array.isArray(searchParams.edit)
     ? searchParams.edit[0]
     : searchParams.edit;
@@ -176,6 +193,16 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           Books
           {!!booksNotificationCount && <TabBadge count={booksNotificationCount} />}
         </Link>
+        <Link
+          href="/admin?tab=churches"
+          className={
+            tab === "churches"
+              ? "border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
+              : "pb-2 text-sm font-medium text-muted-foreground"
+          }
+        >
+          Churches
+        </Link>
       </div>
 
       {tab === "queue" ? (
@@ -184,8 +211,10 @@ export default async function AdminPage(props: PageProps<"/admin">) {
         <UsersList />
       ) : tab === "devotions" ? (
         <DevotionsAdmin editId={editIdParam} />
-      ) : (
+      ) : tab === "books" ? (
         <BooksAdmin />
+      ) : (
+        <ChurchesAdmin editId={editIdParam} />
       )}
     </main>
   );
@@ -849,6 +878,156 @@ async function BooksAdmin() {
           <p className="text-sm text-muted-foreground">
             No author applications or book submissions yet.
           </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+async function ChurchesAdmin({ editId }: { editId: string | undefined }) {
+  const supabase = await createClient();
+
+  const { data: churches, error } = await supabase
+    .from("churches")
+    .select(
+      "id, name, lead_pastor, mission, address, service_time, phone, email, member_count_estimate",
+    )
+    .order("name", { ascending: true })
+    .returns<ChurchRow[]>();
+
+  if (error) {
+    console.error("Failed to load churches", error);
+  }
+
+  const rows = churches ?? [];
+  const editing = editId ? rows.find((c) => c.id === editId) : undefined;
+
+  return (
+    <div className="space-y-6">
+      <form
+        action={
+          editing ? updateChurch.bind(null, editing.id) : createChurch
+        }
+        className="space-y-3 rounded-xl border bg-card p-4"
+      >
+        <p className="text-sm font-semibold">
+          {editing ? "Edit church" : "New church"}
+        </p>
+        <div className="space-y-1.5">
+          <Label htmlFor="name">Church name</Label>
+          <Input id="name" name="name" defaultValue={editing?.name} required />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="lead_pastor">Lead Pastor</Label>
+          <Input
+            id="lead_pastor"
+            name="lead_pastor"
+            defaultValue={editing?.lead_pastor ?? ""}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="mission">Why do they exist?</Label>
+          <Textarea
+            id="mission"
+            name="mission"
+            rows={3}
+            defaultValue={editing?.mission ?? ""}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="address">Address</Label>
+          <Input
+            id="address"
+            name="address"
+            defaultValue={editing?.address ?? ""}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="service_time">Service time</Label>
+          <Input
+            id="service_time"
+            name="service_time"
+            placeholder="e.g. 0800-0930"
+            defaultValue={editing?.service_time ?? ""}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="phone">Phone</Label>
+          <Input id="phone" name="phone" defaultValue={editing?.phone ?? ""} />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            defaultValue={editing?.email ?? ""}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="member_count_estimate">
+            Estimated number of members
+          </Label>
+          <Input
+            id="member_count_estimate"
+            name="member_count_estimate"
+            type="number"
+            min="0"
+            defaultValue={editing?.member_count_estimate ?? ""}
+          />
+        </div>
+        <div className="flex justify-end gap-2">
+          {editing && (
+            <Button
+              render={<Link href="/admin?tab=churches" />}
+              nativeButton={false}
+              type="button"
+              variant="ghost"
+              size="sm"
+            >
+              Cancel
+            </Button>
+          )}
+          <Button type="submit" size="sm">
+            {editing ? "Save changes" : "Create church"}
+          </Button>
+        </div>
+      </form>
+
+      {rows.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 py-12 text-center">
+          <Church className="size-8 text-muted-foreground/50" />
+          <p className="text-sm text-muted-foreground">
+            No churches yet — add the first one above.
+          </p>
+        </div>
+      ) : (
+        <div className="divide-y rounded-xl border bg-card">
+          {rows.map((c) => (
+            <div key={c.id} className="flex items-center justify-between gap-3 p-3">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium">{c.name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {c.lead_pastor ?? "No pastor listed"}
+                </p>
+              </div>
+              <div className="flex shrink-0 gap-2">
+                <Button
+                  render={<Link href={`/admin?tab=churches&edit=${c.id}`} />}
+                  nativeButton={false}
+                  size="xs"
+                  variant="outline"
+                >
+                  Edit
+                </Button>
+                <form action={deleteChurch.bind(null, c.id)}>
+                  <Button type="submit" size="xs" variant="ghost">
+                    Delete
+                  </Button>
+                </form>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
