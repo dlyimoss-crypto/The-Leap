@@ -121,7 +121,7 @@ export default async function DevotionPage(
 
           {featured.reflection && (
             <div className="space-y-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-primary">
+              <p className="text-base font-semibold uppercase tracking-wide text-primary">
                 Reflection
               </p>
               <p className="whitespace-pre-line text-foreground">
@@ -132,7 +132,7 @@ export default async function DevotionPage(
 
           {featured.prayer && (
             <div className="space-y-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-primary">
+              <p className="text-base font-semibold uppercase tracking-wide text-primary">
                 Prayer
               </p>
               <p className="whitespace-pre-line text-foreground">
