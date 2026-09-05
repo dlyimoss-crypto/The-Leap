@@ -82,6 +82,14 @@ type BookRow = {
   profiles: { display_name: string | null } | null;
 };
 
+function TabBadge({ count }: { count: number }) {
+  return (
+    <Badge variant="destructive" className="h-4 min-w-4 px-1 text-[10px]">
+      {count}
+    </Badge>
+  );
+}
+
 export default async function AdminPage(props: PageProps<"/admin">) {
   const searchParams = await props.searchParams;
   const tabParam = Array.isArray(searchParams.tab)
@@ -101,6 +109,26 @@ export default async function AdminPage(props: PageProps<"/admin">) {
 
   await requireAdmin();
 
+  const supabase = await createClient();
+  const [{ count: openReportsCount }, { count: pendingApplicationsCount }, { count: pendingBooksCount }] =
+    await Promise.all([
+      supabase
+        .from("reports")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "open"),
+      supabase
+        .from("author_applications")
+        .select("id", { count: "exact", head: true })
+        .in("status", ["pending", "more_info_requested"]),
+      supabase
+        .from("books")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending_review"),
+    ]);
+
+  const booksNotificationCount =
+    (pendingApplicationsCount ?? 0) + (pendingBooksCount ?? 0);
+
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-6 py-10">
       <h1 className="text-2xl font-heading font-semibold">Admin</h1>
@@ -110,11 +138,12 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           href="/admin"
           className={
             tab === "queue"
-              ? "border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
-              : "pb-2 text-sm font-medium text-muted-foreground"
+              ? "flex items-center gap-1.5 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
+              : "flex items-center gap-1.5 pb-2 text-sm font-medium text-muted-foreground"
           }
         >
           Moderation queue
+          {!!openReportsCount && <TabBadge count={openReportsCount} />}
         </Link>
         <Link
           href="/admin?tab=users"
@@ -140,11 +169,12 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           href="/admin?tab=books"
           className={
             tab === "books"
-              ? "border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
-              : "pb-2 text-sm font-medium text-muted-foreground"
+              ? "flex items-center gap-1.5 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
+              : "flex items-center gap-1.5 pb-2 text-sm font-medium text-muted-foreground"
           }
         >
           Books
+          {!!booksNotificationCount && <TabBadge count={booksNotificationCount} />}
         </Link>
       </div>
 

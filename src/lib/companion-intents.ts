@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   HeartHandshake,
   Compass,
+  Library,
   type LucideIcon,
 } from "lucide-react";
 
@@ -53,6 +54,12 @@ export const COMPANION_INTENTS: CompanionIntent[] = [
     label: "Help me take my next step",
     icon: Compass,
     message: "What's my next step?",
+  },
+  {
+    slug: "materials",
+    label: "Get Christian materials",
+    icon: Library,
+    message: "Can you recommend some Christian books or materials for me?",
   },
 ];
 

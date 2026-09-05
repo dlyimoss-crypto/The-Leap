@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Library } from "lucide-react";
+import { ArrowLeft, Library, Sparkles } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +33,14 @@ type BookRow = {
   manuscript_filename: string | null;
 };
 
+type PublishedBookRow = {
+  id: string;
+  title: string;
+  cover_path: string | null;
+  price_cents: number | null;
+  profiles: { display_name: string | null } | null;
+};
+
 const STATUS_LABEL: Record<string, string> = {
   draft: "Draft",
   pending_review: "Pending Review",
@@ -57,6 +66,10 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
   const editId = Array.isArray(searchParams.edit)
     ? searchParams.edit[0]
     : searchParams.edit;
+  const showApplyFlow =
+    (Array.isArray(searchParams.apply)
+      ? searchParams.apply[0]
+      : searchParams.apply) === "1";
 
   const supabase = await createClient();
   const {
@@ -73,6 +86,77 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
     .eq("id", user.id)
     .single();
 
+  const { data: publishedBooks } = await supabase
+    .from("books")
+    .select("id, title, cover_path, price_cents, profiles(display_name)")
+    .eq("status", "published")
+    .order("created_at", { ascending: false })
+    .returns<PublishedBookRow[]>();
+
+  const library = publishedBooks ?? [];
+
+  const librarySection = (
+    <div className="space-y-3">
+      <div className="flex items-baseline justify-between">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Library
+        </p>
+        {library.length > 0 && (
+          <span className="text-xs text-muted-foreground">
+            {library.length} {library.length === 1 ? "book" : "books"}
+          </span>
+        )}
+      </div>
+      {library.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 rounded-xl border bg-card py-12 text-center">
+          <Library className="size-8 text-muted-foreground/50" />
+          <p className="text-sm text-muted-foreground">
+            No books published yet — be the first to share one below.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-3">
+          {library.map((book) => {
+            const coverUrl = book.cover_path
+              ? supabase.storage.from("book-covers").getPublicUrl(book.cover_path)
+                  .data.publicUrl
+              : null;
+            return (
+              <div
+                key={book.id}
+                className="space-y-2 rounded-xl border bg-card p-3"
+              >
+                <div className="flex aspect-[3/4] items-center justify-center overflow-hidden rounded-lg bg-muted">
+                  {coverUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={coverUrl}
+                      alt=""
+                      className="size-full object-cover"
+                    />
+                  ) : (
+                    <Library className="size-6 text-muted-foreground/40" />
+                  )}
+                </div>
+                <div>
+                  <p className="truncate text-sm font-medium">{book.title}</p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {book.profiles?.display_name ?? "The Leap"}
+                  </p>
+                </div>
+                <Badge variant={book.price_cents ? "outline" : "secondary"}>
+                  {book.price_cents
+                    ? `$${(book.price_cents / 100).toFixed(2)}`
+                    : "Free"}
+                </Badge>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+
   if (!profile?.is_author) {
     const { data: application } = await supabase
       .from("author_applications")
@@ -82,44 +166,79 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
       .limit(1)
       .maybeSingle<ApplicationRow>();
 
-    const showForm =
-      !application ||
-      application.status === "more_info_requested";
+    if (!showApplyFlow) {
+      return (
+        <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-10">
+          <div>
+            <h1 className="text-2xl font-heading font-semibold">
+              Books & Literature
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Go deeper through books, teachings and curated resources.
+            </p>
+          </div>
+
+          {librarySection}
+
+          {application?.status !== "rejected" && (
+            <Link
+              href="/evolve/books?apply=1"
+              className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-4 hover:bg-primary/10"
+            >
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+                <Sparkles className="size-5" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-primary">
+                  {application?.status === "pending"
+                    ? "Your author application is under review"
+                    : application?.status === "more_info_requested"
+                      ? "We need a bit more from you to continue"
+                      : "Do you want to publish your book with The Leap?"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {application?.status === "pending"
+                    ? "We'll let you know as soon as it's reviewed."
+                    : "Share your writing with our community — free or paid, your choice."}
+                </p>
+              </div>
+            </Link>
+          )}
+
+          {application?.status === "rejected" && (
+            <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
+              <p className="font-medium">
+                Your author application wasn&apos;t approved.
+              </p>
+              {application.review_notes && (
+                <p className="mt-1 text-muted-foreground">
+                  {application.review_notes}
+                </p>
+              )}
+            </div>
+          )}
+        </main>
+      );
+    }
 
     return (
       <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-10">
-        <div>
-          <h1 className="text-2xl font-heading font-semibold">
-            Books & Literature
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Go deeper through books, teachings and curated resources.
-          </p>
-        </div>
+        <Link
+          href="/evolve/books"
+          className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          Back to Library
+        </Link>
 
-        {application?.status === "rejected" && (
-          <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
-            <p className="font-medium">
-              Your author application wasn&apos;t approved.
-            </p>
-            {application.review_notes && (
-              <p className="mt-1 text-muted-foreground">
-                {application.review_notes}
-              </p>
-            )}
-          </div>
-        )}
-
-        {application?.status === "pending" && (
+        {application?.status === "pending" ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 py-12 text-center">
-            <Library className="size-8 text-muted-foreground/50" />
+            <Sparkles className="size-8 text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">
               Your author application is under review.
             </p>
           </div>
-        )}
-
-        {showForm && (
+        ) : (
           <form
             action={applyToBeAuthor}
             className="space-y-3 rounded-xl border bg-card p-4"
@@ -205,6 +324,8 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
           Submit a book for review — approved books join the Library.
         </p>
       </div>
+
+      {librarySection}
 
       <form
         action={
