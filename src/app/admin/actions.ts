@@ -132,3 +132,149 @@ export async function deleteDevotion(id: string) {
 
   revalidatePath("/admin");
 }
+
+export async function approveAuthorApplication(
+  applicationId: string,
+  userId: string,
+) {
+  const { supabase } = await requireAdmin();
+
+  const { error: appError } = await supabase
+    .from("author_applications")
+    .update({ status: "approved", review_notes: null })
+    .eq("id", applicationId);
+
+  if (appError) {
+    console.error("Failed to approve author application", appError);
+  }
+
+  const { error: rpcError } = await supabase.rpc("set_user_author", {
+    p_user_id: userId,
+    p_is_author: true,
+  });
+
+  if (rpcError) {
+    console.error("Failed to grant author status", rpcError);
+  }
+
+  revalidatePath("/admin");
+}
+
+export async function rejectAuthorApplication(
+  applicationId: string,
+  formData: FormData,
+) {
+  const { supabase } = await requireAdmin();
+
+  const reviewNotes = String(formData.get("review_notes") ?? "").trim() || null;
+
+  const { error } = await supabase
+    .from("author_applications")
+    .update({ status: "rejected", review_notes: reviewNotes })
+    .eq("id", applicationId);
+
+  if (error) {
+    console.error("Failed to reject author application", error);
+  }
+
+  revalidatePath("/admin");
+}
+
+export async function requestAuthorInfo(
+  applicationId: string,
+  formData: FormData,
+) {
+  const { supabase } = await requireAdmin();
+
+  const reviewNotes = String(formData.get("review_notes") ?? "").trim() || null;
+
+  const { error } = await supabase
+    .from("author_applications")
+    .update({ status: "more_info_requested", review_notes: reviewNotes })
+    .eq("id", applicationId);
+
+  if (error) {
+    console.error("Failed to request more author info", error);
+  }
+
+  revalidatePath("/admin");
+}
+
+export async function requestBookChanges(bookId: string, formData: FormData) {
+  const { supabase } = await requireAdmin();
+
+  const reviewNotes = String(formData.get("review_notes") ?? "").trim() || null;
+
+  const { error } = await supabase
+    .from("books")
+    .update({ status: "changes_requested", review_notes: reviewNotes })
+    .eq("id", bookId);
+
+  if (error) {
+    console.error("Failed to request book changes", error);
+  }
+
+  revalidatePath("/admin");
+}
+
+export async function rejectBook(bookId: string, formData: FormData) {
+  const { supabase } = await requireAdmin();
+
+  const reviewNotes = String(formData.get("review_notes") ?? "").trim() || null;
+
+  const { error } = await supabase
+    .from("books")
+    .update({ status: "rejected", review_notes: reviewNotes })
+    .eq("id", bookId);
+
+  if (error) {
+    console.error("Failed to reject book", error);
+  }
+
+  revalidatePath("/admin");
+}
+
+export async function approveBook(bookId: string) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase
+    .from("books")
+    .update({ status: "approved", review_notes: null })
+    .eq("id", bookId);
+
+  if (error) {
+    console.error("Failed to approve book", error);
+  }
+
+  revalidatePath("/admin");
+}
+
+export async function publishBook(bookId: string) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase
+    .from("books")
+    .update({ status: "published" })
+    .eq("id", bookId);
+
+  if (error) {
+    console.error("Failed to publish book", error);
+  }
+
+  revalidatePath("/admin");
+}
+
+export async function unpublishBook(bookId: string) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase
+    .from("books")
+    .update({ status: "unpublished" })
+    .eq("id", bookId);
+
+  if (error) {
+    console.error("Failed to unpublish book", error);
+  }
+
+  revalidatePath("/admin");
+}

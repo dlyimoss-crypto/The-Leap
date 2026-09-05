@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Inbox, Sparkles } from "lucide-react";
+import { Inbox, Sparkles, BookOpen, Users2 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,15 +10,23 @@ import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/supabase/authorize";
 import { getDevotionStatus } from "@/lib/devotion";
 import {
+  approveAuthorApplication,
+  approveBook,
   banUser,
   createDevotion,
   deleteDevotion,
+  publishBook,
+  rejectAuthorApplication,
+  rejectBook,
+  requestAuthorInfo,
+  requestBookChanges,
   resolveReport,
   unbanUser,
+  unpublishBook,
   updateDevotion,
 } from "./actions";
 
-type Tab = "queue" | "users" | "devotions";
+type Tab = "queue" | "users" | "devotions" | "books";
 
 type DevotionRow = {
   id: string;
@@ -51,13 +59,42 @@ type ProfileRow = {
   is_banned: boolean;
 };
 
+type AuthorApplicationRow = {
+  id: string;
+  user_id: string;
+  bio: string;
+  reason: string;
+  website: string | null;
+  status: string;
+  profiles: { display_name: string | null } | null;
+};
+
+type BookRow = {
+  id: string;
+  author_id: string;
+  title: string;
+  description: string;
+  categories: string[];
+  price_cents: number | null;
+  status: string;
+  manuscript_path: string | null;
+  cover_path: string | null;
+  profiles: { display_name: string | null } | null;
+};
+
 export default async function AdminPage(props: PageProps<"/admin">) {
   const searchParams = await props.searchParams;
   const tabParam = Array.isArray(searchParams.tab)
     ? searchParams.tab[0]
     : searchParams.tab;
   const tab: Tab =
-    tabParam === "users" ? "users" : tabParam === "devotions" ? "devotions" : "queue";
+    tabParam === "users"
+      ? "users"
+      : tabParam === "devotions"
+        ? "devotions"
+        : tabParam === "books"
+          ? "books"
+          : "queue";
   const editIdParam = Array.isArray(searchParams.edit)
     ? searchParams.edit[0]
     : searchParams.edit;
@@ -99,14 +136,26 @@ export default async function AdminPage(props: PageProps<"/admin">) {
         >
           Devotions
         </Link>
+        <Link
+          href="/admin?tab=books"
+          className={
+            tab === "books"
+              ? "border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
+              : "pb-2 text-sm font-medium text-muted-foreground"
+          }
+        >
+          Books
+        </Link>
       </div>
 
       {tab === "queue" ? (
         <ModerationQueue />
       ) : tab === "users" ? (
         <UsersList />
-      ) : (
+      ) : tab === "devotions" ? (
         <DevotionsAdmin editId={editIdParam} />
+      ) : (
+        <BooksAdmin />
       )}
     </main>
   );
@@ -484,6 +533,293 @@ async function DevotionsAdmin({ editId }: { editId: string | undefined }) {
               </div>
             </div>
           ),
+      )}
+    </div>
+  );
+}
+
+const BOOK_STATUS_LABEL: Record<string, string> = {
+  pending_review: "Pending Review",
+  changes_requested: "Changes Requested",
+  rejected: "Rejected",
+  approved: "Approved",
+  published: "Published",
+  unpublished: "Unpublished",
+};
+
+async function BooksAdmin() {
+  const supabase = await createClient();
+
+  const [{ data: applications }, { data: books }] = await Promise.all([
+    supabase
+      .from("author_applications")
+      .select("id, user_id, bio, reason, website, status, profiles(display_name)")
+      .in("status", ["pending", "more_info_requested"])
+      .order("created_at", { ascending: true })
+      .returns<AuthorApplicationRow[]>(),
+    supabase
+      .from("books")
+      .select(
+        "id, author_id, title, description, categories, price_cents, status, manuscript_path, cover_path, profiles(display_name)",
+      )
+      .neq("status", "draft")
+      .order("created_at", { ascending: true })
+      .returns<BookRow[]>(),
+  ]);
+
+  const bookRows = books ?? [];
+  const pendingReview = bookRows.filter((b) => b.status === "pending_review");
+  const approved = bookRows.filter((b) => b.status === "approved");
+  const published = bookRows.filter((b) => b.status === "published");
+  const other = bookRows.filter(
+    (b) => !["pending_review", "approved", "published"].includes(b.status),
+  );
+
+  const coverUrl = (path: string | null) =>
+    path ? supabase.storage.from("book-covers").getPublicUrl(path).data.publicUrl : null;
+
+  const manuscriptUrls = new Map<string, string>();
+  await Promise.all(
+    pendingReview
+      .filter((b) => b.manuscript_path)
+      .map(async (b) => {
+        const { data } = await supabase.storage
+          .from("book-manuscripts")
+          .createSignedUrl(b.manuscript_path as string, 600);
+        if (data?.signedUrl) {
+          manuscriptUrls.set(b.id, data.signedUrl);
+        }
+      }),
+  );
+
+  return (
+    <div className="space-y-6">
+      {(applications ?? []).length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Author applications — {(applications ?? []).length}
+          </p>
+          <div className="divide-y rounded-xl border bg-card">
+            {(applications ?? []).map((app) => (
+              <div key={app.id} className="space-y-2 p-4">
+                <div className="flex items-center gap-2">
+                  <Users2 className="size-4 text-muted-foreground" />
+                  <p className="text-sm font-semibold">
+                    {app.profiles?.display_name ?? "(no name)"}
+                  </p>
+                  <Badge variant="secondary">
+                    {app.status === "more_info_requested"
+                      ? "More info requested"
+                      : "Pending"}
+                  </Badge>
+                </div>
+                <p className="text-sm">
+                  <span className="text-muted-foreground">Bio: </span>
+                  {app.bio}
+                </p>
+                <p className="text-sm">
+                  <span className="text-muted-foreground">Why: </span>
+                  {app.reason}
+                </p>
+                {app.website && (
+                  <p className="text-sm text-muted-foreground">
+                    {app.website}
+                  </p>
+                )}
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <form
+                    action={approveAuthorApplication.bind(
+                      null,
+                      app.id,
+                      app.user_id,
+                    )}
+                  >
+                    <Button type="submit" size="sm">
+                      Approve
+                    </Button>
+                  </form>
+                  <form
+                    action={requestAuthorInfo.bind(null, app.id)}
+                    className="flex items-center gap-2"
+                  >
+                    <Input
+                      name="review_notes"
+                      placeholder="What's missing?"
+                      className="h-8 w-40"
+                    />
+                    <Button type="submit" size="sm" variant="outline">
+                      Request info
+                    </Button>
+                  </form>
+                  <form
+                    action={rejectAuthorApplication.bind(null, app.id)}
+                    className="flex items-center gap-2"
+                  >
+                    <Input
+                      name="review_notes"
+                      placeholder="Reason (optional)"
+                      className="h-8 w-40"
+                    />
+                    <Button type="submit" size="sm" variant="destructive">
+                      Reject
+                    </Button>
+                  </form>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {pendingReview.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Book submissions — {pendingReview.length}
+          </p>
+          <div className="divide-y rounded-xl border bg-card">
+            {pendingReview.map((b) => (
+              <div key={b.id} className="space-y-2 p-4">
+                <div className="flex gap-3">
+                  {coverUrl(b.cover_path) && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={coverUrl(b.cover_path) ?? undefined}
+                      alt=""
+                      className="size-16 shrink-0 rounded-md object-cover"
+                    />
+                  )}
+                  <div className="min-w-0 space-y-1">
+                    <p className="text-sm font-semibold">{b.title}</p>
+                    <p className="text-xs text-muted-foreground">
+                      by {b.profiles?.display_name ?? "(no name)"} ·{" "}
+                      {b.price_cents
+                        ? `$${(b.price_cents / 100).toFixed(2)}`
+                        : "Free"}
+                    </p>
+                    <p className="text-sm">{b.description}</p>
+                    {b.categories.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {b.categories.map((c) => (
+                          <Badge key={c} variant="outline">
+                            {c}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                    {manuscriptUrls.has(b.id) && (
+                      <a
+                        href={manuscriptUrls.get(b.id)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sm font-medium text-primary underline"
+                      >
+                        Preview manuscript
+                      </a>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <form action={approveBook.bind(null, b.id)}>
+                    <Button type="submit" size="sm">
+                      Approve
+                    </Button>
+                  </form>
+                  <form
+                    action={requestBookChanges.bind(null, b.id)}
+                    className="flex items-center gap-2"
+                  >
+                    <Input
+                      name="review_notes"
+                      placeholder="What needs to change?"
+                      className="h-8 w-48"
+                    />
+                    <Button type="submit" size="sm" variant="outline">
+                      Request changes
+                    </Button>
+                  </form>
+                  <form
+                    action={rejectBook.bind(null, b.id)}
+                    className="flex items-center gap-2"
+                  >
+                    <Input
+                      name="review_notes"
+                      placeholder="Reason (optional)"
+                      className="h-8 w-40"
+                    />
+                    <Button type="submit" size="sm" variant="destructive">
+                      Reject
+                    </Button>
+                  </form>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {approved.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Approved — {approved.length}
+          </p>
+          <div className="divide-y rounded-xl border bg-card">
+            {approved.map((b) => (
+              <div key={b.id} className="flex items-center justify-between gap-3 p-3">
+                <p className="truncate text-sm font-medium">{b.title}</p>
+                <form action={publishBook.bind(null, b.id)}>
+                  <Button type="submit" size="xs">
+                    Publish
+                  </Button>
+                </form>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {published.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Published — {published.length}
+          </p>
+          <div className="divide-y rounded-xl border bg-card">
+            {published.map((b) => (
+              <div key={b.id} className="flex items-center justify-between gap-3 p-3">
+                <p className="truncate text-sm font-medium">{b.title}</p>
+                <form action={unpublishBook.bind(null, b.id)}>
+                  <Button type="submit" size="xs" variant="ghost">
+                    Unpublish
+                  </Button>
+                </form>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {other.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Other
+          </p>
+          <div className="divide-y rounded-xl border bg-card">
+            {other.map((b) => (
+              <div key={b.id} className="flex items-center justify-between gap-3 p-3">
+                <p className="truncate text-sm font-medium">{b.title}</p>
+                <Badge variant="secondary">{BOOK_STATUS_LABEL[b.status]}</Badge>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {(applications ?? []).length === 0 && bookRows.length === 0 && (
+        <div className="flex flex-col items-center gap-3 py-12 text-center">
+          <BookOpen className="size-8 text-muted-foreground/50" />
+          <p className="text-sm text-muted-foreground">
+            No author applications or book submissions yet.
+          </p>
+        </div>
       )}
     </div>
   );
