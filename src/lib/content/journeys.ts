@@ -8,7 +8,6 @@ export type JourneyMeta = {
   purpose: string;
   durationDays: number;
   completionTitle: string;
-  nextRecommendations: string[];
 };
 
 const CONTENT_ROOT = path.join(process.cwd(), "content", "en");

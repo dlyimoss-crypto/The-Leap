@@ -1,12 +1,20 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { getJourneySession, type JourneySession } from "@/lib/content/journeys";
+import { findJourneySession } from "@/lib/content/journeys-repo";
+import type { JourneySession } from "@/lib/content/journeys";
 
-// The only journey in V1 (ticket 07) — there's nothing yet to pick between.
+// The default journey shown to a brand-new user who has never started
+// anything — preserves the original onboarding path. Once a user has real
+// progress, the slug they're actually on (tracked per-row below) takes over.
 export const JOURNEY_SLUG = "faith-in-christ";
 
 export type JourneyProgressRow = {
   current_session_number: number;
   completed_at: string | null;
+};
+
+type JourneyProgressQueryRow = JourneyProgressRow & {
+  journey_slug: string;
+  started_at: string;
 };
 
 export async function getCurrentJourneyState(
@@ -15,24 +23,53 @@ export async function getCurrentJourneyState(
 ): Promise<{
   progress: JourneyProgressRow | null;
   currentSession: JourneySession | null;
+  journeySlug: string;
 }> {
-  const { data: progress, error } = await supabase
+  const { data: active, error: activeError } = await supabase
     .from("journey_progress")
-    .select("current_session_number, completed_at")
+    .select("journey_slug, current_session_number, completed_at, started_at")
     .eq("user_id", userId)
-    .eq("journey_slug", JOURNEY_SLUG)
-    .maybeSingle<JourneyProgressRow>();
+    .is("completed_at", null)
+    .order("started_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<JourneyProgressQueryRow>();
 
-  if (error) {
-    // Degrade to "not started" rather than a hard error — but log it,
-    // since that's misleading for a user who has actually made progress.
-    console.error("Failed to load journey progress", error);
+  if (activeError) {
+    console.error("Failed to load active journey progress", activeError);
   }
 
-  const currentSession =
-    progress && !progress.completed_at
-      ? getJourneySession(JOURNEY_SLUG, progress.current_session_number)
-      : null;
+  if (active) {
+    return {
+      progress: active,
+      currentSession: await findJourneySession(
+        supabase,
+        active.journey_slug,
+        active.current_session_number,
+      ),
+      journeySlug: active.journey_slug,
+    };
+  }
 
-  return { progress: progress ?? null, currentSession };
+  const { data: completed, error: completedError } = await supabase
+    .from("journey_progress")
+    .select("journey_slug, current_session_number, completed_at, started_at")
+    .eq("user_id", userId)
+    .not("completed_at", "is", null)
+    .order("completed_at", { ascending: false })
+    .limit(1)
+    .maybeSingle<JourneyProgressQueryRow>();
+
+  if (completedError) {
+    console.error("Failed to load completed journey progress", completedError);
+  }
+
+  if (completed) {
+    return {
+      progress: completed,
+      currentSession: null,
+      journeySlug: completed.journey_slug,
+    };
+  }
+
+  return { progress: null, currentSession: null, journeySlug: JOURNEY_SLUG };
 }

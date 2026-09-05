@@ -11,12 +11,6 @@ describe("getJourneyMeta", () => {
         "To help a person understand who Jesus is, what He has accomplished, what it means to place faith in Him, and what it means to begin following Him.",
       durationDays: 7,
       completionTitle: "You've taken your first Leap.",
-      nextRecommendations: [
-        "the-cross-and-new-life",
-        "identity-in-christ",
-        "walking-with-the-holy-spirit",
-        "living-the-faith",
-      ],
     });
   });
 

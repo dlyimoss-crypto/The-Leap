@@ -5,11 +5,8 @@ import { redirect } from "next/navigation";
 import Anthropic from "@anthropic-ai/sdk";
 import { requireActiveUser } from "@/lib/supabase/authorize";
 import { checkForCrisisLanguage } from "@/lib/crisis-detection";
-import { getJourneyMeta } from "@/lib/content/journeys";
-import {
-  getCurrentJourneyState,
-  JOURNEY_SLUG,
-} from "@/lib/supabase/journey-progress";
+import { findJourneyMeta } from "@/lib/content/journeys-repo";
+import { getCurrentJourneyState } from "@/lib/supabase/journey-progress";
 import {
   toAlternatingTurns,
   type ConversationMessage,
@@ -52,22 +49,23 @@ export async function sendMessage(formData: FormData) {
 
   const userCrisis = checkForCrisisLanguage(message);
 
-  const [{ data: recentHistory }, { currentSession }] = await Promise.all([
-    supabase
-      .from("companion_messages")
-      .select("role, content")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false })
-      .limit(HISTORY_LIMIT)
-      .returns<ConversationMessage[]>(),
-    getCurrentJourneyState(supabase, user.id),
-  ]);
+  const [{ data: recentHistory }, { currentSession, journeySlug }] =
+    await Promise.all([
+      supabase
+        .from("companion_messages")
+        .select("role, content")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(HISTORY_LIMIT)
+        .returns<ConversationMessage[]>(),
+      getCurrentJourneyState(supabase, user.id),
+    ]);
 
   // Query above is newest-first (so LIMIT keeps the *recent* tail of a long
   // conversation, not its oldest messages) — reverse back to chronological
   // order for the API call.
   const history = (recentHistory ?? []).slice().reverse();
-  const journey = getJourneyMeta(JOURNEY_SLUG);
+  const journey = await findJourneyMeta(supabase, journeySlug);
 
   const contextLine =
     currentSession && journey

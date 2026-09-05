@@ -63,12 +63,14 @@ export function DashboardView({
   scriptureReference,
   displayName,
   avatarUrl,
+  otherJourneyTitle,
 }: {
   journey: JourneyMeta;
   progress: JourneyProgress | null;
   scriptureReference: string | null;
   displayName: string | null;
   avatarUrl: string | null;
+  otherJourneyTitle?: string | null;
 }) {
   const firstName = displayName?.split(" ")[0];
 
@@ -221,6 +223,15 @@ export function DashboardView({
             Review the journey
             <ArrowRight className="size-4" />
           </Button>
+
+          <Link
+            href="/evolve/journeys"
+            className="block text-center text-sm font-medium text-primary underline-offset-2 hover:underline"
+          >
+            {otherJourneyTitle
+              ? `You might also explore "${otherJourneyTitle}"`
+              : "Browse other journeys"}
+          </Link>
         </div>
       )}
 

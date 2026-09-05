@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Inbox, Sparkles, BookOpen, Users2, Church } from "lucide-react";
+import { Inbox, Sparkles, BookOpen, Users2, Church, Compass } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,8 +28,16 @@ import {
   updateChurch,
   updateDevotion,
 } from "./actions";
+import {
+  createJourney,
+  deleteJourney,
+  publishJourney,
+  saveJourneyDay,
+  unpublishJourney,
+  updateJourney,
+} from "./journeys-actions";
 
-type Tab = "queue" | "users" | "devotions" | "books" | "churches";
+type Tab = "queue" | "users" | "devotions" | "books" | "churches" | "journeys";
 
 type ChurchRow = {
   id: string;
@@ -98,6 +106,28 @@ type BookRow = {
   profiles: { display_name: string | null } | null;
 };
 
+type JourneyRow = {
+  id: string;
+  slug: string;
+  title: string;
+  purpose: string;
+  duration_days: number;
+  completion_title: string;
+  status: string;
+};
+
+type JourneyDayRow = {
+  day_number: number;
+  title: string;
+  scripture_reference: string;
+  explore: string;
+  reflect: string;
+  pray: string | null;
+  practice: string;
+  connect: string;
+  next_topic: string | null;
+};
+
 function TabBadge({ count }: { count: number }) {
   return (
     <Badge variant="destructive" className="h-4 min-w-4 px-1 text-[10px]">
@@ -120,10 +150,18 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           ? "books"
           : tabParam === "churches"
             ? "churches"
-            : "queue";
+            : tabParam === "journeys"
+              ? "journeys"
+              : "queue";
   const editIdParam = Array.isArray(searchParams.edit)
     ? searchParams.edit[0]
     : searchParams.edit;
+  const journeyIdParam = Array.isArray(searchParams.journey)
+    ? searchParams.journey[0]
+    : searchParams.journey;
+  const dayParam = Array.isArray(searchParams.day)
+    ? searchParams.day[0]
+    : searchParams.day;
 
   await requireAdmin();
 
@@ -204,6 +242,16 @@ export default async function AdminPage(props: PageProps<"/admin">) {
         >
           Churches
         </Link>
+        <Link
+          href="/admin?tab=journeys"
+          className={
+            tab === "journeys"
+              ? "border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
+              : "pb-2 text-sm font-medium text-muted-foreground"
+          }
+        >
+          Journeys
+        </Link>
       </div>
 
       {tab === "queue" ? (
@@ -214,8 +262,14 @@ export default async function AdminPage(props: PageProps<"/admin">) {
         <DevotionsAdmin editId={editIdParam} />
       ) : tab === "books" ? (
         <BooksAdmin />
-      ) : (
+      ) : tab === "churches" ? (
         <ChurchesAdmin editId={editIdParam} />
+      ) : (
+        <JourneysAdmin
+          editId={editIdParam}
+          journeyId={journeyIdParam}
+          day={dayParam}
+        />
       )}
     </main>
   );
@@ -1040,6 +1094,402 @@ async function ChurchesAdmin({ editId }: { editId: string | undefined }) {
           ))}
         </div>
       )}
+    </div>
+  );
+}
+
+async function JourneysAdmin({
+  editId,
+  journeyId,
+  day,
+}: {
+  editId: string | undefined;
+  journeyId: string | undefined;
+  day: string | undefined;
+}) {
+  const supabase = await createClient();
+
+  const { data: journeys, error } = await supabase
+    .from("journeys")
+    .select(
+      "id, slug, title, purpose, duration_days, completion_title, status",
+    )
+    .order("created_at", { ascending: false })
+    .returns<JourneyRow[]>();
+
+  if (error) {
+    console.error("Failed to load journeys", error);
+  }
+
+  const rows = journeys ?? [];
+  const selectedJourney = journeyId
+    ? rows.find((j) => j.id === journeyId)
+    : undefined;
+
+  if (selectedJourney && day) {
+    return (
+      <JourneyDayEditor journey={selectedJourney} dayNumber={Number(day)} />
+    );
+  }
+
+  if (selectedJourney) {
+    return <JourneyDaysList journey={selectedJourney} />;
+  }
+
+  const editing = editId ? rows.find((j) => j.id === editId) : undefined;
+
+  return (
+    <div className="space-y-6">
+      <form
+        action={
+          editing ? updateJourney.bind(null, editing.id) : createJourney
+        }
+        className="space-y-3 rounded-xl border bg-card p-4"
+      >
+        <p className="text-sm font-semibold">
+          {editing ? "Edit journey" : "New journey"}
+        </p>
+        <div className="space-y-1.5">
+          <Label htmlFor="slug">
+            Slug (lowercase, hyphenated — used in the URL)
+          </Label>
+          <Input
+            id="slug"
+            name="slug"
+            placeholder="e.g. identity-in-christ"
+            defaultValue={editing?.slug}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="title">Title</Label>
+          <Input
+            id="title"
+            name="title"
+            defaultValue={editing?.title}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="purpose">Purpose</Label>
+          <Textarea
+            id="purpose"
+            name="purpose"
+            rows={3}
+            defaultValue={editing?.purpose}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="duration_days">Duration (days)</Label>
+          <Input
+            id="duration_days"
+            name="duration_days"
+            type="number"
+            min="1"
+            defaultValue={editing?.duration_days}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="completion_title">Completion title</Label>
+          <Input
+            id="completion_title"
+            name="completion_title"
+            placeholder="e.g. You've taken your first Leap."
+            defaultValue={editing?.completion_title}
+            required
+          />
+        </div>
+        <div className="flex justify-end gap-2">
+          {editing && (
+            <Button
+              render={<Link href="/admin?tab=journeys" />}
+              nativeButton={false}
+              type="button"
+              variant="ghost"
+              size="sm"
+            >
+              Cancel
+            </Button>
+          )}
+          <Button type="submit" size="sm">
+            {editing ? "Save changes" : "Create journey"}
+          </Button>
+        </div>
+      </form>
+
+      {rows.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 py-12 text-center">
+          <Compass className="size-8 text-muted-foreground/50" />
+          <p className="text-sm text-muted-foreground">
+            No admin-authored journeys yet — &ldquo;Faith in Christ&rdquo;
+            remains available to every user as the built-in onboarding
+            journey.
+          </p>
+        </div>
+      ) : (
+        <div className="divide-y rounded-xl border bg-card">
+          {rows.map((j) => (
+            <div key={j.id} className="flex items-center justify-between gap-3 p-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <p className="truncate text-sm font-medium">{j.title}</p>
+                  <Badge variant={j.status === "published" ? "default" : "secondary"}>
+                    {j.status === "published" ? "Published" : "Draft"}
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {j.duration_days} days &middot; /{j.slug}
+                </p>
+              </div>
+              <div className="flex shrink-0 flex-wrap justify-end gap-2">
+                <Button
+                  render={<Link href={`/admin?tab=journeys&journey=${j.id}`} />}
+                  nativeButton={false}
+                  size="xs"
+                  variant="outline"
+                >
+                  Edit days
+                </Button>
+                <Button
+                  render={<Link href={`/admin?tab=journeys&edit=${j.id}`} />}
+                  nativeButton={false}
+                  size="xs"
+                  variant="outline"
+                >
+                  Edit
+                </Button>
+                {j.status === "published" ? (
+                  <form action={unpublishJourney.bind(null, j.id)}>
+                    <Button type="submit" size="xs" variant="ghost">
+                      Unpublish
+                    </Button>
+                  </form>
+                ) : (
+                  <form action={publishJourney.bind(null, j.id)}>
+                    <Button type="submit" size="xs">
+                      Publish
+                    </Button>
+                  </form>
+                )}
+                <form action={deleteJourney.bind(null, j.id)}>
+                  <Button type="submit" size="xs" variant="ghost">
+                    Delete
+                  </Button>
+                </form>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+async function JourneyDaysList({ journey }: { journey: JourneyRow }) {
+  const supabase = await createClient();
+
+  const { data: days, error } = await supabase
+    .from("journey_days")
+    .select("day_number")
+    .eq("journey_id", journey.id)
+    .returns<{ day_number: number }[]>();
+
+  if (error) {
+    console.error("Failed to load journey days", error);
+  }
+
+  const writtenDays = new Set((days ?? []).map((d) => d.day_number));
+  const dayNumbers = Array.from(
+    { length: journey.duration_days },
+    (_, i) => i + 1,
+  );
+  const allWritten = dayNumbers.every((n) => writtenDays.has(n));
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold">{journey.title}</p>
+          <p className="text-xs text-muted-foreground">
+            {writtenDays.size} of {journey.duration_days} days written
+            {journey.status === "draft" && !allWritten
+              ? " — finish every day before publishing"
+              : ""}
+          </p>
+        </div>
+        <Button
+          render={<Link href="/admin?tab=journeys" />}
+          nativeButton={false}
+          size="sm"
+          variant="ghost"
+        >
+          Back to journeys
+        </Button>
+      </div>
+
+      <div className="divide-y rounded-xl border bg-card">
+        {dayNumbers.map((n) => (
+          <div key={n} className="flex items-center justify-between gap-3 p-3">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium">Day {n}</p>
+              <Badge variant={writtenDays.has(n) ? "default" : "secondary"}>
+                {writtenDays.has(n) ? "Written" : "Missing"}
+              </Badge>
+            </div>
+            <Button
+              render={
+                <Link href={`/admin?tab=journeys&journey=${journey.id}&day=${n}`} />
+              }
+              nativeButton={false}
+              size="xs"
+              variant="outline"
+            >
+              {writtenDays.has(n) ? "Edit" : "Write"}
+            </Button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+async function JourneyDayEditor({
+  journey,
+  dayNumber,
+}: {
+  journey: JourneyRow;
+  dayNumber: number;
+}) {
+  const supabase = await createClient();
+
+  const { data: existing, error } = await supabase
+    .from("journey_days")
+    .select(
+      "day_number, title, scripture_reference, explore, reflect, pray, practice, connect, next_topic",
+    )
+    .eq("journey_id", journey.id)
+    .eq("day_number", dayNumber)
+    .maybeSingle<JourneyDayRow>();
+
+  if (error) {
+    console.error("Failed to load journey day", error);
+  }
+
+  const backHref = `/admin?tab=journeys&journey=${journey.id}`;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-semibold">
+          {journey.title} &middot; Day {dayNumber}
+        </p>
+        <Button
+          render={<Link href={backHref} />}
+          nativeButton={false}
+          size="sm"
+          variant="ghost"
+        >
+          Back to days
+        </Button>
+      </div>
+
+      <form
+        action={saveJourneyDay.bind(null, journey.id, dayNumber)}
+        className="space-y-3 rounded-xl border bg-card p-4"
+      >
+        <div className="space-y-1.5">
+          <Label htmlFor="title">Title</Label>
+          <Input
+            id="title"
+            name="title"
+            defaultValue={existing?.title}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="scripture_reference">Scripture reference</Label>
+          <Input
+            id="scripture_reference"
+            name="scripture_reference"
+            placeholder="e.g. Romans 6:1-11"
+            defaultValue={existing?.scripture_reference}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="explore">Explore</Label>
+          <Textarea
+            id="explore"
+            name="explore"
+            rows={3}
+            defaultValue={existing?.explore}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="reflect">Reflect</Label>
+          <Textarea
+            id="reflect"
+            name="reflect"
+            rows={3}
+            defaultValue={existing?.reflect}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="pray">Pray (optional)</Label>
+          <Textarea
+            id="pray"
+            name="pray"
+            rows={2}
+            defaultValue={existing?.pray ?? ""}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="practice">Practice</Label>
+          <Textarea
+            id="practice"
+            name="practice"
+            rows={2}
+            defaultValue={existing?.practice}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="connect">Connect</Label>
+          <Textarea
+            id="connect"
+            name="connect"
+            rows={2}
+            defaultValue={existing?.connect}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="next_topic">Next topic teaser (optional)</Label>
+          <Input
+            id="next_topic"
+            name="next_topic"
+            defaultValue={existing?.next_topic ?? ""}
+          />
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button
+            render={<Link href={backHref} />}
+            nativeButton={false}
+            type="button"
+            variant="ghost"
+            size="sm"
+          >
+            Cancel
+          </Button>
+          <Button type="submit" size="sm">
+            Save day
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }

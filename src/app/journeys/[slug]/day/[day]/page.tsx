@@ -1,12 +1,9 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Step } from "@/components/step";
-import {
-  getJourneyMeta,
-  getJourneySession,
-  type JourneySession,
-} from "@/lib/content/journeys";
+import { findJourneyMeta, findJourneySession } from "@/lib/content/journeys-repo";
+import { createClient } from "@/lib/supabase/server";
 import { getScripturePassages } from "@/lib/content/scripture";
 import { completeSession } from "./actions";
 
@@ -16,8 +13,19 @@ export default async function JourneySessionPage(
   const { slug, day } = await props.params;
   const dayNumber = Number(day);
 
-  const journey = getJourneyMeta(slug);
-  const session: JourneySession | null = getJourneySession(slug, dayNumber);
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/sign-in");
+  }
+
+  const [journey, session] = await Promise.all([
+    findJourneyMeta(supabase, slug),
+    findJourneySession(supabase, slug, dayNumber),
+  ]);
 
   if (!journey || !session) {
     notFound();

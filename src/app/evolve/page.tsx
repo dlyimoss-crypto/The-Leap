@@ -1,11 +1,8 @@
 import { redirect } from "next/navigation";
-import { Compass, BookOpen, Sparkles, Library } from "lucide-react";
+import { Compass, BookOpen, Sparkles, Library, Map } from "lucide-react";
 import { HubCard } from "@/components/hub-card";
 import { createClient } from "@/lib/supabase/server";
-import {
-  getCurrentJourneyState,
-  JOURNEY_SLUG,
-} from "@/lib/supabase/journey-progress";
+import { getCurrentJourneyState } from "@/lib/supabase/journey-progress";
 import { journeyContinueHref } from "@/lib/journey-nav";
 
 export default async function EvolvePage() {
@@ -18,7 +15,10 @@ export default async function EvolvePage() {
     redirect("/sign-in");
   }
 
-  const { progress } = await getCurrentJourneyState(supabase, user.id);
+  const { progress, journeySlug } = await getCurrentJourneyState(
+    supabase,
+    user.id,
+  );
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-10">
@@ -29,10 +29,16 @@ export default async function EvolvePage() {
 
       <div className="space-y-3">
         <HubCard
-          href={journeyContinueHref(JOURNEY_SLUG, progress)}
+          href={journeyContinueHref(journeySlug, progress)}
           icon={Compass}
           title="Continue Your Journey"
           description="Pick up where you left off."
+        />
+        <HubCard
+          href="/evolve/journeys"
+          icon={Map}
+          title="Browse Journeys"
+          description="Explore other formation journeys you can start."
         />
         <HubCard
           href="/evolve/scripture"
