@@ -109,7 +109,7 @@ export default async function DevotionPage(
 
           {featured.scripture_reference && (
             <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
-              <p className="text-sm font-medium text-primary">
+              <p className="text-base font-medium text-primary italic">
                 {featured.scripture_reference}
               </p>
             </div>
@@ -121,7 +121,7 @@ export default async function DevotionPage(
 
           {featured.reflection && (
             <div className="space-y-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-success">
+              <p className="text-xs font-medium uppercase tracking-wide text-primary">
                 Reflection
               </p>
               <p className="whitespace-pre-line text-foreground">
@@ -132,7 +132,7 @@ export default async function DevotionPage(
 
           {featured.prayer && (
             <div className="space-y-1">
-              <p className="text-xs font-medium uppercase tracking-wide text-gold">
+              <p className="text-xs font-medium uppercase tracking-wide text-primary">
                 Prayer
               </p>
               <p className="whitespace-pre-line text-foreground">
