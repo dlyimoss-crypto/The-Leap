@@ -41,7 +41,6 @@ type ChurchRow = {
   phone: string | null;
   email: string | null;
   member_count_estimate: number | null;
-  rating: number | null;
 };
 
 type DevotionRow = {
@@ -901,7 +900,7 @@ async function ChurchesAdmin({ editId }: { editId: string | undefined }) {
   const { data: churches, error } = await supabase
     .from("churches")
     .select(
-      "id, name, lead_pastor, mission, address, service_time, phone, email, member_count_estimate, rating",
+      "id, name, lead_pastor, mission, address, service_time, phone, email, member_count_estimate",
     )
     .order("name", { ascending: true })
     .returns<ChurchRow[]>();
@@ -985,20 +984,6 @@ async function ChurchesAdmin({ editId }: { editId: string | undefined }) {
             type="number"
             min="0"
             defaultValue={editing?.member_count_estimate ?? ""}
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="rating">
-            Rating (1–5 stars, optional — 4 = recommended, 3 = better, 2 =
-            average)
-          </Label>
-          <Input
-            id="rating"
-            name="rating"
-            type="number"
-            min="1"
-            max="5"
-            defaultValue={editing?.rating ?? ""}
           />
         </div>
         <div className="flex justify-end gap-2">
