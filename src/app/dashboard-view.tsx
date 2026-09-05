@@ -4,9 +4,7 @@ import {
   BookOpen,
   Sparkles,
   MessageCircle,
-  Mountain,
   ArrowRight,
-  Trophy,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -137,8 +135,13 @@ export function DashboardView({
                 </p>
               )}
             </div>
-            <div className="flex size-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5">
-              <Mountain className="size-9 text-primary" />
+            <div className="size-20 shrink-0 overflow-hidden rounded-2xl bg-muted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/journey-trail.jpg"
+                alt=""
+                className="size-full object-cover"
+              />
             </div>
           </div>
 
@@ -173,8 +176,13 @@ export function DashboardView({
                 You&apos;ve completed {journey.title}.
               </p>
             </div>
-            <div className="flex size-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5">
-              <Trophy className="size-9 text-primary" />
+            <div className="size-20 shrink-0 overflow-hidden rounded-2xl bg-muted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/journey-trail.jpg"
+                alt=""
+                className="size-full object-cover"
+              />
             </div>
           </div>
 
