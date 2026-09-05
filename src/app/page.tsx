@@ -24,15 +24,20 @@ export default async function HomePage() {
 
   const [{ progress, currentSession }, { data: profile }] = await Promise.all([
     getCurrentJourneyState(supabase, user.id),
-    supabase.from("profiles").select("display_name").eq("id", user.id).single(),
+    supabase
+      .from("profiles")
+      .select("display_name, avatar_url")
+      .eq("id", user.id)
+      .single(),
   ]);
 
   return (
     <DashboardView
       journey={journey}
       progress={progress}
-      nextSessionTitle={currentSession?.title ?? null}
+      scriptureReference={currentSession?.scriptureReference ?? null}
       displayName={profile?.display_name ?? null}
+      avatarUrl={profile?.avatar_url ?? null}
     />
   );
 }

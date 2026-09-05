@@ -10,11 +10,24 @@ function getInitials(name: string | null) {
 
 export function Avatar({
   name,
+  src,
   className,
 }: {
   name: string | null;
+  src?: string | null;
   className?: string;
 }) {
+  if (src) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt=""
+        className={cn("size-9 shrink-0 rounded-full object-cover", className)}
+      />
+    );
+  }
+
   return (
     <div
       className={cn(
