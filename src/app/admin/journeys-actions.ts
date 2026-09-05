@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/supabase/authorize";
 
 function journeyFields(formData: FormData) {
@@ -43,8 +44,36 @@ export async function updateJourney(id: string, formData: FormData) {
   revalidatePath("/admin");
 }
 
+// A journey with any day missing its content 404s the moment a user reaches
+// that day (the day page has nothing to render), so publishing is blocked
+// until every day 1..duration_days has been written.
 export async function publishJourney(id: string) {
   const { supabase } = await requireAdmin();
+
+  const { data: journey } = await supabase
+    .from("journeys")
+    .select("duration_days")
+    .eq("id", id)
+    .single<{ duration_days: number }>();
+
+  const { data: days } = await supabase
+    .from("journey_days")
+    .select("day_number")
+    .eq("journey_id", id)
+    .returns<{ day_number: number }[]>();
+
+  const writtenDays = new Set((days ?? []).map((d) => d.day_number));
+  const missingDays = journey
+    ? Array.from({ length: journey.duration_days }, (_, i) => i + 1).filter(
+        (n) => !writtenDays.has(n),
+      )
+    : [];
+
+  if (missingDays.length > 0) {
+    redirect(
+      `/admin?tab=journeys&journey=${id}&publish_error=missing_days`,
+    );
+  }
 
   const { error } = await supabase
     .from("journeys")

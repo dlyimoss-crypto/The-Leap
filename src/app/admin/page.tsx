@@ -162,6 +162,9 @@ export default async function AdminPage(props: PageProps<"/admin">) {
   const dayParam = Array.isArray(searchParams.day)
     ? searchParams.day[0]
     : searchParams.day;
+  const publishErrorParam = Array.isArray(searchParams.publish_error)
+    ? searchParams.publish_error[0]
+    : searchParams.publish_error;
 
   await requireAdmin();
 
@@ -269,6 +272,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           editId={editIdParam}
           journeyId={journeyIdParam}
           day={dayParam}
+          publishError={publishErrorParam}
         />
       )}
     </main>
@@ -1102,10 +1106,12 @@ async function JourneysAdmin({
   editId,
   journeyId,
   day,
+  publishError,
 }: {
   editId: string | undefined;
   journeyId: string | undefined;
   day: string | undefined;
+  publishError: string | undefined;
 }) {
   const supabase = await createClient();
 
@@ -1133,7 +1139,12 @@ async function JourneysAdmin({
   }
 
   if (selectedJourney) {
-    return <JourneyDaysList journey={selectedJourney} />;
+    return (
+      <JourneyDaysList
+        journey={selectedJourney}
+        showPublishError={publishError === "missing_days"}
+      />
+    );
   }
 
   const editing = editId ? rows.find((j) => j.id === editId) : undefined;
@@ -1287,7 +1298,13 @@ async function JourneysAdmin({
   );
 }
 
-async function JourneyDaysList({ journey }: { journey: JourneyRow }) {
+async function JourneyDaysList({
+  journey,
+  showPublishError,
+}: {
+  journey: JourneyRow;
+  showPublishError: boolean;
+}) {
   const supabase = await createClient();
 
   const { data: days, error } = await supabase
@@ -1305,18 +1322,25 @@ async function JourneyDaysList({ journey }: { journey: JourneyRow }) {
     { length: journey.duration_days },
     (_, i) => i + 1,
   );
-  const allWritten = dayNumbers.every((n) => writtenDays.has(n));
+  const missingDays = dayNumbers.filter((n) => !writtenDays.has(n));
+  const allWritten = missingDays.length === 0;
 
   return (
     <div className="space-y-4">
+      {showPublishError && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+          Can&apos;t publish yet — Day{missingDays.length > 1 ? "s" : ""}{" "}
+          {missingDays.join(", ")} {missingDays.length > 1 ? "are" : "is"}{" "}
+          still missing. Write every day, then publish.
+        </div>
+      )}
+
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
           <p className="text-sm font-semibold">{journey.title}</p>
           <p className="text-xs text-muted-foreground">
             {writtenDays.size} of {journey.duration_days} days written
-            {journey.status === "draft" && !allWritten
-              ? " — finish every day before publishing"
-              : ""}
+            {!allWritten ? " — finish every day before publishing" : ""}
           </p>
         </div>
         <Button
