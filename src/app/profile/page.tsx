@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
-import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/server";
-import { updateProfile } from "./actions";
+import { AvatarCropper } from "./avatar-cropper";
+import { updateDisplayName } from "./actions";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -41,22 +41,17 @@ export default async function ProfilePage() {
         </p>
       </div>
 
+      <div className="rounded-xl border bg-card p-4">
+        <AvatarCropper
+          displayName={profile?.display_name ?? null}
+          avatarUrl={profile?.avatar_url ?? null}
+        />
+      </div>
+
       <form
-        action={updateProfile}
-        encType="multipart/form-data"
-        className="space-y-4 rounded-xl border bg-card p-4"
+        action={updateDisplayName}
+        className="space-y-3 rounded-xl border bg-card p-4"
       >
-        <div className="flex items-center gap-4">
-          <Avatar
-            name={profile?.display_name ?? null}
-            src={profile?.avatar_url ?? null}
-            className="size-16 text-lg"
-          />
-          <div className="flex-1 space-y-1.5">
-            <Label htmlFor="avatar">Profile photo</Label>
-            <Input id="avatar" name="avatar" type="file" accept="image/*" />
-          </div>
-        </div>
         <div className="space-y-1.5">
           <Label htmlFor="display_name">Display name</Label>
           <Input
@@ -65,9 +60,11 @@ export default async function ProfilePage() {
             defaultValue={profile?.display_name ?? ""}
           />
         </div>
-        <Button type="submit" size="sm">
-          Save
-        </Button>
+        <div className="flex justify-end">
+          <Button type="submit" size="sm">
+            Save
+          </Button>
+        </div>
       </form>
     </main>
   );
