@@ -8,8 +8,19 @@ type DevotionRow = {
   title: string;
   scripture_reference: string | null;
   body: string;
+  reflection: string | null;
+  prayer: string | null;
   publish_date: string;
 };
+
+function formatDevotionDate(publishDate: string) {
+  return new Date(`${publishDate}T00:00:00`).toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
 
 export default async function DevotionPage(
   props: PageProps<"/evolve/devotion">,
@@ -36,14 +47,18 @@ export default async function DevotionPage(
   if (idParam) {
     const { data } = await supabase
       .from("devotions")
-      .select("id, title, scripture_reference, body, publish_date")
+      .select(
+        "id, title, scripture_reference, body, reflection, prayer, publish_date",
+      )
       .eq("id", idParam)
       .maybeSingle<DevotionRow>();
     featured = data ?? null;
 
     const { data: pastRows } = await supabase
       .from("devotions")
-      .select("id, title, scripture_reference, body, publish_date")
+      .select(
+        "id, title, scripture_reference, body, reflection, prayer, publish_date",
+      )
       .lte("publish_date", today)
       .neq("id", idParam)
       .order("publish_date", { ascending: false })
@@ -53,7 +68,9 @@ export default async function DevotionPage(
   } else {
     const { data, error } = await supabase
       .from("devotions")
-      .select("id, title, scripture_reference, body, publish_date")
+      .select(
+        "id, title, scripture_reference, body, reflection, prayer, publish_date",
+      )
       .lte("publish_date", today)
       .order("publish_date", { ascending: false })
       .limit(11)
@@ -80,18 +97,49 @@ export default async function DevotionPage(
       </div>
 
       {featured ? (
-        <div className="space-y-3 rounded-xl border bg-card p-5">
-          {featured.scripture_reference && (
-            <p className="text-xs font-medium uppercase tracking-wide text-primary">
-              {featured.scripture_reference}
+        <div className="space-y-4 rounded-xl border bg-card p-5">
+          <div className="space-y-1">
+            <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
+              {formatDevotionDate(featured.publish_date)}
             </p>
+            <h2 className="text-xl font-heading font-semibold text-balance">
+              {featured.title}
+            </h2>
+          </div>
+
+          {featured.scripture_reference && (
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+              <p className="text-sm font-medium text-primary">
+                {featured.scripture_reference}
+              </p>
+            </div>
           )}
-          <h2 className="text-xl font-heading font-semibold text-balance">
-            {featured.title}
-          </h2>
+
           <p className="whitespace-pre-line text-foreground">
             {featured.body}
           </p>
+
+          {featured.reflection && (
+            <div className="space-y-1">
+              <p className="text-xs font-medium uppercase tracking-wide text-success">
+                Reflection
+              </p>
+              <p className="whitespace-pre-line text-foreground">
+                {featured.reflection}
+              </p>
+            </div>
+          )}
+
+          {featured.prayer && (
+            <div className="space-y-1">
+              <p className="text-xs font-medium uppercase tracking-wide text-gold">
+                Prayer
+              </p>
+              <p className="whitespace-pre-line text-foreground">
+                {featured.prayer}
+              </p>
+            </div>
+          )}
         </div>
       ) : (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 py-12 text-center">

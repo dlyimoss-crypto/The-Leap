@@ -86,6 +86,8 @@ function devotionFields(formData: FormData) {
     scripture_reference:
       String(formData.get("scripture_reference") ?? "").trim() || null,
     body: String(formData.get("body") ?? "").trim(),
+    reflection: String(formData.get("reflection") ?? "").trim() || null,
+    prayer: String(formData.get("prayer") ?? "").trim() || null,
     publish_date: String(formData.get("publish_date") ?? "").trim() || null,
   };
 }
