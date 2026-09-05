@@ -6,7 +6,8 @@ insert into storage.buckets (id, name, public)
 values ('book-covers', 'book-covers', true)
 on conflict (id) do nothing;
 
-alter table storage.objects enable row level security;
+-- storage.objects already has RLS enabled by default on Supabase projects,
+-- and the SQL editor's role doesn't own that table to re-enable it anyway.
 
 create policy "authors manage own manuscript files" on storage.objects
   for all using (
