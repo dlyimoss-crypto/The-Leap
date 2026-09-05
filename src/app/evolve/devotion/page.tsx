@@ -1,16 +1,24 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Step } from "@/components/step";
 import { createClient } from "@/lib/supabase/server";
-import { getJourneyMeta } from "@/lib/content/journeys";
-import {
-  getCurrentJourneyState,
-  JOURNEY_SLUG,
-} from "@/lib/supabase/journey-progress";
 
-export default async function DevotionPage() {
+type DevotionRow = {
+  id: string;
+  title: string;
+  scripture_reference: string | null;
+  body: string;
+  publish_date: string;
+};
+
+export default async function DevotionPage(
+  props: PageProps<"/evolve/devotion">,
+) {
+  const searchParams = await props.searchParams;
+  const idParam = Array.isArray(searchParams.id)
+    ? searchParams.id[0]
+    : searchParams.id;
+
   const supabase = await createClient();
   const {
     data: { user },
@@ -20,11 +28,45 @@ export default async function DevotionPage() {
     redirect("/sign-in");
   }
 
-  const { progress, currentSession } = await getCurrentJourneyState(
-    supabase,
-    user.id,
-  );
-  const journey = getJourneyMeta(JOURNEY_SLUG);
+  const today = new Date().toISOString().slice(0, 10);
+
+  let featured: DevotionRow | null = null;
+  let past: DevotionRow[] = [];
+
+  if (idParam) {
+    const { data } = await supabase
+      .from("devotions")
+      .select("id, title, scripture_reference, body, publish_date")
+      .eq("id", idParam)
+      .maybeSingle<DevotionRow>();
+    featured = data ?? null;
+
+    const { data: pastRows } = await supabase
+      .from("devotions")
+      .select("id, title, scripture_reference, body, publish_date")
+      .lte("publish_date", today)
+      .neq("id", idParam)
+      .order("publish_date", { ascending: false })
+      .limit(10)
+      .returns<DevotionRow[]>();
+    past = pastRows ?? [];
+  } else {
+    const { data, error } = await supabase
+      .from("devotions")
+      .select("id, title, scripture_reference, body, publish_date")
+      .lte("publish_date", today)
+      .order("publish_date", { ascending: false })
+      .limit(11)
+      .returns<DevotionRow[]>();
+
+    if (error) {
+      console.error("Failed to load devotions", error);
+    }
+
+    const rows = data ?? [];
+    featured = rows[0] ?? null;
+    past = rows.slice(1);
+  }
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-10">
@@ -37,49 +79,50 @@ export default async function DevotionPage() {
         </p>
       </div>
 
-      {currentSession && journey ? (
-        <div className="space-y-5 rounded-xl border bg-card p-5">
-          <div className="space-y-1">
+      {featured ? (
+        <div className="space-y-3 rounded-xl border bg-card p-5">
+          {featured.scripture_reference && (
             <p className="text-xs font-medium uppercase tracking-wide text-primary">
-              Day {currentSession.day} of {journey.durationDays}
+              {featured.scripture_reference}
             </p>
-            <h2 className="text-xl font-heading font-semibold text-balance">
-              {currentSession.title}
-            </h2>
-          </div>
-          <Step label="Explore">{currentSession.explore}</Step>
-          <Step label="Reflect">{currentSession.reflect}</Step>
+          )}
+          <h2 className="text-xl font-heading font-semibold text-balance">
+            {featured.title}
+          </h2>
+          <p className="whitespace-pre-line text-foreground">
+            {featured.body}
+          </p>
         </div>
       ) : (
-        <div className="flex flex-1 flex-col items-center justify-center gap-4 py-12 text-center">
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 py-12 text-center">
           <Sparkles className="size-8 text-muted-foreground/50" />
-          {progress?.completed_at ? (
-            <>
-              <p className="text-sm text-muted-foreground">
-                You&apos;ve completed your current journey — a new devotion
-                will be ready when your next journey begins.
-              </p>
-              <Button
-                render={<Link href={`/journeys/${JOURNEY_SLUG}/day/1`} />}
-                nativeButton={false}
-                variant="outline"
+          <p className="text-sm text-muted-foreground">
+            No devotion has been published yet — check back soon.
+          </p>
+        </div>
+      )}
+
+      {past.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Past Devotions
+          </p>
+          <div className="divide-y rounded-xl border bg-card">
+            {past.map((d) => (
+              <Link
+                key={d.id}
+                href={`/evolve/devotion?id=${d.id}`}
+                className="flex items-center justify-between gap-3 p-3 hover:bg-muted/50"
               >
-                Review the journey
-              </Button>
-            </>
-          ) : (
-            <>
-              <p className="text-sm text-muted-foreground">
-                Begin your journey to unlock today&apos;s devotion.
-              </p>
-              <Button
-                render={<Link href={`/journeys/${JOURNEY_SLUG}`} />}
-                nativeButton={false}
-              >
-                Begin my journey
-              </Button>
-            </>
-          )}
+                <span className="truncate text-sm font-medium">
+                  {d.title}
+                </span>
+                <span className="shrink-0 font-mono text-[10.5px] text-muted-foreground">
+                  {d.publish_date}
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
       )}
     </main>

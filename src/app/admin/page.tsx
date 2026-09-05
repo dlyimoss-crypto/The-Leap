@@ -1,13 +1,32 @@
 import Link from "next/link";
-import { Inbox } from "lucide-react";
+import { Inbox, Sparkles } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/supabase/authorize";
-import { banUser, resolveReport, unbanUser } from "./actions";
+import { getDevotionStatus } from "@/lib/devotion";
+import {
+  banUser,
+  createDevotion,
+  deleteDevotion,
+  resolveReport,
+  unbanUser,
+  updateDevotion,
+} from "./actions";
 
-type Tab = "queue" | "users";
+type Tab = "queue" | "users" | "devotions";
+
+type DevotionRow = {
+  id: string;
+  title: string;
+  scripture_reference: string | null;
+  body: string;
+  publish_date: string | null;
+};
 
 type ReportRow = {
   id: string;
@@ -35,7 +54,11 @@ export default async function AdminPage(props: PageProps<"/admin">) {
   const tabParam = Array.isArray(searchParams.tab)
     ? searchParams.tab[0]
     : searchParams.tab;
-  const tab: Tab = tabParam === "users" ? "users" : "queue";
+  const tab: Tab =
+    tabParam === "users" ? "users" : tabParam === "devotions" ? "devotions" : "queue";
+  const editIdParam = Array.isArray(searchParams.edit)
+    ? searchParams.edit[0]
+    : searchParams.edit;
 
   await requireAdmin();
 
@@ -64,9 +87,25 @@ export default async function AdminPage(props: PageProps<"/admin">) {
         >
           Users
         </Link>
+        <Link
+          href="/admin?tab=devotions"
+          className={
+            tab === "devotions"
+              ? "border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
+              : "pb-2 text-sm font-medium text-muted-foreground"
+          }
+        >
+          Devotions
+        </Link>
       </div>
 
-      {tab === "queue" ? <ModerationQueue /> : <UsersList />}
+      {tab === "queue" ? (
+        <ModerationQueue />
+      ) : tab === "users" ? (
+        <UsersList />
+      ) : (
+        <DevotionsAdmin editId={editIdParam} />
+      )}
     </main>
   );
 }
@@ -269,6 +308,161 @@ async function UsersList() {
           ))}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+async function DevotionsAdmin({ editId }: { editId: string | undefined }) {
+  const supabase = await createClient();
+
+  const { data: devotions, error } = await supabase
+    .from("devotions")
+    .select("id, title, scripture_reference, body, publish_date")
+    .order("created_at", { ascending: false })
+    .returns<DevotionRow[]>();
+
+  if (error) {
+    console.error("Failed to load devotions", error);
+  }
+
+  const rows = devotions ?? [];
+  const editing = editId ? rows.find((d) => d.id === editId) : undefined;
+
+  const drafts = rows.filter((d) => getDevotionStatus(d.publish_date) === "draft");
+  const scheduled = rows.filter(
+    (d) => getDevotionStatus(d.publish_date) === "scheduled",
+  );
+  const published = rows.filter(
+    (d) => getDevotionStatus(d.publish_date) === "published",
+  );
+
+  return (
+    <div className="space-y-6">
+      <form
+        action={
+          editing ? updateDevotion.bind(null, editing.id) : createDevotion
+        }
+        className="space-y-3 rounded-xl border bg-card p-4"
+      >
+        <p className="text-sm font-semibold">
+          {editing ? "Edit devotion" : "New devotion"}
+        </p>
+        <div className="space-y-1.5">
+          <Label htmlFor="title">Title</Label>
+          <Input
+            id="title"
+            name="title"
+            defaultValue={editing?.title}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="scripture_reference">
+            Scripture reference (optional)
+          </Label>
+          <Input
+            id="scripture_reference"
+            name="scripture_reference"
+            placeholder="e.g. Proverbs 3:5-6"
+            defaultValue={editing?.scripture_reference ?? ""}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="body">Body</Label>
+          <Textarea
+            id="body"
+            name="body"
+            rows={5}
+            defaultValue={editing?.body}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="publish_date">
+            Publish date (leave blank to save as a draft)
+          </Label>
+          <Input
+            id="publish_date"
+            name="publish_date"
+            type="date"
+            defaultValue={editing?.publish_date ?? ""}
+          />
+        </div>
+        <div className="flex justify-end gap-2">
+          {editing && (
+            <Button
+              render={<Link href="/admin?tab=devotions" />}
+              nativeButton={false}
+              type="button"
+              variant="ghost"
+              size="sm"
+            >
+              Cancel
+            </Button>
+          )}
+          <Button type="submit" size="sm">
+            {editing ? "Save changes" : "Create devotion"}
+          </Button>
+        </div>
+      </form>
+
+      {rows.length === 0 && (
+        <div className="flex flex-col items-center gap-3 py-12 text-center">
+          <Sparkles className="size-8 text-muted-foreground/50" />
+          <p className="text-sm text-muted-foreground">
+            No devotions yet — write the first one above.
+          </p>
+        </div>
+      )}
+
+      {(
+        [
+          ["Drafts", drafts],
+          ["Scheduled", scheduled],
+          ["Published", published],
+        ] as const
+      ).map(
+        ([label, group]) =>
+          group.length > 0 && (
+            <div key={label} className="space-y-2">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {label} — {group.length}
+              </p>
+              <div className="divide-y rounded-xl border bg-card">
+                {group.map((d) => (
+                  <div
+                    key={d.id}
+                    className="flex items-center justify-between gap-3 p-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">{d.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {d.publish_date ?? "No date yet"}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 gap-2">
+                      <Button
+                        render={
+                          <Link href={`/admin?tab=devotions&edit=${d.id}`} />
+                        }
+                        nativeButton={false}
+                        size="xs"
+                        variant="outline"
+                      >
+                        Edit
+                      </Button>
+                      <form action={deleteDevotion.bind(null, d.id)}>
+                        <Button type="submit" size="xs" variant="ghost">
+                          Delete
+                        </Button>
+                      </form>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ),
+      )}
     </div>
   );
 }
