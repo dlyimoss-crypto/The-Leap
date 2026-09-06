@@ -4,6 +4,7 @@ import { Bookmark, BookmarkCheck, Search, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ComingSoon } from "@/components/coming-soon";
+import { BackLink } from "@/components/back-link";
 import { createClient } from "@/lib/supabase/server";
 import {
   getScripture,
@@ -73,6 +74,7 @@ export default async function ScripturePage(
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-10">
+      <BackLink href="/evolve" label="Evolve" />
       <div>
         <h1 className="text-2xl font-heading font-semibold">Scripture</h1>
         <p className="text-sm text-muted-foreground">

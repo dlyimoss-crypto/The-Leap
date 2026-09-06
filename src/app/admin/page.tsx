@@ -11,6 +11,7 @@ import {
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { BackLink } from "@/components/back-link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -1015,6 +1016,7 @@ async function ChurchesAdmin({ editId }: { editId: string | undefined }) {
 
   return (
     <div className="space-y-6">
+      <BackLink href="/admin" label="Admin" />
       <form
         action={
           editing ? updateChurch.bind(null, editing.id) : createChurch
@@ -1169,6 +1171,7 @@ async function OpportunitiesAdmin({
 
   return (
     <div className="space-y-6">
+      <BackLink href="/admin" label="Admin" />
       <form
         action={
           editing

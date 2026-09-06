@@ -28,14 +28,14 @@ const BASE_ITEMS = [
     href: "/commit",
     label: "Commit",
     icon: Flag,
-    isActive: (pathname: string) => pathname.startsWith("/commit"),
+    isActive: (pathname: string) =>
+      pathname.startsWith("/commit") || pathname.startsWith("/journeys"),
   },
   {
     href: "/evolve",
     label: "Evolve",
     icon: Sprout,
-    isActive: (pathname: string) =>
-      pathname.startsWith("/evolve") || pathname.startsWith("/journeys"),
+    isActive: (pathname: string) => pathname.startsWith("/evolve"),
   },
   {
     href: "/engage",

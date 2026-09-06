@@ -1,6 +1,7 @@
 import { HeartHandshake } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { BackLink } from "@/components/back-link";
 import { createClient } from "@/lib/supabase/server";
 import { PrayerComposer } from "./prayer-composer";
 import {
@@ -104,6 +105,7 @@ export default async function PrayerRoomPage(
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-10">
+      <BackLink href="/connect" label="Connect" />
       <h1 className="text-2xl font-heading font-semibold">Prayer Room</h1>
 
       <div className="flex gap-4 border-b">

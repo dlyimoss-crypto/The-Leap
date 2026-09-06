@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { BackLink } from "@/components/back-link";
 import { createClient } from "@/lib/supabase/server";
 import { InviteCard } from "./invite-card";
 
@@ -22,6 +23,7 @@ export default async function InvitePage() {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-10">
+      <BackLink href="/engage" label="Engage" />
       <div>
         <h1 className="text-2xl font-heading font-semibold">
           Invite a Friend

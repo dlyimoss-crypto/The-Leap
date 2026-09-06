@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft, Church, Mail, MapPin, Users2 } from "lucide-react";
 import { CopyButton } from "@/components/copy-button";
+import { BackLink } from "@/components/back-link";
 import { createClient } from "@/lib/supabase/server";
 
 type ChurchRow = {
@@ -149,6 +150,7 @@ export default async function ChurchesPage(
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-10">
+      <BackLink href="/connect" label="Connect" />
       <div>
         <h1 className="text-2xl font-heading font-semibold">Churches</h1>
         <p className="text-sm text-muted-foreground">

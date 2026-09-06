@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { HeartHandshake, Share2 } from "lucide-react";
+import { Gift, HeartHandshake, Share2 } from "lucide-react";
 import { HubCard } from "@/components/hub-card";
 import { createClient } from "@/lib/supabase/server";
 
@@ -34,6 +34,13 @@ export default async function EngagePage() {
           icon={HeartHandshake}
           title="Serve & Missions"
           description="Find ways to serve and get involved."
+        />
+        <HubCard
+          href="/engage/give"
+          icon={Gift}
+          title="Giving"
+          description="Support The Leap and the ministries it partners with."
+          comingSoon
         />
       </div>
     </main>

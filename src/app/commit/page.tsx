@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
-import { CheckCircle2, Flag } from "lucide-react";
+import { CheckCircle2, Compass, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { HubCard } from "@/components/hub-card";
+import { BackLink } from "@/components/back-link";
 import { createClient } from "@/lib/supabase/server";
 import {
   getActiveCommitment,
@@ -33,12 +35,21 @@ export default async function CommitPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-10">
+      <BackLink href="/" label="Home" />
+
       <div>
         <h1 className="text-2xl font-heading font-semibold">Commit</h1>
         <p className="text-sm text-muted-foreground">
           I choose the way of Christ.
         </p>
       </div>
+
+      <HubCard
+        href="/commit/journey"
+        icon={Compass}
+        title="Journey"
+        description="Continue your journey or browse a new one."
+      />
 
       {active ? (
         <div className="space-y-4 rounded-2xl bg-muted p-5">

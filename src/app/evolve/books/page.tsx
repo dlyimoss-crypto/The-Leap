@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { BackLink } from "@/components/back-link";
 import { createClient } from "@/lib/supabase/server";
 import {
   applyToBeAuthor,
@@ -169,6 +170,7 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
     if (!showApplyFlow) {
       return (
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-10">
+          <BackLink href="/evolve" label="Evolve" />
           <div>
             <h1 className="text-2xl font-heading font-semibold">
               Books & Literature
@@ -336,6 +338,7 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-10">
+      <BackLink href="/evolve" label="Evolve" />
       <div>
         <h1 className="text-2xl font-heading font-semibold">
           Books & Literature

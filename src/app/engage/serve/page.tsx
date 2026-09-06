@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { HeartHandshake, Mail, MapPin } from "lucide-react";
 import { CopyButton } from "@/components/copy-button";
+import { BackLink } from "@/components/back-link";
 import { createClient } from "@/lib/supabase/server";
 
 type OpportunityRow = {
@@ -40,6 +41,7 @@ export default async function ServePage() {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-10">
+      <BackLink href="/engage" label="Engage" />
       <div>
         <h1 className="text-2xl font-heading font-semibold">
           Serve & Missions
