@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { BookOpen, Sparkles, Library } from "lucide-react";
 import { HubCard } from "@/components/hub-card";
+import { BackLink } from "@/components/back-link";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function EvolvePage() {
@@ -15,6 +16,7 @@ export default async function EvolvePage() {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-10">
+      <BackLink href="/" label="Home" />
       <div>
         <h1 className="text-2xl font-heading font-semibold">Evolve</h1>
         <p className="text-sm text-muted-foreground">I am becoming.</p>

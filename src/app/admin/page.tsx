@@ -222,6 +222,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-6 py-10">
+      <BackLink href="/" label="Home" />
       <h1 className="text-2xl font-heading font-semibold">Admin</h1>
 
       <div className="flex gap-4 border-b">
