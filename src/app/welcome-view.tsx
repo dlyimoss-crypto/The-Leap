@@ -1,36 +1,32 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/logo";
 
+// The hero image carries the headline, tagline, and both button graphics as
+// baked-in pixels (a founder-approved design concept, not composed from live
+// text) — so the two invisible overlays below are real, keyboard- and
+// screen-reader-accessible links positioned over their matching graphics,
+// and the <img>'s alt text carries the screen's full copy for anyone who
+// can't see the image at all.
 export function WelcomeView() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-8 px-6 py-16 text-center">
-      <Logo size="lg" />
+    <main className="flex flex-1 flex-col items-center justify-center bg-[#1c1a18]">
+      <div className="relative w-full max-w-[480px]" style={{ aspectRatio: "503 / 1000" }}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/welcome-splash.jpg"
+          alt="The Leap — Your Essential Companion in Christ. Take your next step with Christ. A diverse, global community journeying together toward a sunrise over a river valley and city. Born from Africa. For the world."
+          className="size-full object-cover"
+        />
 
-      <div className="space-y-2">
-        <h1 className="text-lg font-medium text-foreground">
-          Your Essential Companion in Christ
-        </h1>
-        <p className="text-muted-foreground">Take your next step with Christ.</p>
-      </div>
-
-      <div className="flex w-full max-w-xs flex-col items-center gap-3">
-        <Button
-          render={<Link href="/sign-in?mode=sign-up" />}
-          nativeButton={false}
-          size="lg"
-          className="w-full"
-        >
-          Get Started
-        </Button>
-        <Button
-          render={<Link href="/sign-in" />}
-          nativeButton={false}
-          variant="ghost"
-          size="sm"
-        >
-          I already have an account
-        </Button>
+        <Link
+          href="/sign-in?mode=sign-up"
+          aria-label="Get Started"
+          className="absolute inset-x-[12.8%] top-[78.3%] h-[4.6%] rounded-full outline-offset-2 focus-visible:outline-2 focus-visible:outline-white"
+        />
+        <Link
+          href="/sign-in"
+          aria-label="I already have an account"
+          className="absolute inset-x-[12.8%] top-[85.2%] h-[4.3%] rounded-full outline-offset-2 focus-visible:outline-2 focus-visible:outline-white"
+        />
       </div>
     </main>
   );
