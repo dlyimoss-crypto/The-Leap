@@ -3,28 +3,45 @@
 import { useId } from "react";
 import { cn } from "@/lib/utils";
 
-// Original geometric line-art (two overlapping squares + a center ring form
-// an eight-pointed star, the classic Islamic/Moroccan lattice motif) — not
-// derived from any licensed asset. Used as a faint watermark texture only;
-// never more than ~10% opacity so it never competes with real content.
-function StarLatticeDefs({ patternId }: { patternId: string }) {
+// Original line-art (a radiating sun-burst medallion, a triangle-zigzag
+// border row, a dashed ring and a scatter of dots — drawn from scratch in
+// the spirit of African textile/Ankara print motifs) — not derived from any
+// licensed asset. Used as a faint watermark texture only; never more than
+// ~10% opacity so it never competes with real content.
+function TribalMotifDefs({ patternId }: { patternId: string }) {
   return (
     <pattern
       id={patternId}
-      width="34"
-      height="34"
+      width="120"
+      height="120"
       patternUnits="userSpaceOnUse"
     >
       <g fill="none" stroke="currentColor" strokeWidth="0.6">
-        <rect x="8.5" y="8.5" width="17" height="17" />
-        <rect
-          x="8.5"
-          y="8.5"
-          width="17"
-          height="17"
-          transform="rotate(45 17 17)"
-        />
-        <circle cx="17" cy="17" r="4" />
+        {/* sun-burst medallion */}
+        <circle cx="30" cy="30" r="14" />
+        <circle cx="30" cy="30" r="8" />
+        <circle cx="30" cy="30" r="2.2" fill="currentColor" stroke="none" />
+        <line x1="45" y1="30" x2="49" y2="30" />
+        <line x1="40.6" y1="40.6" x2="43.4" y2="43.4" />
+        <line x1="30" y1="45" x2="30" y2="49" />
+        <line x1="19.4" y1="40.6" x2="16.6" y2="43.4" />
+        <line x1="15" y1="30" x2="11" y2="30" />
+        <line x1="19.4" y1="19.4" x2="16.6" y2="16.6" />
+        <line x1="30" y1="15" x2="30" y2="11" />
+        <line x1="40.6" y1="19.4" x2="43.4" y2="16.6" />
+
+        {/* triangle-zigzag row along the tile's top edge */}
+        <path d="M0 6 L7.5 0 L15 6 L22.5 0 L30 6 L37.5 0 L45 6 L52.5 0 L60 6 L67.5 0 L75 6 L82.5 0 L90 6 L97.5 0 L105 6 L112.5 0 L120 6" />
+
+        {/* dashed ring + small secondary ring */}
+        <circle cx="92" cy="90" r="12" strokeDasharray="1.5 3" />
+        <circle cx="88" cy="42" r="6" />
+
+        {/* scattered dots */}
+        <circle cx="10" cy="88" r="1.4" fill="currentColor" stroke="none" />
+        <circle cx="105" cy="18" r="1.4" fill="currentColor" stroke="none" />
+        <circle cx="65" cy="100" r="1.1" fill="currentColor" stroke="none" />
+        <circle cx="14" cy="62" r="1.1" fill="currentColor" stroke="none" />
       </g>
     </pattern>
   );
@@ -37,7 +54,7 @@ const CORNER_POSITION: Record<string, string> = {
   "bottom-right": "100% 100%",
 };
 
-/** Faint star-lattice texture radiating from one corner, fading to nothing. */
+/** Faint tribal-motif texture radiating from one corner, fading to nothing. */
 export function PatternCorner({
   corner = "top-right",
   className,
@@ -62,14 +79,14 @@ export function PatternCorner({
       }}
     >
       <svg width="100%" height="100%">
-        <StarLatticeDefs patternId={patternId} />
+        <TribalMotifDefs patternId={patternId} />
         <rect width="100%" height="100%" fill={`url(#${patternId})`} />
       </svg>
     </div>
   );
 }
 
-/** Faint star-lattice band across the top and bottom edges, plain in the middle. */
+/** Faint tribal-motif band across the top and bottom edges, plain in the middle. */
 export function PatternBorder({ className }: { className?: string }) {
   const patternId = useId();
   const maskId = useId();
@@ -86,7 +103,7 @@ export function PatternBorder({ className }: { className?: string }) {
     >
       <svg width="100%" height="100%">
         <defs>
-          <StarLatticeDefs patternId={patternId} />
+          <TribalMotifDefs patternId={patternId} />
           <linearGradient id={fadeId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="white" stopOpacity="1" />
             <stop offset="16%" stopColor="white" stopOpacity="0" />
