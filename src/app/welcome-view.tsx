@@ -9,12 +9,12 @@ import Link from "next/link";
 export function WelcomeView() {
   return (
     <main className="flex flex-1 flex-col items-center justify-center bg-[#1c1a18]">
-      <div className="relative w-full max-w-[480px]" style={{ aspectRatio: "503 / 1000" }}>
+      <div className="relative w-full max-w-[480px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="/images/welcome-splash.jpg"
           alt="The Leap — Your Essential Companion in Christ. Take your next step with Christ. A diverse, global community journeying together toward a sunrise over a river valley and city. Born from Africa. For the world."
-          className="size-full object-cover"
+          className="block h-auto w-full"
         />
 
         <Link
