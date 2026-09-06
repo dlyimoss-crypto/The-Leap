@@ -229,6 +229,15 @@ export function DashboardView({
             Review the journey
             <ArrowRight className="size-4" />
           </Button>
+
+          {!nextJourney && (
+            <Link
+              href="/evolve/journeys"
+              className="mx-auto block w-fit rounded-full bg-background px-4 py-1.5 text-center text-xs font-medium text-foreground hover:bg-background/80"
+            >
+              Browse other journeys
+            </Link>
+          )}
         </div>
       )}
 
@@ -255,15 +264,6 @@ export function DashboardView({
             <ArrowRight className="size-4" />
           </Button>
         </div>
-      )}
-
-      {progress?.completed_at && !nextJourney && (
-        <Link
-          href="/evolve/journeys"
-          className="block text-center text-sm font-medium text-primary underline-offset-2 hover:underline"
-        >
-          Browse other journeys
-        </Link>
       )}
 
       <div className="space-y-3">
