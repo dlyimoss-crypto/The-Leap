@@ -31,6 +31,9 @@ A build-ready V1 (MVP) implementation plan for The Leap — architecture/stack, 
 - [Nav movement iconography](./issues/14-nav-iconography.md): Connect → `Users`, Commit → `Flag`, Evolve → `Sprout`, Engage → `Globe` — confirmed via a visual picker as the deliberate answer, matching what had already shipped as a placeholder.
 - [Books & Literature content scope](./issues/15-books-library-content-scope.md): wrong-shaped question, superseded. Turned out to be a request for a multi-author publishing platform with monetization (also reopening ticket 11's Daily Devotion answer) — spun into its own effort, [`.scratch/author-publishing/`](../author-publishing/map.md), rather than answered here.
 - **Groups fog resolved**: the mockup's "Groups" tab under Connect (flagged below as contradicting ticket 02's "no groups in V1") is replaced outright with a **Churches directory** instead — a curated, admin-only list of local churches (name, lead pastor, mission, address, service time, phone/email with copy-to-clipboard and mailto, member estimate) at `/connect/churches`. No groups concept was ever built; the contradiction is moot. This is a lightweight directory, not the deferred "church network" feature (Out of scope, below) — no inter-church or cross-user features, browsable list only, no user-to-church association yet.
+- [Commit's contents](./issues/16-commit-contents.md): the `commitments` table (ticket 02) finally gets a UI — one active weekly `Commitment` at a time, mark-as-kept, a kept-history list, and a surfaced card on Home. No day-by-day check-in granularity yet.
+- [Engage's contents](./issues/17-engage-contents.md): a hub with **Invite a Friend** (share/copy link, no new data) and **Serve & Missions** (new `service_opportunities` table, admin-authored, same shape as Churches). **Give/support the ministry** considered and deferred — real payments/compliance work, out of scope per this map's Notes.
+- [Journey Formation Loop narrowed](../../docs/adr/0001-narrow-the-formation-loop.md): Sessions now run Scripture → Message → Explore → Reflect → Pray, dropping Practice and Connect as Session steps so a day lands one thought instead of spreading across six. Practice survives only as a Daily Devotion field (ticket 11's answer, unaffected).
 
 ## Not yet specified
 
@@ -38,8 +41,6 @@ A build-ready V1 (MVP) implementation plan for The Leap — architecture/stack, 
 
 ## Open questions
 
-- **Commit's contents**: what screens/features live under the Commit tab — open, not yet asked.
-- **Engage's contents**: what screens/features live under the Engage tab — open, not yet asked.
 - **Home's Practice shortcut**: where the fourth "Today" row item (Practice) leads — open, not yet asked.
 
 ## Out of scope
