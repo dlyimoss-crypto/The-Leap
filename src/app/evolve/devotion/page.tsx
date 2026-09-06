@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Sparkles } from "lucide-react";
 import { BackLink } from "@/components/back-link";
+import { PatternBorder } from "@/components/pattern-bg";
 import { createClient } from "@/lib/supabase/server";
 
 type DevotionRow = {
@@ -88,7 +89,8 @@ export default async function DevotionPage(
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-6 py-10">
+    <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-6 overflow-hidden px-6 py-10">
+      <PatternBorder />
       <BackLink href="/evolve" label="Evolve" />
       <div>
         <h1 className="text-2xl font-heading font-semibold">

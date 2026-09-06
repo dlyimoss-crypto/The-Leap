@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ComingSoon } from "@/components/coming-soon";
 import { BackLink } from "@/components/back-link";
+import { PatternBorder } from "@/components/pattern-bg";
 import { createClient } from "@/lib/supabase/server";
 import {
   getScripture,
@@ -73,7 +74,8 @@ export default async function ScripturePage(
     : false;
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-10">
+    <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
+      <PatternBorder />
       <BackLink href="/evolve" label="Evolve" />
       <div>
         <h1 className="text-2xl font-heading font-semibold">Scripture</h1>

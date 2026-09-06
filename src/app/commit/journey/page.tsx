@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Compass, Map } from "lucide-react";
 import { HubCard } from "@/components/hub-card";
 import { BackLink } from "@/components/back-link";
+import { PatternBorder } from "@/components/pattern-bg";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentJourneyState } from "@/lib/supabase/journey-progress";
 import { journeyContinueHref } from "@/lib/journey-nav";
@@ -22,7 +23,8 @@ export default async function JourneyChooserPage() {
   );
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-10">
+    <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
+      <PatternBorder />
       <BackLink href="/commit" label="Commit" />
 
       <div>

@@ -1,6 +1,7 @@
 import { Users } from "lucide-react";
 import { redirect } from "next/navigation";
 import { BackLink } from "@/components/back-link";
+import { PatternBorder } from "@/components/pattern-bg";
 import { createClient } from "@/lib/supabase/server";
 import { getCommunityPrompt } from "@/lib/content/community-prompt";
 import { Composer } from "./composer";
@@ -88,7 +89,8 @@ export default async function CommunityPage(
   });
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-10">
+    <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
+      <PatternBorder />
       <BackLink href="/connect" label="Connect" />
       <h1 className="text-2xl font-heading font-semibold">Community</h1>
 

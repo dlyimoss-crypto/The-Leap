@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { PatternBorder } from "@/components/pattern-bg";
 import { createClient } from "@/lib/supabase/server";
 import { addComment } from "../actions";
 
@@ -64,7 +65,8 @@ export default async function PostDetailPage(
   );
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 px-6 py-10">
+    <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
+      <PatternBorder />
       <Link href="/community" className="text-sm text-muted-foreground">
         &larr; Community
       </Link>

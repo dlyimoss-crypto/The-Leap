@@ -12,6 +12,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BackLink } from "@/components/back-link";
+import { PatternCorner } from "@/components/pattern-bg";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -221,7 +222,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
     (pendingApplicationsCount ?? 0) + (pendingBooksCount ?? 0);
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-6 py-10">
+    <main className="relative mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
+      <PatternCorner corner="top-right" />
       <BackLink href="/" label="Home" />
       <h1 className="text-2xl font-heading font-semibold">Admin</h1>
 

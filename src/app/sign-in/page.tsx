@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { PatternBorder } from "@/components/pattern-bg";
 import { SignInForm } from "./sign-in-form";
 
 export default async function SignInPage(props: PageProps<"/sign-in">) {
@@ -10,7 +11,8 @@ export default async function SignInPage(props: PageProps<"/sign-in">) {
   const initialMode = modeParam === "sign-up" ? "sign-up" : "sign-in";
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-8 px-6 py-16">
+    <main className="relative flex flex-1 flex-col items-center justify-center gap-8 overflow-hidden px-6 py-16">
+      <PatternBorder />
       <SignInForm initialMode={initialMode} />
       <Button
         render={<Link href="/" />}

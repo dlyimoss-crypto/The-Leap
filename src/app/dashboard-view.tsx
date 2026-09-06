@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { PatternCorner } from "@/components/pattern-bg";
 import type { JourneyMeta } from "@/lib/content/journeys";
 import type { JourneyProgressRow } from "@/lib/supabase/journey-progress";
 import { journeyContinueHref } from "@/lib/journey-nav";
@@ -82,7 +83,8 @@ export function DashboardView({
   const firstName = displayName?.split(" ")[0];
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-8 px-6 py-10">
+    <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-8 overflow-hidden px-6 py-10">
+      <PatternCorner corner="top-right" />
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Link href="/profile" aria-label="Edit your profile">
