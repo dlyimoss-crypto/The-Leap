@@ -69,11 +69,10 @@ export default async function JourneySessionPage(
             ),
           )}
         </div>
+        <Step label="Message">{session.message}</Step>
         <Step label="Explore">{session.explore}</Step>
         <Step label="Reflect">{session.reflect}</Step>
         {session.pray && <Step label="Pray">{session.pray}</Step>}
-        <Step label="Practice">{session.practice}</Step>
-        <Step label="Connect">{session.connect}</Step>
       </div>
 
       {isLastDay && (

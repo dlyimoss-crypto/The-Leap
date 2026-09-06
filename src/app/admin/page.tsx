@@ -120,11 +120,10 @@ type JourneyDayRow = {
   day_number: number;
   title: string;
   scripture_reference: string;
+  message: string;
   explore: string;
   reflect: string;
   pray: string | null;
-  practice: string;
-  connect: string;
   next_topic: string | null;
 };
 
@@ -1391,7 +1390,7 @@ async function JourneyDayEditor({
   const { data: existing, error } = await supabase
     .from("journey_days")
     .select(
-      "day_number, title, scripture_reference, explore, reflect, pray, practice, connect, next_topic",
+      "day_number, title, scripture_reference, message, explore, reflect, pray, next_topic",
     )
     .eq("journey_id", journey.id)
     .eq("day_number", dayNumber)
@@ -1443,6 +1442,16 @@ async function JourneyDayEditor({
           />
         </div>
         <div className="space-y-1.5">
+          <Label htmlFor="message">Message</Label>
+          <Textarea
+            id="message"
+            name="message"
+            rows={4}
+            defaultValue={existing?.message}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
           <Label htmlFor="explore">Explore</Label>
           <Textarea
             id="explore"
@@ -1469,26 +1478,6 @@ async function JourneyDayEditor({
             name="pray"
             rows={2}
             defaultValue={existing?.pray ?? ""}
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="practice">Practice</Label>
-          <Textarea
-            id="practice"
-            name="practice"
-            rows={2}
-            defaultValue={existing?.practice}
-            required
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="connect">Connect</Label>
-          <Textarea
-            id="connect"
-            name="connect"
-            rows={2}
-            defaultValue={existing?.connect}
-            required
           />
         </div>
         <div className="space-y-1.5">

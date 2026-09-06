@@ -17,8 +17,12 @@ A single day's unit of content inside a Formation Journey, run through the Forma
 _Avoid_: Lesson, day, unit
 
 **The Formation Loop**:
-The fixed sequence a Session moves through: Scripture → Explore → Reflect → Pray → Practice → Connect → Next Step → Engage.
+The fixed sequence a Session moves through: Scripture → Message → Explore → Reflect → Pray → Next Step → Engage. Deliberately narrow — one Scripture-and-Message thought per Session — so a person absorbs one thing deeply per day rather than several thoughts at once (see [ADR-0001](docs/adr/0001-narrow-the-formation-loop.md)).
 _Avoid_: Devotional flow, lesson structure
+
+**Message**:
+The short, plain-language, encouraging passage in a Session's Formation Loop that unpacks its Scripture — the "sermon" moment a person studies before Explore.
+_Avoid_: Sermon, teaching, body
 
 **The Four Core Movements**:
 The top-level navigation and discipleship posture: CONNECT ("I belong") → COMMIT ("I choose the way of Christ") → EVOLVE ("I am becoming") → ENGAGE ("My life has a purpose beyond myself"), with MULTIPLY ("I can help someone else take their next step") as the mature outcome. These are also the four primary nav tabs plus Home.
@@ -49,7 +53,7 @@ A user-authored, self-tracked weekly intention (e.g. "Pray each morning"), shown
 _Avoid_: Task, goal, streak (distinct from Practice — see below)
 
 **Practice**:
-The daily prompted action inside a Session's Formation Loop (e.g. "Choose one practical act of obedience"). Not persisted as its own row — it's a step within a Session, not a standalone user record.
+The optional prompted action attached to a Daily Devotion entry (e.g. "Choose one practical act of obedience"). No longer part of the Formation Loop — Sessions dropped it (see [ADR-0001](docs/adr/0001-narrow-the-formation-loop.md)) — so this term now belongs to Daily Devotion only, not Formation Journeys.
 _Avoid_: Commitment, exercise
 
 **Prayer Request**:

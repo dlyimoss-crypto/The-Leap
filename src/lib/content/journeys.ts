@@ -23,11 +23,10 @@ export type JourneySession = {
   day: number;
   title: string;
   scriptureReference: string;
+  message: string;
   explore: string;
   reflect: string;
   pray: string | null;
-  practice: string;
-  connect: string;
   nextTopic: string | null;
 };
 

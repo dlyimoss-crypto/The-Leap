@@ -29,13 +29,16 @@ export default async function HomePage() {
     return <WelcomeView />;
   }
 
-  // Only needed to power the completed-state "you might also explore" nudge
+  // Only needed to power the completed-state "recommended next journey" card
   // — skip the extra query on every other Home render.
-  let otherJourneyTitle: string | null = null;
+  let nextJourney: { slug: string; title: string; purpose: string } | null =
+    null;
   if (progress?.completed_at) {
     const available = await findAvailableJourneys(supabase);
-    otherJourneyTitle =
-      available.find((j) => j.slug !== journeySlug)?.title ?? null;
+    const match = available.find((j) => j.slug !== journeySlug) ?? null;
+    nextJourney = match
+      ? { slug: match.slug, title: match.title, purpose: match.purpose }
+      : null;
   }
 
   return (
@@ -45,7 +48,7 @@ export default async function HomePage() {
       scriptureReference={currentSession?.scriptureReference ?? null}
       displayName={profile?.display_name ?? null}
       avatarUrl={profile?.avatar_url ?? null}
-      otherJourneyTitle={otherJourneyTitle}
+      nextJourney={nextJourney}
     />
   );
 }

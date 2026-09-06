@@ -23,11 +23,10 @@ type JourneyDayRow = {
   day_number: number;
   title: string;
   scripture_reference: string;
+  message: string;
   explore: string;
   reflect: string;
   pray: string | null;
-  practice: string;
-  connect: string;
   next_topic: string | null;
 };
 
@@ -47,11 +46,10 @@ function mapDbDay(row: JourneyDayRow): JourneySession {
     day: row.day_number,
     title: row.title,
     scriptureReference: row.scripture_reference,
+    message: row.message,
     explore: row.explore,
     reflect: row.reflect,
     pray: row.pray,
-    practice: row.practice,
-    connect: row.connect,
     nextTopic: row.next_topic,
   };
 }
@@ -97,7 +95,7 @@ export async function findJourneySession(
   const { data: dayRow } = await supabase
     .from("journey_days")
     .select(
-      "day_number, title, scripture_reference, explore, reflect, pray, practice, connect, next_topic",
+      "day_number, title, scripture_reference, message, explore, reflect, pray, next_topic",
     )
     .eq("journey_id", journey.id)
     .eq("day_number", day)

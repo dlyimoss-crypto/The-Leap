@@ -118,11 +118,10 @@ function journeyDayFields(formData: FormData) {
   return {
     title: String(formData.get("title") ?? "").trim(),
     scripture_reference: String(formData.get("scripture_reference") ?? "").trim(),
+    message: String(formData.get("message") ?? "").trim(),
     explore: String(formData.get("explore") ?? "").trim(),
     reflect: String(formData.get("reflect") ?? "").trim(),
     pray: String(formData.get("pray") ?? "").trim() || null,
-    practice: String(formData.get("practice") ?? "").trim(),
-    connect: String(formData.get("connect") ?? "").trim(),
     next_topic: String(formData.get("next_topic") ?? "").trim() || null,
   };
 }

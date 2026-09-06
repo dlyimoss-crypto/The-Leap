@@ -22,11 +22,9 @@ function greeting() {
   return "Good evening";
 }
 
-// Text on the orange fill uses primary-foreground (dark charcoal), not the
-// requested light grey — light-on-orange only reaches ~2.6:1 contrast (same
-// reasoning as the brand refresh's primary-foreground choice, see
-// globals.css); light grey stays for the label over the plain track, where
-// it's actually legible.
+// A day-at-a-time line rather than a filled pill: the marker sits at the
+// current day's position along the track, so progress reads as "here's
+// where you are on the plan" instead of a raw percentage.
 function JourneyProgressBar({
   currentSessionNumber,
   durationDays,
@@ -40,22 +38,28 @@ function JourneyProgressBar({
   const daysRemaining = Math.max(durationDays - (currentSessionNumber - 1), 0);
 
   return (
-    <div className="relative h-8 overflow-hidden rounded-full bg-card">
-      <div
-        className="absolute inset-y-0 left-0 rounded-full bg-primary transition-[width]"
-        style={{ width: `${percentComplete}%` }}
-      />
-      <div className="absolute inset-0 flex items-center justify-between px-3 text-[11px] font-medium">
-        <span className="text-primary-foreground">
-          {percentComplete}% complete
-        </span>
-        <span className="text-muted-foreground">
-          {daysRemaining} {daysRemaining === 1 ? "day" : "days"}
+    <div className="space-y-2">
+      <div className="relative h-1.5 w-full rounded-full bg-card">
+        <div
+          className="absolute inset-y-0 left-0 rounded-full bg-primary transition-[width]"
+          style={{ width: `${percentComplete}%` }}
+        />
+        <div
+          className="absolute top-1/2 size-3 -translate-y-1/2 -translate-x-1/2 rounded-full border-2 border-background bg-primary shadow-sm transition-[left]"
+          style={{ left: `${percentComplete}%` }}
+        />
+      </div>
+      <div className="flex items-center justify-between text-[11px] font-medium text-muted-foreground">
+        <span>{percentComplete}% complete</span>
+        <span>
+          {daysRemaining} {daysRemaining === 1 ? "day" : "days"} left
         </span>
       </div>
     </div>
   );
 }
+
+type NextJourney = { slug: string; title: string; purpose: string };
 
 export function DashboardView({
   journey,
@@ -63,14 +67,14 @@ export function DashboardView({
   scriptureReference,
   displayName,
   avatarUrl,
-  otherJourneyTitle,
+  nextJourney,
 }: {
   journey: JourneyMeta;
   progress: JourneyProgress | null;
   scriptureReference: string | null;
   displayName: string | null;
   avatarUrl: string | null;
-  otherJourneyTitle?: string | null;
+  nextJourney?: NextJourney | null;
 }) {
   const firstName = displayName?.split(" ")[0];
 
@@ -205,11 +209,13 @@ export function DashboardView({
             </div>
           </div>
 
-          <div className="relative h-8 overflow-hidden rounded-full bg-muted">
-            <div className="absolute inset-0 rounded-full bg-primary" />
-            <div className="absolute inset-0 flex items-center justify-between px-3 text-[11px] font-medium">
-              <span className="text-primary-foreground">100% complete</span>
-              <span className="text-primary-foreground">Done</span>
+          <div className="space-y-2">
+            <div className="relative h-1.5 w-full rounded-full bg-primary">
+              <div className="absolute top-1/2 right-0 size-3 -translate-y-1/2 translate-x-1/2 rounded-full border-2 border-background bg-primary shadow-sm" />
+            </div>
+            <div className="flex items-center justify-between text-[11px] font-medium text-muted-foreground">
+              <span>100% complete</span>
+              <span>Done</span>
             </div>
           </div>
 
@@ -223,16 +229,41 @@ export function DashboardView({
             Review the journey
             <ArrowRight className="size-4" />
           </Button>
-
-          <Link
-            href="/evolve/journeys"
-            className="block text-center text-sm font-medium text-primary underline-offset-2 hover:underline"
-          >
-            {otherJourneyTitle
-              ? `You might also explore "${otherJourneyTitle}"`
-              : "Browse other journeys"}
-          </Link>
         </div>
+      )}
+
+      {progress?.completed_at && nextJourney && (
+        <div className="space-y-3 rounded-2xl border-2 border-dashed border-primary/30 bg-card p-5">
+          <div className="space-y-1">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+              Take your next Leap
+            </p>
+            <h2 className="font-heading text-xl font-bold text-foreground text-balance">
+              {nextJourney.title}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {nextJourney.purpose}
+            </p>
+          </div>
+          <Button
+            render={<Link href={`/journeys/${nextJourney.slug}`} />}
+            nativeButton={false}
+            size="lg"
+            className="w-full rounded-full"
+          >
+            Start this journey
+            <ArrowRight className="size-4" />
+          </Button>
+        </div>
+      )}
+
+      {progress?.completed_at && !nextJourney && (
+        <Link
+          href="/evolve/journeys"
+          className="block text-center text-sm font-medium text-primary underline-offset-2 hover:underline"
+        >
+          Browse other journeys
+        </Link>
       )}
 
       <div className="space-y-3">

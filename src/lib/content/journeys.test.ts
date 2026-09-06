@@ -33,13 +33,13 @@ describe("getJourneySession", () => {
       day: 1,
       title: "Why Jesus?",
       scriptureReference: "John 1:1-5; John 1:14; Colossians 1:15-20",
+      message:
+        "Before anything existed, Jesus did. John doesn't open with a manger — he opens with eternity: \"In the beginning was the Word, and the Word was with God, and the Word was God.\" That Word became flesh and moved into our neighborhood. So Jesus isn't a good teacher who showed up in history — He's the eternal God who stepped into it. Whatever you've believed about Him before today, start here: He is Lord over all things, and He came near on purpose.",
       explore:
         "Jesus as Lord, Son, Savior and the One through whom all things were made.",
       reflect:
         "What have you previously believed about Jesus? Who is Jesus to you today?",
       pray: "Jesus, help me to see You more clearly. Give me an open heart as I discover who You are.",
-      practice: "Read John 1:1-14 slowly for five minutes.",
-      connect: "What word or idea about Jesus stood out to you today?",
       nextTopic: "What is the Gospel?",
     });
   });
