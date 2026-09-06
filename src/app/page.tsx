@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { findAvailableJourneys, findJourneyMeta } from "@/lib/content/journeys-repo";
 import { getCurrentJourneyState } from "@/lib/supabase/journey-progress";
+import { getActiveCommitment } from "@/lib/supabase/commitments";
 import { WelcomeView } from "./welcome-view";
 import { DashboardView } from "./dashboard-view";
 
@@ -14,7 +15,7 @@ export default async function HomePage() {
     return <WelcomeView />;
   }
 
-  const [{ progress, currentSession, journeySlug }, { data: profile }] =
+  const [{ progress, currentSession, journeySlug }, { data: profile }, commitment] =
     await Promise.all([
       getCurrentJourneyState(supabase, user.id),
       supabase
@@ -22,6 +23,7 @@ export default async function HomePage() {
         .select("display_name, avatar_url")
         .eq("id", user.id)
         .single(),
+      getActiveCommitment(supabase, user.id),
     ]);
 
   const journey = await findJourneyMeta(supabase, journeySlug);
@@ -49,6 +51,7 @@ export default async function HomePage() {
       displayName={profile?.display_name ?? null}
       avatarUrl={profile?.avatar_url ?? null}
       nextJourney={nextJourney}
+      commitmentBody={commitment?.body ?? null}
     />
   );
 }

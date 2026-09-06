@@ -337,3 +337,65 @@ export async function deleteChurch(id: string) {
 
   revalidatePath("/admin");
 }
+
+function serviceOpportunityFields(formData: FormData) {
+  const status = String(formData.get("status") ?? "draft");
+
+  return {
+    title: String(formData.get("title") ?? "").trim(),
+    category: String(formData.get("category") ?? "").trim() || null,
+    description: String(formData.get("description") ?? "").trim() || null,
+    location: String(formData.get("location") ?? "").trim() || null,
+    contact_email: String(formData.get("contact_email") ?? "").trim() || null,
+    contact_phone: String(formData.get("contact_phone") ?? "").trim() || null,
+    link: String(formData.get("link") ?? "").trim() || null,
+    status: status === "published" ? "published" : "draft",
+  };
+}
+
+export async function createServiceOpportunity(formData: FormData) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase
+    .from("service_opportunities")
+    .insert(serviceOpportunityFields(formData));
+
+  if (error) {
+    console.error("Failed to create service opportunity", error);
+  }
+
+  revalidatePath("/admin");
+}
+
+export async function updateServiceOpportunity(
+  id: string,
+  formData: FormData,
+) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase
+    .from("service_opportunities")
+    .update(serviceOpportunityFields(formData))
+    .eq("id", id);
+
+  if (error) {
+    console.error("Failed to update service opportunity", error);
+  }
+
+  revalidatePath("/admin");
+}
+
+export async function deleteServiceOpportunity(id: string) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase
+    .from("service_opportunities")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error("Failed to delete service opportunity", error);
+  }
+
+  revalidatePath("/admin");
+}

@@ -1,5 +1,13 @@
 import Link from "next/link";
-import { Inbox, Sparkles, BookOpen, Users2, Church, Compass } from "lucide-react";
+import {
+  Inbox,
+  Sparkles,
+  BookOpen,
+  Users2,
+  Church,
+  Compass,
+  HeartHandshake,
+} from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -15,8 +23,10 @@ import {
   banUser,
   createChurch,
   createDevotion,
+  createServiceOpportunity,
   deleteChurch,
   deleteDevotion,
+  deleteServiceOpportunity,
   publishBook,
   rejectAuthorApplication,
   rejectBook,
@@ -27,6 +37,7 @@ import {
   unpublishBook,
   updateChurch,
   updateDevotion,
+  updateServiceOpportunity,
 } from "./actions";
 import {
   createJourney,
@@ -37,7 +48,14 @@ import {
   updateJourney,
 } from "./journeys-actions";
 
-type Tab = "queue" | "users" | "devotions" | "books" | "churches" | "journeys";
+type Tab =
+  | "queue"
+  | "users"
+  | "devotions"
+  | "books"
+  | "churches"
+  | "journeys"
+  | "opportunities";
 
 type ChurchRow = {
   id: string;
@@ -49,6 +67,18 @@ type ChurchRow = {
   phone: string | null;
   email: string | null;
   member_count_estimate: number | null;
+};
+
+type OpportunityRow = {
+  id: string;
+  title: string;
+  category: string | null;
+  description: string | null;
+  location: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  link: string | null;
+  status: string;
 };
 
 type DevotionRow = {
@@ -151,7 +181,9 @@ export default async function AdminPage(props: PageProps<"/admin">) {
             ? "churches"
             : tabParam === "journeys"
               ? "journeys"
-              : "queue";
+              : tabParam === "opportunities"
+                ? "opportunities"
+                : "queue";
   const editIdParam = Array.isArray(searchParams.edit)
     ? searchParams.edit[0]
     : searchParams.edit;
@@ -254,6 +286,16 @@ export default async function AdminPage(props: PageProps<"/admin">) {
         >
           Journeys
         </Link>
+        <Link
+          href="/admin?tab=opportunities"
+          className={
+            tab === "opportunities"
+              ? "border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
+              : "pb-2 text-sm font-medium text-muted-foreground"
+          }
+        >
+          Opportunities
+        </Link>
       </div>
 
       {tab === "queue" ? (
@@ -266,6 +308,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
         <BooksAdmin />
       ) : tab === "churches" ? (
         <ChurchesAdmin editId={editIdParam} />
+      ) : tab === "opportunities" ? (
+        <OpportunitiesAdmin editId={editIdParam} />
       ) : (
         <JourneysAdmin
           editId={editIdParam}
@@ -1088,6 +1132,177 @@ async function ChurchesAdmin({ editId }: { editId: string | undefined }) {
                   Edit
                 </Button>
                 <form action={deleteChurch.bind(null, c.id)}>
+                  <Button type="submit" size="xs" variant="ghost">
+                    Delete
+                  </Button>
+                </form>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+async function OpportunitiesAdmin({
+  editId,
+}: {
+  editId: string | undefined;
+}) {
+  const supabase = await createClient();
+
+  const { data: opportunities, error } = await supabase
+    .from("service_opportunities")
+    .select(
+      "id, title, category, description, location, contact_email, contact_phone, link, status",
+    )
+    .order("created_at", { ascending: false })
+    .returns<OpportunityRow[]>();
+
+  if (error) {
+    console.error("Failed to load service opportunities", error);
+  }
+
+  const rows = opportunities ?? [];
+  const editing = editId ? rows.find((o) => o.id === editId) : undefined;
+
+  return (
+    <div className="space-y-6">
+      <form
+        action={
+          editing
+            ? updateServiceOpportunity.bind(null, editing.id)
+            : createServiceOpportunity
+        }
+        className="space-y-3 rounded-xl border bg-card p-4"
+      >
+        <p className="text-sm font-semibold">
+          {editing ? "Edit opportunity" : "New opportunity"}
+        </p>
+        <div className="space-y-1.5">
+          <Label htmlFor="title">Title</Label>
+          <Input
+            id="title"
+            name="title"
+            defaultValue={editing?.title}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="category">Category</Label>
+          <Input
+            id="category"
+            name="category"
+            placeholder="e.g. Volunteering, Missions, Outreach"
+            defaultValue={editing?.category ?? ""}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            name="description"
+            rows={3}
+            defaultValue={editing?.description ?? ""}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="location">Location</Label>
+          <Input
+            id="location"
+            name="location"
+            defaultValue={editing?.location ?? ""}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="contact_email">Contact email</Label>
+          <Input
+            id="contact_email"
+            name="contact_email"
+            type="email"
+            defaultValue={editing?.contact_email ?? ""}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="contact_phone">Contact phone</Label>
+          <Input
+            id="contact_phone"
+            name="contact_phone"
+            defaultValue={editing?.contact_phone ?? ""}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="link">Link (optional)</Label>
+          <Input
+            id="link"
+            name="link"
+            placeholder="https://"
+            defaultValue={editing?.link ?? ""}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="status">Status</Label>
+          <select
+            id="status"
+            name="status"
+            defaultValue={editing?.status ?? "draft"}
+            className="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30"
+          >
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+          </select>
+        </div>
+        <div className="flex justify-end gap-2">
+          {editing && (
+            <Button
+              render={<Link href="/admin?tab=opportunities" />}
+              nativeButton={false}
+              type="button"
+              variant="ghost"
+              size="sm"
+            >
+              Cancel
+            </Button>
+          )}
+          <Button type="submit" size="sm">
+            {editing ? "Save changes" : "Create opportunity"}
+          </Button>
+        </div>
+      </form>
+
+      {rows.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 py-12 text-center">
+          <HeartHandshake className="size-8 text-muted-foreground/50" />
+          <p className="text-sm text-muted-foreground">
+            No opportunities yet — add the first one above.
+          </p>
+        </div>
+      ) : (
+        <div className="divide-y rounded-xl border bg-card">
+          {rows.map((o) => (
+            <div key={o.id} className="flex items-center justify-between gap-3 p-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <p className="truncate text-sm font-medium">{o.title}</p>
+                  <Badge variant={o.status === "published" ? "default" : "secondary"}>
+                    {o.status}
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {o.category ?? "No category"}
+                </p>
+              </div>
+              <div className="flex shrink-0 gap-2">
+                <Button
+                  render={<Link href={`/admin?tab=opportunities&edit=${o.id}`} />}
+                  nativeButton={false}
+                  size="xs"
+                  variant="outline"
+                >
+                  Edit
+                </Button>
+                <form action={deleteServiceOpportunity.bind(null, o.id)}>
                   <Button type="submit" size="xs" variant="ghost">
                     Delete
                   </Button>

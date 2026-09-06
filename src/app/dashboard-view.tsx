@@ -5,6 +5,7 @@ import {
   Sparkles,
   MessageCircle,
   ArrowRight,
+  Flag,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -68,6 +69,7 @@ export function DashboardView({
   displayName,
   avatarUrl,
   nextJourney,
+  commitmentBody,
 }: {
   journey: JourneyMeta;
   progress: JourneyProgress | null;
@@ -75,6 +77,7 @@ export function DashboardView({
   displayName: string | null;
   avatarUrl: string | null;
   nextJourney?: NextJourney | null;
+  commitmentBody?: string | null;
 }) {
   const firstName = displayName?.split(" ")[0];
 
@@ -289,6 +292,23 @@ export function DashboardView({
           </Link>
         </div>
       </div>
+
+      <Link
+        href="/commit"
+        className="flex items-center gap-3 rounded-xl border bg-card p-4 hover:bg-muted/50"
+      >
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+          <Flag className="size-4" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-semibold">
+            {commitmentBody ? "This week's commitment" : "Make a commitment"}
+          </p>
+          <p className="truncate text-xs text-muted-foreground">
+            {commitmentBody ?? "Choose one thing you'll do this week."}
+          </p>
+        </div>
+      </Link>
 
       <Link
         href="/companion"
