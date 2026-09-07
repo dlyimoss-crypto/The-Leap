@@ -221,7 +221,8 @@ export function DashboardView({
                 {journey.completionTitle}
               </h1>
               <p className="text-sm text-muted-foreground">
-                You&apos;ve completed {journey.title}.
+                You&apos;ve begun the journey of following Christ. This is
+                only the beginning.
               </p>
             </div>
             <div className="size-20 shrink-0 overflow-hidden rounded-2xl bg-muted">
@@ -251,7 +252,7 @@ export function DashboardView({
             size="lg"
             className="w-full rounded-full"
           >
-            Review the journey
+            Continue
             <ArrowRight className="size-4" />
           </Button>
 
