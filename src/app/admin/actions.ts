@@ -280,6 +280,28 @@ export async function unpublishBook(bookId: string) {
   revalidatePath("/admin");
 }
 
+export async function updateBookPrice(bookId: string, formData: FormData) {
+  const { supabase } = await requireAdmin();
+
+  const raw = String(formData.get("price_usd") ?? "").trim();
+  const value = raw ? Number.parseFloat(raw) : null;
+  const priceCents =
+    value === null || Number.isNaN(value) || value < 0
+      ? null
+      : Math.round(value * 100);
+
+  const { error } = await supabase
+    .from("books")
+    .update({ price_cents: priceCents })
+    .eq("id", bookId);
+
+  if (error) {
+    console.error("Failed to update book price", error);
+  }
+
+  revalidatePath("/admin");
+}
+
 function churchFields(formData: FormData) {
   const memberCountRaw = String(
     formData.get("member_count_estimate") ?? "",

@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Link from "next/link";
 import {
   Inbox,
@@ -37,6 +38,7 @@ import {
   resolveReport,
   unbanUser,
   unpublishBook,
+  updateBookPrice,
   updateChurch,
   updateDevotion,
   updateServiceOpportunity,
@@ -745,8 +747,12 @@ async function BooksAdmin() {
   const pendingReview = bookRows.filter((b) => b.status === "pending_review");
   const approved = bookRows.filter((b) => b.status === "approved");
   const published = bookRows.filter((b) => b.status === "published");
+  const unpublished = bookRows.filter((b) => b.status === "unpublished");
   const other = bookRows.filter(
-    (b) => !["pending_review", "approved", "published"].includes(b.status),
+    (b) =>
+      !["pending_review", "approved", "published", "unpublished"].includes(
+        b.status,
+      ),
   );
 
   const coverUrl = (path: string | null) =>
@@ -938,14 +944,13 @@ async function BooksAdmin() {
           </p>
           <div className="divide-y rounded-xl border bg-card">
             {approved.map((b) => (
-              <div key={b.id} className="flex items-center justify-between gap-3 p-3">
-                <p className="truncate text-sm font-medium">{b.title}</p>
+              <BookAdminRow key={b.id} book={b}>
                 <form action={publishBook.bind(null, b.id)}>
                   <Button type="submit" size="xs">
                     Publish
                   </Button>
                 </form>
-              </div>
+              </BookAdminRow>
             ))}
           </div>
         </div>
@@ -958,14 +963,32 @@ async function BooksAdmin() {
           </p>
           <div className="divide-y rounded-xl border bg-card">
             {published.map((b) => (
-              <div key={b.id} className="flex items-center justify-between gap-3 p-3">
-                <p className="truncate text-sm font-medium">{b.title}</p>
+              <BookAdminRow key={b.id} book={b}>
                 <form action={unpublishBook.bind(null, b.id)}>
                   <Button type="submit" size="xs" variant="ghost">
                     Unpublish
                   </Button>
                 </form>
-              </div>
+              </BookAdminRow>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {unpublished.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Unpublished — {unpublished.length}
+          </p>
+          <div className="divide-y rounded-xl border bg-card">
+            {unpublished.map((b) => (
+              <BookAdminRow key={b.id} book={b}>
+                <form action={publishBook.bind(null, b.id)}>
+                  <Button type="submit" size="xs">
+                    Publish
+                  </Button>
+                </form>
+              </BookAdminRow>
             ))}
           </div>
         </div>
@@ -995,6 +1018,52 @@ async function BooksAdmin() {
           </p>
         </div>
       )}
+    </div>
+  );
+}
+
+/**
+ * Row shared by the Approved/Published/Unpublished book lists — every one
+ * of them needs the price editable inline, since price is what decides
+ * whether "Read now" even works for a reader (see getReadableManuscript).
+ */
+function BookAdminRow({
+  book,
+  children,
+}: {
+  book: BookRow;
+  children: ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3 p-3">
+      <div className="min-w-0">
+        <p className="truncate text-sm font-medium">{book.title}</p>
+        <p className="text-xs text-muted-foreground">
+          {book.price_cents ? `$${(book.price_cents / 100).toFixed(2)}` : "Free"}
+        </p>
+      </div>
+      <div className="flex items-center gap-2">
+        <form
+          action={updateBookPrice.bind(null, book.id)}
+          className="flex items-center gap-1.5"
+        >
+          <Input
+            name="price_usd"
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="0.00"
+            defaultValue={
+              book.price_cents ? (book.price_cents / 100).toFixed(2) : ""
+            }
+            className="h-8 w-20"
+          />
+          <Button type="submit" size="xs" variant="outline">
+            Set price
+          </Button>
+        </form>
+        {children}
+      </div>
     </div>
   );
 }
