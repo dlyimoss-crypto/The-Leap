@@ -1,8 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { requireActiveUser, requireUser } from "@/lib/supabase/authorize";
+import { requireActiveUser } from "@/lib/supabase/authorize";
 import { createClient } from "@/lib/supabase/server";
 
 function parseCategories(raw: string): string[] {
@@ -122,45 +121,6 @@ export async function createBookSubmission(formData: FormData) {
   }
 
   revalidatePath("/evolve/books");
-}
-
-/**
- * Manuscripts live in a private bucket, so opening a book means minting a
- * short-lived signed URL and redirecting to it — a plain public URL would
- * either 404 (bucket is private) or, if it were made public, leak every
- * author's manuscript regardless of the book's status.
- */
-export async function openManuscript(bookId: string) {
-  const { supabase } = await requireUser();
-
-  const { data: book } = await supabase
-    .from("books")
-    .select("manuscript_path, status, price_cents")
-    .eq("id", bookId)
-    .maybeSingle<{
-      manuscript_path: string | null;
-      status: string;
-      price_cents: number | null;
-    }>();
-
-  if (
-    !book?.manuscript_path ||
-    book.status !== "published" ||
-    book.price_cents !== null
-  ) {
-    redirect(`/evolve/books/${bookId}?error=unavailable`);
-  }
-
-  const { data: signed, error } = await supabase.storage
-    .from("book-manuscripts")
-    .createSignedUrl(book.manuscript_path, 60 * 5);
-
-  if (error || !signed) {
-    console.error("Failed to sign manuscript URL", error);
-    redirect(`/evolve/books/${bookId}?error=unavailable`);
-  }
-
-  redirect(signed.signedUrl);
 }
 
 export async function updateBookSubmission(id: string, formData: FormData) {

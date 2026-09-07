@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { BookOpen, Library } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -5,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
 import { createClient } from "@/lib/supabase/server";
-import { openManuscript } from "../actions";
 
 type BookDetailRow = {
   id: string;
@@ -22,8 +22,6 @@ export default async function BookDetailPage(
   props: PageProps<"/evolve/books/[id]">,
 ) {
   const { id } = await props.params;
-  const searchParams = await props.searchParams;
-  const showUnavailable = searchParams.error === "unavailable";
 
   const supabase = await createClient();
   const {
@@ -96,20 +94,16 @@ export default async function BookDetailPage(
         {book.description}
       </p>
 
-      {showUnavailable && (
-        <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
-          This book couldn&apos;t be opened right now. Please try again in a
-          moment.
-        </div>
-      )}
-
       {isFree ? (
-        <form action={openManuscript.bind(null, book.id)}>
-          <Button type="submit" size="lg" className="w-full rounded-full">
-            <BookOpen className="size-4" />
-            Read now
-          </Button>
-        </form>
+        <Button
+          render={<Link href={`/evolve/books/${book.id}/read`} />}
+          nativeButton={false}
+          size="lg"
+          className="w-full rounded-full"
+        >
+          <BookOpen className="size-4" />
+          Read now
+        </Button>
       ) : (
         <div className="space-y-2 rounded-xl border bg-card p-4 text-center">
           <p className="text-sm font-medium">Purchasing isn&apos;t live yet</p>
