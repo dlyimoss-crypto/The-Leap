@@ -227,13 +227,13 @@ export default async function AdminPage(props: PageProps<"/admin">) {
       <BackLink href="/" label="Home" />
       <h1 className="text-2xl font-heading font-semibold">Admin</h1>
 
-      <div className="flex gap-4 border-b">
+      <div className="-mx-6 flex gap-4 overflow-x-auto border-b px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <Link
           href="/admin"
           className={
             tab === "queue"
-              ? "flex items-center gap-1.5 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
-              : "flex items-center gap-1.5 pb-2 text-sm font-medium text-muted-foreground"
+              ? "flex shrink-0 items-center gap-1.5 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
+              : "flex shrink-0 items-center gap-1.5 pb-2 text-sm font-medium text-muted-foreground"
           }
         >
           Moderation queue
@@ -243,8 +243,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           href="/admin?tab=users"
           className={
             tab === "users"
-              ? "border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
-              : "pb-2 text-sm font-medium text-muted-foreground"
+              ? "shrink-0 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
+              : "shrink-0 pb-2 text-sm font-medium text-muted-foreground"
           }
         >
           Users
@@ -253,8 +253,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           href="/admin?tab=devotions"
           className={
             tab === "devotions"
-              ? "border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
-              : "pb-2 text-sm font-medium text-muted-foreground"
+              ? "shrink-0 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
+              : "shrink-0 pb-2 text-sm font-medium text-muted-foreground"
           }
         >
           Devotions
@@ -263,8 +263,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           href="/admin?tab=books"
           className={
             tab === "books"
-              ? "flex items-center gap-1.5 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
-              : "flex items-center gap-1.5 pb-2 text-sm font-medium text-muted-foreground"
+              ? "flex shrink-0 items-center gap-1.5 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
+              : "flex shrink-0 items-center gap-1.5 pb-2 text-sm font-medium text-muted-foreground"
           }
         >
           Books
@@ -274,8 +274,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           href="/admin?tab=churches"
           className={
             tab === "churches"
-              ? "border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
-              : "pb-2 text-sm font-medium text-muted-foreground"
+              ? "shrink-0 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
+              : "shrink-0 pb-2 text-sm font-medium text-muted-foreground"
           }
         >
           Churches
@@ -284,8 +284,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           href="/admin?tab=journeys"
           className={
             tab === "journeys"
-              ? "border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
-              : "pb-2 text-sm font-medium text-muted-foreground"
+              ? "shrink-0 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
+              : "shrink-0 pb-2 text-sm font-medium text-muted-foreground"
           }
         >
           Journeys
@@ -294,8 +294,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           href="/admin?tab=opportunities"
           className={
             tab === "opportunities"
-              ? "border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
-              : "pb-2 text-sm font-medium text-muted-foreground"
+              ? "shrink-0 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
+              : "shrink-0 pb-2 text-sm font-medium text-muted-foreground"
           }
         >
           Opportunities
