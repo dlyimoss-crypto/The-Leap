@@ -18,6 +18,8 @@ import { PatternCorner } from "@/components/pattern-bg";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ChipListInput } from "@/components/admin/chip-list-input";
+import { SuggestibleTextarea } from "@/components/admin/suggestible-textarea";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/supabase/authorize";
 import { getDevotionStatus } from "@/lib/devotion";
@@ -1420,6 +1422,17 @@ async function OpportunitiesAdmin({
   );
 }
 
+const PRAYER_POINT_SUGGESTIONS = [
+  "Pray for open doors for the gospel",
+  "Pray for peace and safety",
+  "Pray for the local church there",
+  "Pray for provision",
+  "Pray for boldness to share Christ",
+  "Pray for unity among believers",
+  "Pray for protection over families",
+  "Pray for revival",
+];
+
 async function PrayerMovementsAdmin({
   editId,
 }: {
@@ -1479,13 +1492,12 @@ async function PrayerMovementsAdmin({
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="prayer_points">Prayer points (one per line)</Label>
-          <Textarea
-            id="prayer_points"
+          <Label>Prayer points</Label>
+          <ChipListInput
             name="prayer_points"
-            rows={4}
-            placeholder={"Pray for open doors for the gospel\nPray for peace and safety\nPray for the local church there"}
-            defaultValue={editing?.prayer_points.join("\n") ?? ""}
+            defaultValue={editing?.prayer_points ?? []}
+            suggestions={PRAYER_POINT_SUGGESTIONS}
+            placeholder="Type a prayer point, then press Enter"
           />
         </div>
         <div className="flex justify-end gap-2">
@@ -1856,6 +1868,30 @@ async function JourneyDaysList({
   );
 }
 
+const JOURNEY_DAY_SUGGESTIONS = {
+  message: [
+    "Today we're looking at...",
+    "In this passage, we see...",
+    "This changes everything because...",
+  ],
+  explore: [
+    "Read the passage slowly, twice.",
+    "What stands out to you here?",
+    "Who is speaking, and who are they speaking to?",
+  ],
+  reflect: [
+    "How does this truth change the way you see...?",
+    "Where do you need to apply this today?",
+    "What is one step you can take because of this?",
+  ],
+  pray: [
+    "Thank You, Lord, for...",
+    "Help me to...",
+    "I confess that...",
+    "Give me courage to...",
+  ],
+} as const;
+
 async function JourneyDayEditor({
   journey,
   dayNumber,
@@ -1921,41 +1957,45 @@ async function JourneyDayEditor({
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="message">Message</Label>
-          <Textarea
+          <SuggestibleTextarea
             id="message"
             name="message"
             rows={4}
             defaultValue={existing?.message}
             required
+            suggestions={JOURNEY_DAY_SUGGESTIONS.message}
           />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="explore">Explore</Label>
-          <Textarea
+          <SuggestibleTextarea
             id="explore"
             name="explore"
             rows={3}
             defaultValue={existing?.explore}
             required
+            suggestions={JOURNEY_DAY_SUGGESTIONS.explore}
           />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="reflect">Reflect</Label>
-          <Textarea
+          <SuggestibleTextarea
             id="reflect"
             name="reflect"
             rows={3}
             defaultValue={existing?.reflect}
             required
+            suggestions={JOURNEY_DAY_SUGGESTIONS.reflect}
           />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="pray">Pray (optional)</Label>
-          <Textarea
+          <SuggestibleTextarea
             id="pray"
             name="pray"
             rows={2}
             defaultValue={existing?.pray ?? ""}
+            suggestions={JOURNEY_DAY_SUGGESTIONS.pray}
           />
         </div>
         <div className="space-y-1.5">
