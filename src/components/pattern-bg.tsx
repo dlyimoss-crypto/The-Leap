@@ -3,20 +3,23 @@
 import { useId } from "react";
 import { cn } from "@/lib/utils";
 
-// Flowing wave-line motif — thin curved lines drifting across the tile,
-// inspired by the founder-supplied reference art. Drawn from scratch as a
-// seamless vector tile (each line completes exactly one period across the
-// tile width so it repeats without a seam). Kept intentionally light so it
-// never competes with real content, but tinted with the brand color and
-// given enough opacity to actually read in light mode, not just dark.
+// Flowing wave-line motif — thin curved lines drifting top-to-bottom across
+// the tile (matching the vertical flow of the founder-supplied reference
+// art, which reads as a portrait wallpaper, not horizontal rows). Drawn
+// from scratch as a seamless vector tile (each line completes exactly one
+// period across the tile height so it repeats without a seam running
+// either direction, including all the way to the bottom of the screen).
+// Kept intentionally light so it never competes with real content, but
+// tinted with the brand color and given enough opacity to actually read in
+// light mode, not just dark.
 const TILE = 140;
 
-const WAVE_LINES: { y: number; amp: number; dir: 1 | -1 }[] = [
-  { y: 14, amp: 7, dir: 1 },
-  { y: 42, amp: 10, dir: -1 },
-  { y: 70, amp: 8, dir: 1 },
-  { y: 98, amp: 10, dir: -1 },
-  { y: 126, amp: 7, dir: 1 },
+const WAVE_LINES: { x: number; amp: number; dir: 1 | -1 }[] = [
+  { x: 14, amp: 7, dir: 1 },
+  { x: 42, amp: 10, dir: -1 },
+  { x: 70, amp: 8, dir: 1 },
+  { x: 98, amp: 10, dir: -1 },
+  { x: 126, amp: 7, dir: 1 },
 ];
 
 function FlowingLinesDefs({ patternId }: { patternId: string }) {
@@ -28,10 +31,10 @@ function FlowingLinesDefs({ patternId }: { patternId: string }) {
       patternUnits="userSpaceOnUse"
     >
       <g fill="none" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round">
-        {WAVE_LINES.map(({ y, amp, dir }) => (
+        {WAVE_LINES.map(({ x, amp, dir }) => (
           <path
-            key={y}
-            d={`M0 ${y} Q ${TILE / 4} ${y - dir * amp} ${TILE / 2} ${y} T ${TILE} ${y}`}
+            key={x}
+            d={`M${x} 0 Q ${x - dir * amp} ${TILE / 4} ${x} ${TILE / 2} T ${x} ${TILE}`}
           />
         ))}
       </g>
