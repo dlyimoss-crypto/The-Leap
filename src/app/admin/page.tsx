@@ -234,8 +234,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           href="/admin"
           className={
             tab === "queue"
-              ? "flex shrink-0 items-center gap-1.5 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
-              : "flex shrink-0 items-center gap-1.5 pb-2 text-sm font-medium text-muted-foreground"
+              ? "flex shrink-0 items-center gap-1.5 rounded-t-md border-b-2 border-primary px-2 -mx-2 pb-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 hover:shadow-sm"
+              : "flex shrink-0 items-center gap-1.5 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
           }
         >
           Moderation queue
@@ -245,8 +245,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           href="/admin?tab=users"
           className={
             tab === "users"
-              ? "shrink-0 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
-              : "shrink-0 pb-2 text-sm font-medium text-muted-foreground"
+              ? "shrink-0 rounded-t-md border-b-2 border-primary px-2 -mx-2 pb-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 hover:shadow-sm"
+              : "shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
           }
         >
           Users
@@ -255,8 +255,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           href="/admin?tab=devotions"
           className={
             tab === "devotions"
-              ? "shrink-0 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
-              : "shrink-0 pb-2 text-sm font-medium text-muted-foreground"
+              ? "shrink-0 rounded-t-md border-b-2 border-primary px-2 -mx-2 pb-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 hover:shadow-sm"
+              : "shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
           }
         >
           Devotions
@@ -265,8 +265,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           href="/admin?tab=books"
           className={
             tab === "books"
-              ? "flex shrink-0 items-center gap-1.5 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
-              : "flex shrink-0 items-center gap-1.5 pb-2 text-sm font-medium text-muted-foreground"
+              ? "flex shrink-0 items-center gap-1.5 rounded-t-md border-b-2 border-primary px-2 -mx-2 pb-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 hover:shadow-sm"
+              : "flex shrink-0 items-center gap-1.5 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
           }
         >
           Books
@@ -276,8 +276,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           href="/admin?tab=churches"
           className={
             tab === "churches"
-              ? "shrink-0 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
-              : "shrink-0 pb-2 text-sm font-medium text-muted-foreground"
+              ? "shrink-0 rounded-t-md border-b-2 border-primary px-2 -mx-2 pb-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 hover:shadow-sm"
+              : "shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
           }
         >
           Churches
@@ -286,8 +286,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           href="/admin?tab=journeys"
           className={
             tab === "journeys"
-              ? "shrink-0 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
-              : "shrink-0 pb-2 text-sm font-medium text-muted-foreground"
+              ? "shrink-0 rounded-t-md border-b-2 border-primary px-2 -mx-2 pb-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 hover:shadow-sm"
+              : "shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
           }
         >
           Journeys
@@ -296,8 +296,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           href="/admin?tab=opportunities"
           className={
             tab === "opportunities"
-              ? "shrink-0 border-b-2 border-primary pb-2 text-sm font-semibold text-primary"
-              : "shrink-0 pb-2 text-sm font-medium text-muted-foreground"
+              ? "shrink-0 rounded-t-md border-b-2 border-primary px-2 -mx-2 pb-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 hover:shadow-sm"
+              : "shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
           }
         >
           Opportunities
