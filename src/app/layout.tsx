@@ -25,9 +25,26 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ["400", "500"],
 });
 
+const SITE_URL = "https://leapgrow.app";
+const SHARE_DESCRIPTION =
+  "A daily companion for prayer, scripture and community — join a global family taking their next step with Christ. Born from Africa. For the world.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "The Leap",
   description: "Your Essential Companion in Christ",
+  openGraph: {
+    title: "The Leap — Your Essential Companion in Christ",
+    description: SHARE_DESCRIPTION,
+    url: SITE_URL,
+    siteName: "The Leap",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "The Leap — Your Essential Companion in Christ",
+    description: SHARE_DESCRIPTION,
+  },
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
