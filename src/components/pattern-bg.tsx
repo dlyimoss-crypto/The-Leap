@@ -49,7 +49,17 @@ const CORNER_POSITION: Record<string, string> = {
   "bottom-right": "100% 100%",
 };
 
-/** Faint flowing-line texture radiating from one corner, fading to nothing. */
+// Same horizontal side, opposite vertical edge — so the corner pattern
+// shows up at the bottom of the screen exactly as it does at the top,
+// instead of fading to nothing partway down on a tall page.
+const CORNER_MIRROR_POSITION: Record<string, string> = {
+  "top-left": "0% 100%",
+  "top-right": "100% 100%",
+  "bottom-left": "0% 0%",
+  "bottom-right": "100% 0%",
+};
+
+/** Faint flowing-line texture radiating from one corner and its mirror at the opposite edge, fading in between. */
 export function PatternCorner({
   corner = "top-right",
   className,
@@ -59,6 +69,8 @@ export function PatternCorner({
 }) {
   const patternId = useId();
   const position = CORNER_POSITION[corner];
+  const mirrorPosition = CORNER_MIRROR_POSITION[corner];
+  const mask = `radial-gradient(circle at ${position}, black 0%, transparent 55%), radial-gradient(circle at ${mirrorPosition}, black 0%, transparent 55%)`;
 
   return (
     <div
@@ -68,8 +80,8 @@ export function PatternCorner({
         className,
       )}
       style={{
-        maskImage: `radial-gradient(circle at ${position}, black 0%, transparent 55%)`,
-        WebkitMaskImage: `radial-gradient(circle at ${position}, black 0%, transparent 55%)`,
+        maskImage: mask,
+        WebkitMaskImage: mask,
       }}
     >
       <svg width="100%" height="100%">
