@@ -6,6 +6,7 @@ import {
   HeartHandshake,
   Compass,
   Library,
+  Flower2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -19,6 +20,13 @@ export type CompanionIntent = {
 // Seed messages are phrased as the user's own request — Companion
 // facilitates, it never leads or claims spiritual authority (CONTEXT.md).
 export const COMPANION_INTENTS: CompanionIntent[] = [
+  {
+    slug: "new-believer",
+    label: "I just prayed to receive Jesus",
+    icon: Flower2,
+    message:
+      "I just prayed to receive Jesus. Where do I begin? I'm not sure yet whether I'm just beginning to follow Jesus, want to understand the Bible, want to learn how to pray, want to grow in my faith, or just have questions about Jesus — can you help me figure out where to start?",
+  },
   {
     slug: "pray",
     label: "Pray with me",

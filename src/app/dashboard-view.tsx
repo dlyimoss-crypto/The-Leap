@@ -19,6 +19,7 @@ import {
   getPrayerMovementDaysLeft,
   type PrayerMovement,
 } from "@/lib/supabase/prayer-movements";
+import { GospelInviteCard } from "@/components/gospel-invite/gospel-invite-card";
 import { signOut } from "./sign-in/actions";
 
 type JourneyProgress = JourneyProgressRow;
@@ -78,6 +79,7 @@ export function DashboardView({
   nextJourney,
   commitmentProgress,
   prayerMovement,
+  showGospelInvite,
 }: {
   journey: JourneyMeta;
   progress: JourneyProgress | null;
@@ -87,21 +89,31 @@ export function DashboardView({
   nextJourney?: NextJourney | null;
   commitmentProgress?: { done: number; total: number } | null;
   prayerMovement?: PrayerMovement | null;
+  showGospelInvite?: boolean;
 }) {
   const firstName = displayName?.split(" ")[0];
 
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-8 overflow-hidden px-6 py-10">
+      <GospelInviteCard
+        shouldShow={!!showGospelInvite}
+        journeyHref={journeyContinueHref(journey.slug, progress)}
+      />
       <PatternCorner corner="top-right" />
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Link href="/profile" aria-label="Edit your profile">
             <Avatar name={displayName} src={avatarUrl} />
           </Link>
-          <p className="font-heading text-lg font-semibold">
-            {greeting()}
-            {firstName ? `, ${firstName}` : ""}
-          </p>
+          <div>
+            <p className="font-heading text-lg font-semibold">
+              {greeting()}
+              {firstName ? `, ${firstName}` : ""}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Take the next step. Grow in Christ. Live His purpose.
+            </p>
+          </div>
         </div>
         <form action={signOut}>
           <Button

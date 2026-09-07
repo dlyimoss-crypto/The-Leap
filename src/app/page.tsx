@@ -29,7 +29,7 @@ export default async function HomePage() {
     getCurrentJourneyState(supabase, user.id),
     supabase
       .from("profiles")
-      .select("display_name, avatar_url")
+      .select("display_name, avatar_url, gospel_invite_shown_at")
       .eq("id", user.id)
       .single(),
     getActiveCommitment(supabase, user.id),
@@ -67,6 +67,7 @@ export default async function HomePage() {
           : null
       }
       prayerMovement={prayerMovement}
+      showGospelInvite={!profile?.gospel_invite_shown_at}
     />
   );
 }
