@@ -13,6 +13,7 @@ import { PatternCorner } from "@/components/pattern-bg";
 import type { JourneyMeta } from "@/lib/content/journeys";
 import type { JourneyProgressRow } from "@/lib/supabase/journey-progress";
 import { journeyContinueHref } from "@/lib/journey-nav";
+import { getJourneyCompleteImage } from "@/lib/journey-complete-image";
 import { signOut } from "./sign-in/actions";
 
 type JourneyProgress = JourneyProgressRow;
@@ -207,7 +208,7 @@ export function DashboardView({
             <div className="size-20 shrink-0 overflow-hidden rounded-2xl bg-muted">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src="/images/journey-trail.jpg"
+                src={getJourneyCompleteImage()}
                 alt=""
                 className="size-full object-cover"
               />
