@@ -134,6 +134,107 @@ export async function deleteDevotion(id: string) {
   revalidatePath("/admin");
 }
 
+function prayerMovementFields(formData: FormData) {
+  const prayer_points = String(formData.get("prayer_points") ?? "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  return {
+    title: String(formData.get("title") ?? "").trim(),
+    scripture_reference:
+      String(formData.get("scripture_reference") ?? "").trim() || null,
+    prayer_points,
+  };
+}
+
+export async function createPrayerMovement(formData: FormData) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase
+    .from("prayer_movements")
+    .insert(prayerMovementFields(formData));
+
+  if (error) {
+    console.error("Failed to create prayer movement", error);
+  }
+
+  revalidatePath("/admin");
+}
+
+export async function updatePrayerMovement(id: string, formData: FormData) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase
+    .from("prayer_movements")
+    .update(prayerMovementFields(formData))
+    .eq("id", id);
+
+  if (error) {
+    console.error("Failed to update prayer movement", error);
+  }
+
+  revalidatePath("/admin");
+}
+
+// Only one movement is featured at a time, so activating one archives
+// whichever was previously active first.
+export async function activatePrayerMovement(id: string) {
+  const { supabase } = await requireAdmin();
+
+  const { error: archiveError } = await supabase
+    .from("prayer_movements")
+    .update({ status: "archived" })
+    .eq("status", "active");
+
+  if (archiveError) {
+    console.error("Failed to archive previous prayer movement", archiveError);
+  }
+
+  const { error } = await supabase
+    .from("prayer_movements")
+    .update({ status: "active" })
+    .eq("id", id);
+
+  if (error) {
+    console.error("Failed to activate prayer movement", error);
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/prayer-room");
+}
+
+export async function archivePrayerMovement(id: string) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase
+    .from("prayer_movements")
+    .update({ status: "archived" })
+    .eq("id", id);
+
+  if (error) {
+    console.error("Failed to archive prayer movement", error);
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/prayer-room");
+}
+
+export async function deletePrayerMovement(id: string) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase
+    .from("prayer_movements")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    console.error("Failed to delete prayer movement", error);
+  }
+
+  revalidatePath("/admin");
+}
+
 export async function approveAuthorApplication(
   applicationId: string,
   userId: string,

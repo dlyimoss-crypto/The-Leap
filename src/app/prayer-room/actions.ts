@@ -83,6 +83,21 @@ export async function markAnswered(prayerRequestId: string, formData: FormData) 
   revalidatePath("/prayer-room");
 }
 
+export async function joinPrayerMovement(movementId: string) {
+  const { supabase, user } = await requireUser();
+
+  const { error } = await supabase.from("prayer_movement_participants").upsert(
+    { movement_id: movementId, user_id: user.id },
+    { onConflict: "movement_id,user_id", ignoreDuplicates: true },
+  );
+
+  if (error) {
+    console.error("Failed to record prayer movement participation", error);
+  }
+
+  revalidatePath("/prayer-room");
+}
+
 export async function reportPrayerRequest(prayerRequestId: string) {
   const { supabase } = await requireUser();
 

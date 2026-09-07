@@ -8,6 +8,7 @@ import {
   Church,
   Compass,
   HeartHandshake,
+  Heart,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,11 @@ import {
   updateChurch,
   updateDevotion,
   updateServiceOpportunity,
+  createPrayerMovement,
+  updatePrayerMovement,
+  activatePrayerMovement,
+  archivePrayerMovement,
+  deletePrayerMovement,
 } from "./actions";
 import {
   createJourney,
@@ -59,7 +65,8 @@ type Tab =
   | "books"
   | "churches"
   | "journeys"
-  | "opportunities";
+  | "opportunities"
+  | "prayer";
 
 type ChurchRow = {
   id: string;
@@ -150,6 +157,14 @@ type JourneyRow = {
   status: string;
 };
 
+type PrayerMovementRow = {
+  id: string;
+  title: string;
+  scripture_reference: string | null;
+  prayer_points: string[];
+  status: string;
+};
+
 type JourneyDayRow = {
   day_number: number;
   title: string;
@@ -187,7 +202,9 @@ export default async function AdminPage(props: PageProps<"/admin">) {
               ? "journeys"
               : tabParam === "opportunities"
                 ? "opportunities"
-                : "queue";
+                : tabParam === "prayer"
+                  ? "prayer"
+                  : "queue";
   const editIdParam = Array.isArray(searchParams.edit)
     ? searchParams.edit[0]
     : searchParams.edit;
@@ -302,6 +319,16 @@ export default async function AdminPage(props: PageProps<"/admin">) {
         >
           Opportunities
         </Link>
+        <Link
+          href="/admin?tab=prayer"
+          className={
+            tab === "prayer"
+              ? "shrink-0 rounded-t-md border-b-2 border-primary px-2 -mx-2 pb-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 hover:shadow-sm"
+              : "shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
+          }
+        >
+          Prayer
+        </Link>
       </div>
 
       {tab === "queue" ? (
@@ -316,6 +343,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
         <ChurchesAdmin editId={editIdParam} />
       ) : tab === "opportunities" ? (
         <OpportunitiesAdmin editId={editIdParam} />
+      ) : tab === "prayer" ? (
+        <PrayerMovementsAdmin editId={editIdParam} />
       ) : (
         <JourneysAdmin
           editId={editIdParam}
@@ -1386,6 +1415,165 @@ async function OpportunitiesAdmin({
             </div>
           ))}
         </div>
+      )}
+    </div>
+  );
+}
+
+async function PrayerMovementsAdmin({
+  editId,
+}: {
+  editId: string | undefined;
+}) {
+  const supabase = await createClient();
+
+  const { data: movements, error } = await supabase
+    .from("prayer_movements")
+    .select("id, title, scripture_reference, prayer_points, status")
+    .order("created_at", { ascending: false })
+    .returns<PrayerMovementRow[]>();
+
+  if (error) {
+    console.error("Failed to load prayer movements", error);
+  }
+
+  const rows = movements ?? [];
+  const editing = editId ? rows.find((m) => m.id === editId) : undefined;
+
+  const active = rows.filter((m) => m.status === "active");
+  const drafts = rows.filter((m) => m.status === "draft");
+  const archived = rows.filter((m) => m.status === "archived");
+
+  return (
+    <div className="space-y-6">
+      <form
+        action={
+          editing
+            ? updatePrayerMovement.bind(null, editing.id)
+            : createPrayerMovement
+        }
+        className="space-y-3 rounded-xl border bg-card p-4"
+      >
+        <p className="text-sm font-semibold">
+          {editing ? "Edit prayer movement" : "New prayer movement"}
+        </p>
+        <div className="space-y-1.5">
+          <Label htmlFor="title">Title</Label>
+          <Input
+            id="title"
+            name="title"
+            placeholder="e.g. Let's pray for Nepal"
+            defaultValue={editing?.title}
+            required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="scripture_reference">
+            Scripture reference (optional)
+          </Label>
+          <Input
+            id="scripture_reference"
+            name="scripture_reference"
+            placeholder="e.g. Psalm 67:1-2"
+            defaultValue={editing?.scripture_reference ?? ""}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="prayer_points">Prayer points (one per line)</Label>
+          <Textarea
+            id="prayer_points"
+            name="prayer_points"
+            rows={4}
+            placeholder={"Pray for open doors for the gospel\nPray for peace and safety\nPray for the local church there"}
+            defaultValue={editing?.prayer_points.join("\n") ?? ""}
+          />
+        </div>
+        <div className="flex justify-end gap-2">
+          {editing && (
+            <Button
+              render={<Link href="/admin?tab=prayer" />}
+              nativeButton={false}
+              type="button"
+              variant="ghost"
+              size="sm"
+            >
+              Cancel
+            </Button>
+          )}
+          <Button type="submit" size="sm">
+            {editing ? "Save changes" : "Create movement"}
+          </Button>
+        </div>
+      </form>
+
+      {rows.length === 0 && (
+        <div className="flex flex-col items-center gap-3 py-12 text-center">
+          <Heart className="size-8 text-muted-foreground/50" />
+          <p className="text-sm text-muted-foreground">
+            No prayer movements yet — create the first one above.
+          </p>
+        </div>
+      )}
+
+      {(
+        [
+          ["Active", active],
+          ["Drafts", drafts],
+          ["Archived", archived],
+        ] as const
+      ).map(
+        ([label, group]) =>
+          group.length > 0 && (
+            <div key={label} className="space-y-2">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {label} — {group.length}
+              </p>
+              <div className="divide-y rounded-xl border bg-card">
+                {group.map((m) => (
+                  <div
+                    key={m.id}
+                    className="flex items-center justify-between gap-3 p-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">{m.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {m.prayer_points.length} prayer point
+                        {m.prayer_points.length === 1 ? "" : "s"}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 flex-wrap justify-end gap-2">
+                      <Button
+                        render={<Link href={`/admin?tab=prayer&edit=${m.id}`} />}
+                        nativeButton={false}
+                        size="xs"
+                        variant="outline"
+                      >
+                        Edit
+                      </Button>
+                      {m.status === "active" ? (
+                        <form action={archivePrayerMovement.bind(null, m.id)}>
+                          <Button type="submit" size="xs" variant="ghost">
+                            Archive
+                          </Button>
+                        </form>
+                      ) : (
+                        <form action={activatePrayerMovement.bind(null, m.id)}>
+                          <Button type="submit" size="xs">
+                            Activate
+                          </Button>
+                        </form>
+                      )}
+                      <form action={deletePrayerMovement.bind(null, m.id)}>
+                        <Button type="submit" size="xs" variant="ghost">
+                          Delete
+                        </Button>
+                      </form>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ),
       )}
     </div>
   );

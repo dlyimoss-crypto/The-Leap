@@ -4,7 +4,12 @@ import { redirect } from "next/navigation";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
 import { createClient } from "@/lib/supabase/server";
+import {
+  getActivePrayerMovement,
+  getPrayerMovementParticipation,
+} from "@/lib/supabase/prayer-movements";
 import { PrayerComposer } from "./prayer-composer";
+import { PrayerMovementCard } from "./prayer-movement-card";
 import {
   PrayerRequestCard,
   type PrayerRequestRow,
@@ -50,6 +55,11 @@ export default async function PrayerRoomPage(
   if (!user) {
     redirect("/sign-in");
   }
+
+  const activeMovement = await getActivePrayerMovement(supabase);
+  const movementParticipation = activeMovement
+    ? await getPrayerMovementParticipation(supabase, activeMovement.id, user.id)
+    : null;
 
   const selectColumns =
     "id, user_id, body, visibility, is_anonymous, status, testimony, created_at, profiles(display_name), prayer_responses(count)";
@@ -109,6 +119,14 @@ export default async function PrayerRoomPage(
       <PatternBorder />
       <BackLink href="/connect" label="Connect" />
       <h1 className="text-2xl font-heading font-semibold">Prayer Room</h1>
+
+      {activeMovement && movementParticipation && (
+        <PrayerMovementCard
+          movement={activeMovement}
+          participantCount={movementParticipation.count}
+          hasPrayed={movementParticipation.hasPrayed}
+        />
+      )}
 
       <div className="flex gap-4 border-b">
         {TABS.map(({ key, label }) => (
