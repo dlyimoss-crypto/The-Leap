@@ -21,12 +21,12 @@ export function WelcomeView() {
         <Link
           href="/sign-in?mode=sign-up"
           aria-label="Get Started"
-          className="absolute inset-x-[14.7%] top-[75.7%] h-[5.1%] rounded-full outline-offset-2 focus-visible:outline-2 focus-visible:outline-white"
+          className="absolute inset-x-[14.7%] top-[74.4%] h-[5.3%] rounded-full outline-offset-2 focus-visible:outline-2 focus-visible:outline-white"
         />
         <Link
           href="/sign-in"
           aria-label="I already have an account"
-          className="absolute inset-x-[14.7%] top-[82.0%] h-[5.1%] rounded-full outline-offset-2 focus-visible:outline-2 focus-visible:outline-white"
+          className="absolute inset-x-[14.7%] top-[81.0%] h-[5.3%] rounded-full outline-offset-2 focus-visible:outline-2 focus-visible:outline-white"
         />
       </div>
     </main>
