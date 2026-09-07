@@ -1,16 +1,21 @@
 import { redirect } from "next/navigation";
-import { CheckCircle2, Compass, Flag } from "lucide-react";
+import { CheckCircle2, Circle, Compass, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { HubCard } from "@/components/hub-card";
 import { BackLink } from "@/components/back-link";
 import { PatternCorner } from "@/components/pattern-bg";
 import { createClient } from "@/lib/supabase/server";
 import {
+  COMMITMENT_ITEMS,
+  commitmentItemsDone,
   getActiveCommitment,
   getCommitmentHistory,
 } from "@/lib/supabase/commitments";
-import { createCommitment, completeCommitment } from "./actions";
+import {
+  createCommitment,
+  completeCommitment,
+  toggleCommitmentItem,
+} from "./actions";
 
 function formatWeekOf(weekOf: string) {
   return new Date(`${weekOf}T00:00:00`).toLocaleDateString("en-US", {
@@ -33,6 +38,9 @@ export default async function CommitPage() {
     getActiveCommitment(supabase, user.id),
     getCommitmentHistory(supabase, user.id),
   ]);
+
+  const doneCount = active ? commitmentItemsDone(active) : 0;
+  const allDone = doneCount === COMMITMENT_ITEMS.length;
 
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-6 overflow-hidden px-6 py-10">
@@ -63,46 +71,90 @@ export default async function CommitPage() {
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 This week&apos;s commitment
               </p>
-              <p className="font-heading text-lg font-semibold text-foreground text-balance">
-                {active.body}
-              </p>
               <p className="text-xs text-muted-foreground">
-                Week of {formatWeekOf(active.week_of)}
+                Week of {formatWeekOf(active.week_of)} — {doneCount} of{" "}
+                {COMMITMENT_ITEMS.length} kept
               </p>
             </div>
           </div>
 
+          <div className="divide-y divide-border overflow-hidden rounded-xl border bg-card">
+            {COMMITMENT_ITEMS.map((item) => {
+              const checked = active[item.key];
+              return (
+                <form
+                  key={item.key}
+                  action={toggleCommitmentItem.bind(
+                    null,
+                    active.id,
+                    item.key,
+                    !checked,
+                  )}
+                >
+                  <button
+                    type="submit"
+                    className="flex w-full items-center gap-3 p-3 text-left hover:bg-muted/50"
+                  >
+                    {checked ? (
+                      <CheckCircle2 className="size-5 shrink-0 text-primary" />
+                    ) : (
+                      <Circle className="size-5 shrink-0 text-muted-foreground" />
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium">{item.label}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.detail}
+                      </p>
+                    </div>
+                  </button>
+                </form>
+              );
+            })}
+          </div>
+
           <form action={completeCommitment.bind(null, active.id)}>
-            <Button type="submit" size="lg" className="w-full rounded-full">
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full rounded-full"
+              disabled={!allDone}
+            >
               <CheckCircle2 className="size-4" />
-              Mark as kept
+              {allDone ? "Mark as kept" : `Check all ${COMMITMENT_ITEMS.length} to mark as kept`}
             </Button>
           </form>
         </div>
       ) : (
-        <form
-          action={createCommitment}
-          className="space-y-3 rounded-2xl bg-muted p-5"
-        >
+        <div className="space-y-4 rounded-2xl bg-muted p-5">
           <div className="space-y-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              Set this week&apos;s commitment
+              This week&apos;s commitment
             </p>
             <p className="text-sm text-muted-foreground">
-              One thing you&apos;ll choose to do this week — small enough to
-              actually keep.
+              Three practices, every week — small enough to actually keep.
             </p>
           </div>
-          <Textarea
-            name="body"
-            rows={3}
-            placeholder="e.g. Reading my Bible, 5 paragraphs each day"
-            required
-          />
-          <Button type="submit" size="lg" className="w-full rounded-full">
-            Commit to this
-          </Button>
-        </form>
+
+          <div className="divide-y divide-border overflow-hidden rounded-xl border bg-card">
+            {COMMITMENT_ITEMS.map((item) => (
+              <div key={item.key} className="flex items-center gap-3 p-3">
+                <Circle className="size-5 shrink-0 text-muted-foreground" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{item.label}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {item.detail}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <form action={createCommitment}>
+            <Button type="submit" size="lg" className="w-full rounded-full">
+              Commit to this week
+            </Button>
+          </form>
+        </div>
       )}
 
       {history.length > 0 && (

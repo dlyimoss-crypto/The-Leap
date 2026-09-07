@@ -70,7 +70,7 @@ export function DashboardView({
   displayName,
   avatarUrl,
   nextJourney,
-  commitmentBody,
+  commitmentProgress,
 }: {
   journey: JourneyMeta;
   progress: JourneyProgress | null;
@@ -78,7 +78,7 @@ export function DashboardView({
   displayName: string | null;
   avatarUrl: string | null;
   nextJourney?: NextJourney | null;
-  commitmentBody?: string | null;
+  commitmentProgress?: { done: number; total: number } | null;
 }) {
   const firstName = displayName?.split(" ")[0];
 
@@ -304,10 +304,12 @@ export function DashboardView({
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold">
-            {commitmentBody ? "This week's commitment" : "Make a commitment"}
+            {commitmentProgress ? "This week's commitment" : "Make a commitment"}
           </p>
           <p className="truncate text-xs text-muted-foreground">
-            {commitmentBody ?? "Choose one thing you'll do this week."}
+            {commitmentProgress
+              ? `${commitmentProgress.done} of ${commitmentProgress.total} kept this week`
+              : "Study, pray, and share the gospel this week."}
           </p>
         </div>
       </Link>

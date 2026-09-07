@@ -1,7 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { findAvailableJourneys, findJourneyMeta } from "@/lib/content/journeys-repo";
 import { getCurrentJourneyState } from "@/lib/supabase/journey-progress";
-import { getActiveCommitment } from "@/lib/supabase/commitments";
+import {
+  commitmentItemsDone,
+  COMMITMENT_ITEMS,
+  getActiveCommitment,
+} from "@/lib/supabase/commitments";
 import { WelcomeView } from "./welcome-view";
 import { DashboardView } from "./dashboard-view";
 
@@ -51,7 +55,11 @@ export default async function HomePage() {
       displayName={profile?.display_name ?? null}
       avatarUrl={profile?.avatar_url ?? null}
       nextJourney={nextJourney}
-      commitmentBody={commitment?.body ?? null}
+      commitmentProgress={
+        commitment
+          ? { done: commitmentItemsDone(commitment), total: COMMITMENT_ITEMS.length }
+          : null
+      }
     />
   );
 }
