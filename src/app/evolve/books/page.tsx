@@ -124,9 +124,10 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
                   .data.publicUrl
               : null;
             return (
-              <div
+              <Link
                 key={book.id}
-                className="space-y-2 rounded-xl border bg-card p-3"
+                href={`/evolve/books/${book.id}`}
+                className="space-y-2 rounded-xl border bg-card p-3 transition-colors hover:bg-accent"
               >
                 <div className="flex aspect-[3/4] items-center justify-center overflow-hidden rounded-lg bg-muted">
                   {coverUrl ? (
@@ -151,7 +152,7 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
                     ? `$${(book.price_cents / 100).toFixed(2)}`
                     : "Free"}
                 </Badge>
-              </div>
+              </Link>
             );
           })}
         </div>
