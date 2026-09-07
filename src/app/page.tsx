@@ -6,6 +6,10 @@ import {
   COMMITMENT_ITEMS,
   getActiveCommitment,
 } from "@/lib/supabase/commitments";
+import {
+  getActivePrayerMovement,
+  getPrayerMovementParticipation,
+} from "@/lib/supabase/prayer-movements";
 import { WelcomeView } from "./welcome-view";
 import { DashboardView } from "./dashboard-view";
 
@@ -19,16 +23,25 @@ export default async function HomePage() {
     return <WelcomeView />;
   }
 
-  const [{ progress, currentSession, journeySlug }, { data: profile }, commitment] =
-    await Promise.all([
-      getCurrentJourneyState(supabase, user.id),
-      supabase
-        .from("profiles")
-        .select("display_name, avatar_url")
-        .eq("id", user.id)
-        .single(),
-      getActiveCommitment(supabase, user.id),
-    ]);
+  const [
+    { progress, currentSession, journeySlug },
+    { data: profile },
+    commitment,
+    prayerMovement,
+  ] = await Promise.all([
+    getCurrentJourneyState(supabase, user.id),
+    supabase
+      .from("profiles")
+      .select("display_name, avatar_url")
+      .eq("id", user.id)
+      .single(),
+    getActiveCommitment(supabase, user.id),
+    getActivePrayerMovement(supabase),
+  ]);
+
+  const prayerMovementParticipation = prayerMovement
+    ? await getPrayerMovementParticipation(supabase, prayerMovement.id, user.id)
+    : null;
 
   const journey = await findJourneyMeta(supabase, journeySlug);
   if (!journey) {
@@ -60,6 +73,8 @@ export default async function HomePage() {
           ? { done: commitmentItemsDone(commitment), total: COMMITMENT_ITEMS.length }
           : null
       }
+      prayerMovement={prayerMovement}
+      prayerMovementParticipation={prayerMovementParticipation}
     />
   );
 }

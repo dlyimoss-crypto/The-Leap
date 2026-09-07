@@ -96,6 +96,7 @@ export async function joinPrayerMovement(movementId: string) {
   }
 
   revalidatePath("/prayer-room");
+  revalidatePath("/");
 }
 
 export async function reportPrayerRequest(prayerRequestId: string) {

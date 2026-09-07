@@ -14,6 +14,8 @@ import type { JourneyMeta } from "@/lib/content/journeys";
 import type { JourneyProgressRow } from "@/lib/supabase/journey-progress";
 import { journeyContinueHref } from "@/lib/journey-nav";
 import { getJourneyCompleteImage } from "@/lib/journey-complete-image";
+import type { PrayerMovement } from "@/lib/supabase/prayer-movements";
+import { PrayerMovementCard } from "./prayer-room/prayer-movement-card";
 import { signOut } from "./sign-in/actions";
 
 type JourneyProgress = JourneyProgressRow;
@@ -72,6 +74,8 @@ export function DashboardView({
   avatarUrl,
   nextJourney,
   commitmentProgress,
+  prayerMovement,
+  prayerMovementParticipation,
 }: {
   journey: JourneyMeta;
   progress: JourneyProgress | null;
@@ -80,6 +84,8 @@ export function DashboardView({
   avatarUrl: string | null;
   nextJourney?: NextJourney | null;
   commitmentProgress?: { done: number; total: number } | null;
+  prayerMovement?: PrayerMovement | null;
+  prayerMovementParticipation?: { count: number; hasPrayed: boolean } | null;
 }) {
   const firstName = displayName?.split(" ")[0];
 
@@ -270,6 +276,14 @@ export function DashboardView({
             <ArrowRight className="size-4" />
           </Button>
         </div>
+      )}
+
+      {prayerMovement && prayerMovementParticipation && (
+        <PrayerMovementCard
+          movement={prayerMovement}
+          participantCount={prayerMovementParticipation.count}
+          hasPrayed={prayerMovementParticipation.hasPrayed}
+        />
       )}
 
       <div className="space-y-3">
