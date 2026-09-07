@@ -6,10 +6,7 @@ import {
   COMMITMENT_ITEMS,
   getActiveCommitment,
 } from "@/lib/supabase/commitments";
-import {
-  getActivePrayerMovement,
-  getPrayerMovementParticipation,
-} from "@/lib/supabase/prayer-movements";
+import { getActivePrayerMovement } from "@/lib/supabase/prayer-movements";
 import { WelcomeView } from "./welcome-view";
 import { DashboardView } from "./dashboard-view";
 
@@ -38,10 +35,6 @@ export default async function HomePage() {
     getActiveCommitment(supabase, user.id),
     getActivePrayerMovement(supabase),
   ]);
-
-  const prayerMovementParticipation = prayerMovement
-    ? await getPrayerMovementParticipation(supabase, prayerMovement.id, user.id)
-    : null;
 
   const journey = await findJourneyMeta(supabase, journeySlug);
   if (!journey) {
@@ -74,7 +67,6 @@ export default async function HomePage() {
           : null
       }
       prayerMovement={prayerMovement}
-      prayerMovementParticipation={prayerMovementParticipation}
     />
   );
 }

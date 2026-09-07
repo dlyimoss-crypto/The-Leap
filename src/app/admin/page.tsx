@@ -23,6 +23,7 @@ import { SuggestibleTextarea } from "@/components/admin/suggestible-textarea";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/supabase/authorize";
 import { getDevotionStatus } from "@/lib/devotion";
+import { getPrayerMovementDaysLeft } from "@/lib/supabase/prayer-movements";
 import {
   approveAuthorApplication,
   approveBook,
@@ -165,6 +166,7 @@ type PrayerMovementRow = {
   scripture_reference: string | null;
   prayer_points: string[];
   status: string;
+  active_until: string | null;
 };
 
 type JourneyDayRow = {
@@ -1442,7 +1444,7 @@ async function PrayerMovementsAdmin({
 
   const { data: movements, error } = await supabase
     .from("prayer_movements")
-    .select("id, title, scripture_reference, prayer_points, status")
+    .select("id, title, scripture_reference, prayer_points, status, active_until")
     .order("created_at", { ascending: false })
     .returns<PrayerMovementRow[]>();
 
@@ -1551,9 +1553,18 @@ async function PrayerMovementsAdmin({
                       <p className="text-xs text-muted-foreground">
                         {m.prayer_points.length} prayer point
                         {m.prayer_points.length === 1 ? "" : "s"}
+                        {m.status === "active" &&
+                          (() => {
+                            const daysLeft = getPrayerMovementDaysLeft(
+                              m.active_until,
+                            );
+                            return daysLeft === null
+                              ? " · no expiry"
+                              : ` · ${daysLeft} day${daysLeft === 1 ? "" : "s"} left`;
+                          })()}
                       </p>
                     </div>
-                    <div className="flex shrink-0 flex-wrap justify-end gap-2">
+                    <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
                       <Button
                         render={<Link href={`/admin?tab=prayer&edit=${m.id}`} />}
                         nativeButton={false}
@@ -1569,7 +1580,18 @@ async function PrayerMovementsAdmin({
                           </Button>
                         </form>
                       ) : (
-                        <form action={activatePrayerMovement.bind(null, m.id)}>
+                        <form
+                          action={activatePrayerMovement.bind(null, m.id)}
+                          className="flex items-center gap-1"
+                        >
+                          <Input
+                            name="days"
+                            type="number"
+                            min="1"
+                            defaultValue={7}
+                            aria-label="Days to run"
+                            className="h-6 w-14 px-1.5 text-xs"
+                          />
                           <Button type="submit" size="xs">
                             Activate
                           </Button>

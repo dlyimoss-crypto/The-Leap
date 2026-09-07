@@ -6,18 +6,25 @@ export type PrayerMovement = {
   scripture_reference: string | null;
   prayer_points: string[];
   created_at: string;
+  active_until: string | null;
 };
 
 // The single featured prayer movement, if any — mirrors the "at most one
 // active commitment" pattern so the Prayer Room always has one clear cause
-// to rally around rather than a list to choose from.
+// to rally around rather than a list to choose from. A movement with an
+// `active_until` in the past is treated as expired and excluded here, even
+// though its row is still `status = 'active'` — the admin has to
+// re-activate it (with a fresh day count) to bring it back.
 export async function getActivePrayerMovement(
   supabase: SupabaseClient,
 ): Promise<PrayerMovement | null> {
+  const today = new Date().toISOString().slice(0, 10);
+
   const { data, error } = await supabase
     .from("prayer_movements")
-    .select("id, title, scripture_reference, prayer_points, created_at")
+    .select("id, title, scripture_reference, prayer_points, created_at, active_until")
     .eq("status", "active")
+    .or(`active_until.is.null,active_until.gte.${today}`)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle<PrayerMovement>();
@@ -48,4 +55,22 @@ export async function getPrayerMovementParticipation(
   ]);
 
   return { count: count ?? 0, hasPrayed: !!mine };
+}
+
+// Whole days remaining until (and including) `active_until`, or null if the
+// movement has no expiry. Rounds up so "activated today, 1 day" reads as
+// "1 day left" all day rather than immediately showing 0.
+export function getPrayerMovementDaysLeft(
+  activeUntil: string | null,
+): number | null {
+  if (!activeUntil) {
+    return null;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const end = new Date(`${activeUntil}T00:00:00`);
+  const diffDays = Math.ceil((end.getTime() - today.getTime()) / (24 * 60 * 60 * 1000));
+
+  return Math.max(diffDays + 1, 0);
 }

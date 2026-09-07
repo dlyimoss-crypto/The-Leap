@@ -1,6 +1,9 @@
 import { CheckCircle2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { PrayerMovement } from "@/lib/supabase/prayer-movements";
+import {
+  getPrayerMovementDaysLeft,
+  type PrayerMovement,
+} from "@/lib/supabase/prayer-movements";
 import { joinPrayerMovement } from "./actions";
 
 export function PrayerMovementCard({
@@ -12,12 +15,21 @@ export function PrayerMovementCard({
   participantCount: number;
   hasPrayed: boolean;
 }) {
+  const daysLeft = getPrayerMovementDaysLeft(movement.active_until);
+
   return (
     <div className="space-y-3 rounded-2xl border-2 border-primary/30 bg-card p-4 shadow-sm">
       <div className="space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-          Let&apos;s pray for 5 minutes
-        </p>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+            Let&apos;s pray for 5 minutes
+          </p>
+          {daysLeft !== null && (
+            <p className="shrink-0 text-xs font-medium text-muted-foreground">
+              {daysLeft} day{daysLeft === 1 ? "" : "s"} left
+            </p>
+          )}
+        </div>
         <h2 className="font-heading text-lg font-semibold text-balance">
           {movement.title}
         </h2>

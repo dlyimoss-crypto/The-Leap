@@ -6,6 +6,7 @@ import {
   MessageCircle,
   ArrowRight,
   Flag,
+  HeartHandshake,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -14,8 +15,10 @@ import type { JourneyMeta } from "@/lib/content/journeys";
 import type { JourneyProgressRow } from "@/lib/supabase/journey-progress";
 import { journeyContinueHref } from "@/lib/journey-nav";
 import { getJourneyCompleteImage } from "@/lib/journey-complete-image";
-import type { PrayerMovement } from "@/lib/supabase/prayer-movements";
-import { PrayerMovementCard } from "./prayer-room/prayer-movement-card";
+import {
+  getPrayerMovementDaysLeft,
+  type PrayerMovement,
+} from "@/lib/supabase/prayer-movements";
 import { signOut } from "./sign-in/actions";
 
 type JourneyProgress = JourneyProgressRow;
@@ -75,7 +78,6 @@ export function DashboardView({
   nextJourney,
   commitmentProgress,
   prayerMovement,
-  prayerMovementParticipation,
 }: {
   journey: JourneyMeta;
   progress: JourneyProgress | null;
@@ -85,7 +87,6 @@ export function DashboardView({
   nextJourney?: NextJourney | null;
   commitmentProgress?: { done: number; total: number } | null;
   prayerMovement?: PrayerMovement | null;
-  prayerMovementParticipation?: { count: number; hasPrayed: boolean } | null;
 }) {
   const firstName = displayName?.split(" ")[0];
 
@@ -278,12 +279,28 @@ export function DashboardView({
         </div>
       )}
 
-      {prayerMovement && prayerMovementParticipation && (
-        <PrayerMovementCard
-          movement={prayerMovement}
-          participantCount={prayerMovementParticipation.count}
-          hasPrayed={prayerMovementParticipation.hasPrayed}
-        />
+      {prayerMovement && (
+        <Link
+          href="/prayer-room"
+          className="flex items-center gap-3 rounded-xl border-2 border-primary/30 bg-card p-4 hover:bg-muted/50"
+        >
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+            <HeartHandshake className="size-4" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold">{prayerMovement.title}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {(() => {
+                const daysLeft = getPrayerMovementDaysLeft(
+                  prayerMovement.active_until,
+                );
+                return daysLeft !== null
+                  ? `${daysLeft} day${daysLeft === 1 ? "" : "s"} left — tap to pray`
+                  : "Tap to pray";
+              })()}
+            </p>
+          </div>
+        </Link>
       )}
 
       <div className="space-y-3">

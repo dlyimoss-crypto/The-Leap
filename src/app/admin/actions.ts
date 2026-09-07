@@ -179,8 +179,14 @@ export async function updatePrayerMovement(id: string, formData: FormData) {
 
 // Only one movement is featured at a time, so activating one archives
 // whichever was previously active first.
-export async function activatePrayerMovement(id: string) {
+export async function activatePrayerMovement(id: string, formData: FormData) {
   const { supabase } = await requireAdmin();
+
+  const daysRaw = Number.parseInt(String(formData.get("days") ?? ""), 10);
+  const days = Number.isFinite(daysRaw) && daysRaw > 0 ? daysRaw : 7;
+  const activeUntil = new Date();
+  activeUntil.setDate(activeUntil.getDate() + (days - 1));
+  const activeUntilStr = activeUntil.toISOString().slice(0, 10);
 
   const { error: archiveError } = await supabase
     .from("prayer_movements")
@@ -193,7 +199,7 @@ export async function activatePrayerMovement(id: string) {
 
   const { error } = await supabase
     .from("prayer_movements")
-    .update({ status: "active" })
+    .update({ status: "active", active_until: activeUntilStr })
     .eq("id", id);
 
   if (error) {
@@ -202,6 +208,7 @@ export async function activatePrayerMovement(id: string) {
 
   revalidatePath("/admin");
   revalidatePath("/prayer-room");
+  revalidatePath("/");
 }
 
 export async function archivePrayerMovement(id: string) {
@@ -218,6 +225,7 @@ export async function archivePrayerMovement(id: string) {
 
   revalidatePath("/admin");
   revalidatePath("/prayer-room");
+  revalidatePath("/");
 }
 
 export async function deletePrayerMovement(id: string) {
