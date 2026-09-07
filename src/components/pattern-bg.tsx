@@ -3,45 +3,37 @@
 import { useId } from "react";
 import { cn } from "@/lib/utils";
 
-// Original line-art (a radiating sun-burst medallion, a triangle-zigzag
-// border row, a dashed ring and a scatter of dots — drawn from scratch in
-// the spirit of African textile/Ankara print motifs) — not derived from any
-// licensed asset. Used as a faint watermark texture only; never more than
-// ~10% opacity so it never competes with real content.
-function TribalMotifDefs({ patternId }: { patternId: string }) {
+// Flowing wave-line motif — thin curved lines drifting across the tile,
+// inspired by the founder-supplied reference art. Drawn from scratch as a
+// seamless vector tile (each line completes exactly one period across the
+// tile width so it repeats without a seam). Kept intentionally light so it
+// never competes with real content, but tinted with the brand color and
+// given enough opacity to actually read in light mode, not just dark.
+const TILE = 140;
+
+const WAVE_LINES: { y: number; amp: number; dir: 1 | -1 }[] = [
+  { y: 14, amp: 7, dir: 1 },
+  { y: 42, amp: 10, dir: -1 },
+  { y: 70, amp: 8, dir: 1 },
+  { y: 98, amp: 10, dir: -1 },
+  { y: 126, amp: 7, dir: 1 },
+];
+
+function FlowingLinesDefs({ patternId }: { patternId: string }) {
   return (
     <pattern
       id={patternId}
-      width="120"
-      height="120"
+      width={TILE}
+      height={TILE}
       patternUnits="userSpaceOnUse"
     >
-      <g fill="none" stroke="currentColor" strokeWidth="0.6">
-        {/* sun-burst medallion */}
-        <circle cx="30" cy="30" r="14" />
-        <circle cx="30" cy="30" r="8" />
-        <circle cx="30" cy="30" r="2.2" fill="currentColor" stroke="none" />
-        <line x1="45" y1="30" x2="49" y2="30" />
-        <line x1="40.6" y1="40.6" x2="43.4" y2="43.4" />
-        <line x1="30" y1="45" x2="30" y2="49" />
-        <line x1="19.4" y1="40.6" x2="16.6" y2="43.4" />
-        <line x1="15" y1="30" x2="11" y2="30" />
-        <line x1="19.4" y1="19.4" x2="16.6" y2="16.6" />
-        <line x1="30" y1="15" x2="30" y2="11" />
-        <line x1="40.6" y1="19.4" x2="43.4" y2="16.6" />
-
-        {/* triangle-zigzag row along the tile's top edge */}
-        <path d="M0 6 L7.5 0 L15 6 L22.5 0 L30 6 L37.5 0 L45 6 L52.5 0 L60 6 L67.5 0 L75 6 L82.5 0 L90 6 L97.5 0 L105 6 L112.5 0 L120 6" />
-
-        {/* dashed ring + small secondary ring */}
-        <circle cx="92" cy="90" r="12" strokeDasharray="1.5 3" />
-        <circle cx="88" cy="42" r="6" />
-
-        {/* scattered dots */}
-        <circle cx="10" cy="88" r="1.4" fill="currentColor" stroke="none" />
-        <circle cx="105" cy="18" r="1.4" fill="currentColor" stroke="none" />
-        <circle cx="65" cy="100" r="1.1" fill="currentColor" stroke="none" />
-        <circle cx="14" cy="62" r="1.1" fill="currentColor" stroke="none" />
+      <g fill="none" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round">
+        {WAVE_LINES.map(({ y, amp, dir }) => (
+          <path
+            key={y}
+            d={`M0 ${y} Q ${TILE / 4} ${y - dir * amp} ${TILE / 2} ${y} T ${TILE} ${y}`}
+          />
+        ))}
       </g>
     </pattern>
   );
@@ -54,7 +46,7 @@ const CORNER_POSITION: Record<string, string> = {
   "bottom-right": "100% 100%",
 };
 
-/** Faint tribal-motif texture radiating from one corner, fading to nothing. */
+/** Faint flowing-line texture radiating from one corner, fading to nothing. */
 export function PatternCorner({
   corner = "top-right",
   className,
@@ -69,24 +61,23 @@ export function PatternCorner({
     <div
       aria-hidden
       className={cn(
-        "pointer-events-none absolute inset-0 -z-10 overflow-hidden text-foreground",
+        "pointer-events-none absolute inset-0 -z-10 overflow-hidden text-primary opacity-[0.32] dark:opacity-[0.22]",
         className,
       )}
       style={{
-        opacity: 0.06,
-        maskImage: `radial-gradient(circle at ${position}, black 0%, transparent 45%)`,
-        WebkitMaskImage: `radial-gradient(circle at ${position}, black 0%, transparent 45%)`,
+        maskImage: `radial-gradient(circle at ${position}, black 0%, transparent 55%)`,
+        WebkitMaskImage: `radial-gradient(circle at ${position}, black 0%, transparent 55%)`,
       }}
     >
       <svg width="100%" height="100%">
-        <TribalMotifDefs patternId={patternId} />
+        <FlowingLinesDefs patternId={patternId} />
         <rect width="100%" height="100%" fill={`url(#${patternId})`} />
       </svg>
     </div>
   );
 }
 
-/** Faint tribal-motif band across the top and bottom edges, plain in the middle. */
+/** Faint flowing-line band across the top and bottom edges, plain in the middle. */
 export function PatternBorder({ className }: { className?: string }) {
   const patternId = useId();
   const maskId = useId();
@@ -96,18 +87,17 @@ export function PatternBorder({ className }: { className?: string }) {
     <div
       aria-hidden
       className={cn(
-        "pointer-events-none absolute inset-0 -z-10 overflow-hidden text-foreground",
+        "pointer-events-none absolute inset-0 -z-10 overflow-hidden text-primary opacity-[0.32] dark:opacity-[0.22]",
         className,
       )}
-      style={{ opacity: 0.06 }}
     >
       <svg width="100%" height="100%">
         <defs>
-          <TribalMotifDefs patternId={patternId} />
+          <FlowingLinesDefs patternId={patternId} />
           <linearGradient id={fadeId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="white" stopOpacity="1" />
-            <stop offset="16%" stopColor="white" stopOpacity="0" />
-            <stop offset="84%" stopColor="white" stopOpacity="0" />
+            <stop offset="28%" stopColor="white" stopOpacity="0" />
+            <stop offset="72%" stopColor="white" stopOpacity="0" />
             <stop offset="100%" stopColor="white" stopOpacity="1" />
           </linearGradient>
           <mask id={maskId}>
