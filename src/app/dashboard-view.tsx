@@ -210,7 +210,7 @@ export function DashboardView({
         </div>
       )}
 
-      {progress?.completed_at && (
+      {progress?.completed_at && !nextJourney && (
         <div className="space-y-4 rounded-2xl bg-muted p-5">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 space-y-1">
@@ -256,40 +256,25 @@ export function DashboardView({
             <ArrowRight className="size-4" />
           </Button>
 
-          {!nextJourney && (
-            <Link
-              href="/evolve/journeys"
-              className="mx-auto block w-fit rounded-full bg-background px-4 py-1.5 text-center text-xs font-medium text-foreground hover:bg-background/80"
-            >
-              Browse other journeys
-            </Link>
-          )}
+          <Link
+            href="/evolve/journeys"
+            className="mx-auto block w-fit rounded-full bg-background px-4 py-1.5 text-center text-xs font-medium text-foreground hover:bg-background/80"
+          >
+            Browse other journeys
+          </Link>
         </div>
       )}
 
       {progress?.completed_at && nextJourney && (
-        <div className="space-y-3 rounded-2xl border-2 border-dashed border-primary/30 bg-card p-5">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-              Take your next Leap
-            </p>
-            <h2 className="font-heading text-xl font-bold text-foreground text-balance">
-              {nextJourney.title}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {nextJourney.purpose}
-            </p>
-          </div>
-          <Button
-            render={<Link href={`/journeys/${nextJourney.slug}`} />}
-            nativeButton={false}
-            size="lg"
-            className="w-full rounded-full"
-          >
-            Start this journey
-            <ArrowRight className="size-4" />
-          </Button>
-        </div>
+        <Link
+          href={`/journeys/${nextJourney.slug}`}
+          className="flex items-center justify-between gap-3 rounded-2xl border-2 border-dashed border-primary/30 bg-card px-5 py-4 hover:bg-muted/50"
+        >
+          <span className="font-heading text-base font-bold text-foreground">
+            Take your next Leap
+          </span>
+          <ArrowRight className="size-4 shrink-0 text-primary" />
+        </Link>
       )}
 
       {prayerMovement && (
