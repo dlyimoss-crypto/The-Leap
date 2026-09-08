@@ -257,7 +257,7 @@ export function DashboardView({
           </Button>
 
           <Link
-            href="/evolve/journeys"
+            href="/commit/journeys"
             className="mx-auto block w-fit rounded-full bg-background px-4 py-1.5 text-center text-xs font-medium text-foreground hover:bg-background/80"
           >
             Browse other journeys
