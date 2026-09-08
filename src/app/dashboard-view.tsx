@@ -31,6 +31,19 @@ function greeting() {
   return "Good evening";
 }
 
+// A journey's purpose can run to several sentences — fine for its own
+// overview page, too much for a teaser line on a card. Cut to a whole word
+// so a full-length purpose (like Faith in Christ's) still passes through
+// untouched.
+function truncate(text: string, maxLength: number): string {
+  if (text.length <= maxLength) {
+    return text;
+  }
+  const cut = text.slice(0, maxLength);
+  const lastSpace = cut.lastIndexOf(" ");
+  return `${cut.slice(0, lastSpace > 0 ? lastSpace : maxLength)}…`;
+}
+
 // A day-at-a-time line rather than a filled pill: the marker sits at the
 // current day's position along the track, so progress reads as "here's
 // where you are on the plan" instead of a raw percentage.
@@ -222,7 +235,7 @@ export function DashboardView({
               </h1>
               <p className="text-sm text-muted-foreground">
                 {nextJourney
-                  ? `${nextJourney.title} — ${nextJourney.purpose}`
+                  ? `${nextJourney.title} — ${truncate(nextJourney.purpose, 100)}`
                   : "You've begun the journey of following Christ. This is only the beginning."}
               </p>
             </div>
