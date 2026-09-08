@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { ArrowLeft, ArrowRight, Library, PenLine, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/authorize";
 import {
   applyToBeAuthor,
   createBookSubmission,
@@ -73,14 +72,7 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
       ? searchParams.apply[0]
       : searchParams.apply) === "1";
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase, user } = await requireUser();
 
   const { data: profile } = await supabase
     .from("profiles")

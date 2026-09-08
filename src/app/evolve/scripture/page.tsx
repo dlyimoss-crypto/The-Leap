@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Bookmark, BookmarkCheck, Search, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ComingSoon } from "@/components/coming-soon";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/authorize";
 import {
   getScripture,
   listCuratedReferences,
@@ -40,14 +39,7 @@ export default async function ScripturePage(
   const q = (Array.isArray(searchParams.q) ? searchParams.q[0] : searchParams.q) ?? "";
   const ref = Array.isArray(searchParams.ref) ? searchParams.ref[0] : searchParams.ref;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase, user } = await requireUser();
 
   const { data: bookmarkRows, error } = await supabase
     .from("scripture_bookmarks")

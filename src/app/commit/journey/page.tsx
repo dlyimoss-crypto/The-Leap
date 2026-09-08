@@ -1,21 +1,13 @@
-import { redirect } from "next/navigation";
 import { Compass, Map } from "lucide-react";
 import { HubCard } from "@/components/hub-card";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/authorize";
 import { getCurrentJourneyState } from "@/lib/supabase/journey-progress";
 import { journeyContinueHref } from "@/lib/journey-nav";
 
 export default async function JourneyChooserPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase, user } = await requireUser();
 
   const { progress, journeySlug } = await getCurrentJourneyState(
     supabase,

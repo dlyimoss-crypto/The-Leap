@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { ArrowRight, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/authorize";
 import { findAvailableJourneys } from "@/lib/content/journeys-repo";
 import { journeyContinueHref } from "@/lib/journey-nav";
 import type { JourneyProgressRow } from "@/lib/supabase/journey-progress";
@@ -12,14 +11,7 @@ import type { JourneyProgressRow } from "@/lib/supabase/journey-progress";
 type ProgressBySlugRow = JourneyProgressRow & { journey_slug: string };
 
 export default async function BrowseJourneysPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase, user } = await requireUser();
 
   const [journeys, { data: progressRows }] = await Promise.all([
     findAvailableJourneys(supabase),

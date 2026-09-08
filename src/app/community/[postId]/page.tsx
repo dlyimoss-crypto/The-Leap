@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { PatternBorder } from "@/components/pattern-bg";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/authorize";
 import { addComment } from "../actions";
 
 type PostWithAuthor = {
@@ -28,14 +28,7 @@ export default async function PostDetailPage(
   const searchParams = await props.searchParams;
   const showCrisisBanner = searchParams.crisis === "1";
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase, user } = await requireUser();
 
   const [{ data: post }, { data: comments }, { data: blocks }] =
     await Promise.all([

@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { ArrowLeft, Church, Mail, MapPin, Users2 } from "lucide-react";
 import { CopyButton } from "@/components/copy-button";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/authorize";
 
 type ChurchRow = {
   id: string;
@@ -26,14 +25,7 @@ export default async function ChurchesPage(
     ? searchParams.id[0]
     : searchParams.id;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase } = await requireUser();
 
   const { data: churches } = await supabase
     .from("churches")

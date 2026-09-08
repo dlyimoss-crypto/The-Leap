@@ -1,9 +1,8 @@
 import { HeartHandshake } from "lucide-react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/authorize";
 import {
   getActivePrayerMovement,
   getPrayerMovementParticipation,
@@ -47,14 +46,7 @@ export default async function PrayerRoomPage(
     tabParam === "testimonies" || tabParam === "mine" ? tabParam : "requests";
   const showCrisisBanner = searchParams.crisis === "1";
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase, user } = await requireUser();
 
   const activeMovement = await getActivePrayerMovement(supabase);
   const movementParticipation = activeMovement

@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Sparkles } from "lucide-react";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/authorize";
 
 type DevotionRow = {
   id: string;
@@ -33,14 +32,7 @@ export default async function DevotionPage(
     ? searchParams.id[0]
     : searchParams.id;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase } = await requireUser();
 
   const today = new Date().toISOString().slice(0, 10);
 

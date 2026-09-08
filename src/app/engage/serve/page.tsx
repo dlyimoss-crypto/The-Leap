@@ -1,9 +1,8 @@
-import { redirect } from "next/navigation";
 import { HeartHandshake, Mail, MapPin } from "lucide-react";
 import { CopyButton } from "@/components/copy-button";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/authorize";
 
 type OpportunityRow = {
   id: string;
@@ -17,14 +16,7 @@ type OpportunityRow = {
 };
 
 export default async function ServePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase } = await requireUser();
 
   const { data: opportunities, error } = await supabase
     .from("service_opportunities")

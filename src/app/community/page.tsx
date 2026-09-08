@@ -1,8 +1,7 @@
 import { Users } from "lucide-react";
-import { redirect } from "next/navigation";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/authorize";
 import { getCommunityPrompt } from "@/lib/content/community-prompt";
 import { Composer } from "./composer";
 import { PostCard, type PostRow } from "./post-card";
@@ -23,14 +22,7 @@ export default async function CommunityPage(
   const searchParams = await props.searchParams;
   const showCrisisBanner = searchParams.crisis === "1";
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase, user } = await requireUser();
 
   const today = new Date().toISOString().slice(0, 10);
   const prompt = getCommunityPrompt(today);

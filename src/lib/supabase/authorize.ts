@@ -1,11 +1,42 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "./server";
 
-export async function requireUser() {
+/**
+ * A page's root layout and the page itself each need the current user, and
+ * layout can't pass data down into the page it wraps — so without dedup
+ * every request paid for auth.getUser()'s network round trip (a real call to
+ * Supabase Auth, not a local JWT decode) two or three times over. `cache()`
+ * makes every caller within one request share the same in-flight call.
+ */
+export const getAuthedUser = cache(async () => {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  return { supabase, user };
+});
+
+/**
+ * Same dedup, for the profile row that authorization checks (role,
+ * is_banned) live on — layout's admin-nav check and a page's own
+ * requireActiveUser/requireAdmin call used to each run their own separate
+ * query for the same row.
+ */
+export const getProfile = cache(async (userId: string) => {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("role, is_banned")
+    .eq("id", userId)
+    .maybeSingle();
+
+  return data;
+});
+
+export async function requireUser() {
+  const { supabase, user } = await getAuthedUser();
 
   if (!user) {
     redirect("/sign-in");
@@ -22,13 +53,9 @@ export async function requireUser() {
 export async function requireActiveUser(redirectTo: string) {
   const { supabase, user } = await requireUser();
 
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("is_banned")
-    .eq("id", user.id)
-    .single();
+  const profile = await getProfile(user.id);
 
-  if (error || profile?.is_banned) {
+  if (!profile || profile.is_banned) {
     redirect(redirectTo);
   }
 
@@ -42,13 +69,9 @@ export async function requireActiveUser(redirectTo: string) {
 export async function requireAdmin(redirectTo = "/") {
   const { supabase, user } = await requireUser();
 
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
+  const profile = await getProfile(user.id);
 
-  if (error || profile?.role !== "admin") {
+  if (!profile || profile.role !== "admin") {
     redirect(redirectTo);
   }
 

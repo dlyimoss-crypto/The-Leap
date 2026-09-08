@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { getAuthedUser } from "@/lib/supabase/authorize";
 import { findAvailableJourneys, findJourneyMeta } from "@/lib/content/journeys-repo";
 import { getCurrentJourneyState } from "@/lib/supabase/journey-progress";
 import {
@@ -11,10 +11,7 @@ import { WelcomeView } from "./welcome-view";
 import { DashboardView } from "./dashboard-view";
 
 export default async function HomePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getAuthedUser();
 
   if (!user) {
     return <WelcomeView />;

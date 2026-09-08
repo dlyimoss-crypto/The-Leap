@@ -1,10 +1,9 @@
-import { redirect } from "next/navigation";
 import { CheckCircle2, Circle, Compass, Flag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HubCard } from "@/components/hub-card";
 import { BackLink } from "@/components/back-link";
 import { PatternCorner } from "@/components/pattern-bg";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/authorize";
 import {
   COMMITMENT_ITEMS,
   commitmentItemsDone,
@@ -25,14 +24,7 @@ function formatWeekOf(weekOf: string) {
 }
 
 export default async function CommitPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase, user } = await requireUser();
 
   const [active, history] = await Promise.all([
     getActiveCommitment(supabase, user.id),

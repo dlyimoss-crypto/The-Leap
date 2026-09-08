@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { PatternBorder } from "@/components/pattern-bg";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/authorize";
 import { findJourneyMeta } from "@/lib/content/journeys-repo";
 
 export default async function JourneyOverviewPage(
@@ -10,14 +10,7 @@ export default async function JourneyOverviewPage(
 ) {
   const { slug } = await props.params;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase } = await requireUser();
 
   const journey = await findJourneyMeta(supabase, slug);
 

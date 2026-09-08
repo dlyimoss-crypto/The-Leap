@@ -1,19 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/authorize";
 import { COMMITMENT_BODY, COMMITMENT_ITEMS } from "@/lib/supabase/commitments";
 
 export async function createCommitment() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase, user } = await requireUser();
 
   const { error } = await supabase
     .from("commitments")
@@ -43,14 +35,7 @@ export async function toggleCommitmentItem(
     return;
   }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase, user } = await requireUser();
 
   const { error } = await supabase
     .from("commitments")
@@ -71,14 +56,7 @@ export async function toggleCommitmentItem(
 // disables this button until they're all ticked, but a client can't be
 // trusted to enforce that on its own.
 export async function completeCommitment(id: string) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase, user } = await requireUser();
 
   const { error } = await supabase
     .from("commitments")

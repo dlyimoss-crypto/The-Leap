@@ -1,10 +1,9 @@
-import { redirect } from "next/navigation";
 import { BookOpen, Compass, HeartHandshake, Send, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { PatternBorder } from "@/components/pattern-bg";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/authorize";
 import { getCompanionIntent } from "@/lib/companion-intents";
 import { sendMessage } from "./actions";
 
@@ -40,14 +39,7 @@ export default async function CompanionPage(
     : searchParams.intent;
   const intent = getCompanionIntent(intentParam);
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase, user } = await requireUser();
 
   const { data: messages, error } = await supabase
     .from("companion_messages")
