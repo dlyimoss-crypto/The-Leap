@@ -218,11 +218,12 @@ export function DashboardView({
                 Journey Complete
               </p>
               <h1 className="font-heading text-2xl font-bold text-foreground text-balance">
-                {journey.completionTitle}
+                {nextJourney ? "Welcome to the Next Leap" : journey.completionTitle}
               </h1>
               <p className="text-sm text-muted-foreground">
-                You&apos;ve begun the journey of following Christ. This is
-                only the beginning.
+                {nextJourney
+                  ? `${nextJourney.title} — ${nextJourney.purpose}`
+                  : "You've begun the journey of following Christ. This is only the beginning."}
               </p>
             </div>
             <div className="size-20 shrink-0 overflow-hidden rounded-2xl bg-muted">
@@ -246,7 +247,15 @@ export function DashboardView({
           </div>
 
           <Button
-            render={<Link href={journeyContinueHref(journey.slug, progress)} />}
+            render={
+              <Link
+                href={
+                  nextJourney
+                    ? `/journeys/${nextJourney.slug}`
+                    : journeyContinueHref(journey.slug, progress)
+                }
+              />
+            }
             nativeButton={false}
             variant="outline"
             size="lg"
@@ -262,31 +271,6 @@ export function DashboardView({
           >
             Browse other journeys
           </Link>
-        </div>
-      )}
-
-      {progress?.completed_at && nextJourney && (
-        <div className="space-y-3 rounded-2xl border-2 border-dashed border-primary/30 bg-card p-5">
-          <div className="space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-              Take your next Leap
-            </p>
-            <h2 className="font-heading text-xl font-bold text-foreground text-balance">
-              {nextJourney.title}
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              {nextJourney.purpose}
-            </p>
-          </div>
-          <Button
-            render={<Link href={`/journeys/${nextJourney.slug}`} />}
-            nativeButton={false}
-            size="lg"
-            className="w-full rounded-full"
-          >
-            Start this journey
-            <ArrowRight className="size-4" />
-          </Button>
         </div>
       )}
 
