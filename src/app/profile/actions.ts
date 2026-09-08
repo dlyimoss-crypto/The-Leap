@@ -21,6 +21,28 @@ export async function updateDisplayName(formData: FormData) {
   revalidatePath("/");
 }
 
+export async function updatePreferredLanguage(formData: FormData) {
+  const { supabase, user } = await requireActiveUser("/profile");
+
+  const preferredLanguage = String(formData.get("preferred_language") ?? "");
+  if (preferredLanguage !== "en" && preferredLanguage !== "sw") {
+    return;
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ preferred_language: preferredLanguage })
+    .eq("id", user.id);
+
+  if (error) {
+    console.error("Failed to update preferred language", error);
+  }
+
+  // Locale affects every route's chrome (nav, dashboard, companion, etc.),
+  // not just this page — purge everything rather than a couple of paths.
+  revalidatePath("/", "layout");
+}
+
 export async function updateAvatar(formData: FormData) {
   const { supabase, user } = await requireActiveUser("/profile");
 

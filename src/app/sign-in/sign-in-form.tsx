@@ -9,6 +9,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { signIn, signUp, type AuthState } from "./actions";
 
 const initialState: AuthState = {};
@@ -17,8 +18,10 @@ type Mode = "sign-in" | "sign-up";
 
 export function SignInForm({
   initialMode = "sign-in",
+  dict,
 }: {
   initialMode?: Mode;
+  dict: Dictionary["signIn"];
 }) {
   const [mode, setMode] = useState<Mode>(initialMode);
   const isSignIn = mode === "sign-in";
@@ -26,12 +29,12 @@ export function SignInForm({
   return (
     <div className="flex w-full max-w-sm flex-col items-center gap-6">
       <h1 className="text-2xl font-heading font-semibold">
-        {isSignIn ? "Welcome back" : "Create your account"}
+        {isSignIn ? dict.welcomeBack : dict.createAccount}
       </h1>
 
       {/* Keyed by mode so useActionState resets — otherwise an error from
           the sign-in attempt would linger after switching to sign-up. */}
-      <AuthFields key={mode} mode={mode} />
+      <AuthFields key={mode} mode={mode} dict={dict} />
 
       <Button
         type="button"
@@ -39,15 +42,19 @@ export function SignInForm({
         size="sm"
         onClick={() => setMode(isSignIn ? "sign-up" : "sign-in")}
       >
-        {isSignIn
-          ? "New here? Create an account"
-          : "Already have an account? Sign in"}
+        {isSignIn ? dict.newHere : dict.alreadyHaveAccount}
       </Button>
     </div>
   );
 }
 
-function AuthFields({ mode }: { mode: Mode }) {
+function AuthFields({
+  mode,
+  dict,
+}: {
+  mode: Mode;
+  dict: Dictionary["signIn"];
+}) {
   const isSignIn = mode === "sign-in";
   const [state, formAction, pending] = useActionState(
     isSignIn ? signIn : signUp,
@@ -59,12 +66,12 @@ function AuthFields({ mode }: { mode: Mode }) {
       <FieldGroup>
         {!isSignIn && (
           <Field>
-            <FieldLabel htmlFor="displayName">Name</FieldLabel>
+            <FieldLabel htmlFor="displayName">{dict.name}</FieldLabel>
             <Input id="displayName" name="displayName" autoComplete="name" />
           </Field>
         )}
         <Field>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
+          <FieldLabel htmlFor="email">{dict.email}</FieldLabel>
           <Input
             id="email"
             name="email"
@@ -74,7 +81,7 @@ function AuthFields({ mode }: { mode: Mode }) {
           />
         </Field>
         <Field>
-          <FieldLabel htmlFor="password">Password</FieldLabel>
+          <FieldLabel htmlFor="password">{dict.password}</FieldLabel>
           <Input
             id="password"
             name="password"
@@ -86,7 +93,7 @@ function AuthFields({ mode }: { mode: Mode }) {
         </Field>
         {state.error && <FieldError>{state.error}</FieldError>}
         <Button type="submit" className="w-full" disabled={pending}>
-          {isSignIn ? "Sign in" : "Create account"}
+          {isSignIn ? dict.signInButton : dict.createAccountButton}
         </Button>
       </FieldGroup>
     </form>

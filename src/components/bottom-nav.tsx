@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Users, Flag, Sprout, Globe, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 
 // Four Core Movements nav (ticket 10) — Connect/Evolve's real sub-destinations
 // live outside their own hub's URL prefix (e.g. /community, /journeys), so
@@ -11,13 +12,13 @@ import { cn } from "@/lib/utils";
 const BASE_ITEMS = [
   {
     href: "/",
-    label: "Home",
+    labelKey: "home",
     icon: Home,
     isActive: (pathname: string) => pathname === "/",
   },
   {
     href: "/connect",
-    label: "Connect",
+    labelKey: "connect",
     icon: Users,
     isActive: (pathname: string) =>
       pathname.startsWith("/connect") ||
@@ -26,20 +27,20 @@ const BASE_ITEMS = [
   },
   {
     href: "/commit",
-    label: "Commit",
+    labelKey: "commit",
     icon: Flag,
     isActive: (pathname: string) =>
       pathname.startsWith("/commit") || pathname.startsWith("/journeys"),
   },
   {
     href: "/evolve",
-    label: "Evolve",
+    labelKey: "evolve",
     icon: Sprout,
     isActive: (pathname: string) => pathname.startsWith("/evolve"),
   },
   {
     href: "/engage",
-    label: "Engage",
+    labelKey: "engage",
     icon: Globe,
     isActive: (pathname: string) => pathname.startsWith("/engage"),
   },
@@ -47,12 +48,18 @@ const BASE_ITEMS = [
 
 const ADMIN_ITEM = {
   href: "/admin",
-  label: "Admin",
+  labelKey: "admin",
   icon: ShieldCheck,
   isActive: (pathname: string) => pathname.startsWith("/admin"),
 } as const;
 
-export function BottomNav({ isAdmin }: { isAdmin: boolean }) {
+export function BottomNav({
+  isAdmin,
+  dict,
+}: {
+  isAdmin: boolean;
+  dict: Dictionary["nav"];
+}) {
   const pathname = usePathname();
   const items = isAdmin ? [...BASE_ITEMS, ADMIN_ITEM] : BASE_ITEMS;
 
@@ -70,7 +77,7 @@ export function BottomNav({ isAdmin }: { isAdmin: boolean }) {
           isAdmin ? "grid-cols-6" : "grid-cols-5",
         )}
       >
-        {items.map(({ href, label, icon: Icon, isActive: matches }) => {
+        {items.map(({ href, labelKey, icon: Icon, isActive: matches }) => {
           const active = matches(pathname);
           return (
             <Link
@@ -84,7 +91,7 @@ export function BottomNav({ isAdmin }: { isAdmin: boolean }) {
               )}
             >
               <Icon className="size-5" strokeWidth={active ? 2.5 : 2} />
-              {label}
+              {dict[labelKey]}
             </Link>
           );
         })}

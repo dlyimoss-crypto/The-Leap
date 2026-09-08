@@ -6,6 +6,7 @@ import Cropper, { type Area } from "react-easy-crop";
 import { Camera } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { updateAvatar } from "./actions";
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -55,9 +56,11 @@ async function getCroppedImageBlob(
 export function AvatarCropper({
   displayName,
   avatarUrl,
+  dict,
 }: {
   displayName: string | null;
   avatarUrl: string | null;
+  dict: Dictionary["profile"];
 }) {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -124,7 +127,7 @@ export function AvatarCropper({
           value={zoom}
           onChange={(e) => setZoom(Number(e.target.value))}
           className="w-full accent-primary"
-          aria-label="Zoom"
+          aria-label={dict.zoom}
         />
         <div className="flex justify-end gap-2">
           <Button
@@ -134,10 +137,10 @@ export function AvatarCropper({
             onClick={handleCancel}
             disabled={saving}
           >
-            Cancel
+            {dict.cancel}
           </Button>
           <Button type="button" size="sm" onClick={handleSave} disabled={saving}>
-            {saving ? "Saving…" : "Save photo"}
+            {saving ? dict.saving : dict.savePhoto}
           </Button>
         </div>
       </div>
@@ -155,7 +158,7 @@ export function AvatarCropper({
           onClick={() => fileInputRef.current?.click()}
         >
           <Camera className="size-3.5" />
-          Change photo
+          {dict.changePhoto}
         </Button>
         <input
           ref={fileInputRef}

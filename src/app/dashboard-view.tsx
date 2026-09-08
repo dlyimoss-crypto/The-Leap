@@ -20,15 +20,16 @@ import {
   type PrayerMovement,
 } from "@/lib/supabase/prayer-movements";
 import { GospelInviteCard } from "@/components/gospel-invite/gospel-invite-card";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { signOut } from "./sign-in/actions";
 
 type JourneyProgress = JourneyProgressRow;
 
-function greeting() {
+function greeting(dict: Dictionary) {
   const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 18) return "Good afternoon";
-  return "Good evening";
+  if (hour < 12) return dict.dashboard.goodMorning;
+  if (hour < 18) return dict.dashboard.goodAfternoon;
+  return dict.dashboard.goodEvening;
 }
 
 // A journey's purpose can run to several sentences — fine for its own
@@ -50,9 +51,11 @@ function truncate(text: string, maxLength: number): string {
 function JourneyProgressBar({
   currentSessionNumber,
   durationDays,
+  dict,
 }: {
   currentSessionNumber: number;
   durationDays: number;
+  dict: Dictionary;
 }) {
   const percentComplete = Math.round(
     ((currentSessionNumber - 1) / durationDays) * 100,
@@ -72,10 +75,8 @@ function JourneyProgressBar({
         />
       </div>
       <div className="flex items-center justify-between text-[11px] font-medium text-muted-foreground">
-        <span>{percentComplete}% complete</span>
-        <span>
-          {daysRemaining} {daysRemaining === 1 ? "day" : "days"} left
-        </span>
+        <span>{dict.dashboard.percentComplete(percentComplete)}</span>
+        <span>{dict.dashboard.daysLeft(daysRemaining)}</span>
       </div>
     </div>
   );
@@ -91,7 +92,7 @@ type NextJourney = {
 export function DashboardView({
   journey,
   progress,
-  scriptureReference,
+  dict,
   displayName,
   avatarUrl,
   nextJourney,
@@ -101,7 +102,7 @@ export function DashboardView({
 }: {
   journey: JourneyMeta;
   progress: JourneyProgress | null;
-  scriptureReference: string | null;
+  dict: Dictionary;
   displayName: string | null;
   avatarUrl: string | null;
   nextJourney?: NextJourney | null;
@@ -116,20 +117,21 @@ export function DashboardView({
       <GospelInviteCard
         shouldShow={!!showGospelInvite}
         journeyHref={journeyContinueHref(journey.slug, progress)}
+        dict={dict.gospelInvite}
       />
       <PatternCorner corner="top-right" />
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Link href="/profile" aria-label="Edit your profile">
+          <Link href="/profile" aria-label={dict.dashboard.editProfileAriaLabel}>
             <Avatar name={displayName} src={avatarUrl} />
           </Link>
           <div>
             <p className="font-heading text-lg font-semibold">
-              {greeting()}
+              {greeting(dict)}
               {firstName ? `, ${firstName}` : ""}
             </p>
             <p className="text-xs text-muted-foreground">
-              Take the next step. Grow in Christ. Live His purpose.
+              {dict.dashboard.tagline}
             </p>
           </div>
         </div>
@@ -138,7 +140,7 @@ export function DashboardView({
             type="submit"
             variant="ghost"
             size="icon"
-            aria-label="Sign out"
+            aria-label={dict.dashboard.signOutAriaLabel}
           >
             <LogOut className="size-4" />
           </Button>
@@ -150,10 +152,10 @@ export function DashboardView({
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 space-y-1">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Welcome
+                {dict.dashboard.welcomeEyebrow}
               </p>
               <h1 className="font-heading text-2xl font-bold text-foreground text-balance">
-                Let&apos;s begin your journey
+                {dict.dashboard.beginJourneyHeading}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {truncate(journey.teaser ?? journey.purpose, 100)}
@@ -175,7 +177,7 @@ export function DashboardView({
             size="lg"
             className="w-full rounded-full"
           >
-            Begin my journey
+            {dict.dashboard.beginMyJourney}
             <ArrowRight className="size-4" />
           </Button>
         </div>
@@ -186,18 +188,20 @@ export function DashboardView({
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 space-y-1">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Continue Your Journey
+                {dict.dashboard.continueYourJourneyEyebrow}
               </p>
               <h1 className="font-heading text-2xl font-bold text-foreground text-balance">
                 {journey.title}
               </h1>
               <p className="text-sm text-muted-foreground">
-                Day {progress.current_session_number} of{" "}
-                {journey.durationDays}
+                {dict.dashboard.dayOf(
+                  progress.current_session_number,
+                  journey.durationDays,
+                )}
               </p>
-              {scriptureReference && (
+              {journey.teaser && (
                 <p className="text-sm text-muted-foreground">
-                  {scriptureReference}
+                  {truncate(journey.teaser, 100)}
                 </p>
               )}
             </div>
@@ -214,6 +218,7 @@ export function DashboardView({
           <JourneyProgressBar
             currentSessionNumber={progress.current_session_number}
             durationDays={journey.durationDays}
+            dict={dict}
           />
 
           <Button
@@ -222,7 +227,7 @@ export function DashboardView({
             size="lg"
             className="w-full rounded-full"
           >
-            Continue the journey
+            {dict.dashboard.continueTheJourney}
             <ArrowRight className="size-4" />
           </Button>
         </div>
@@ -233,15 +238,19 @@ export function DashboardView({
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 space-y-1">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                {nextJourney ? "Next Leap" : "Journey Complete"}
+                {nextJourney
+                  ? dict.dashboard.nextLeapEyebrow
+                  : dict.dashboard.journeyCompleteEyebrow}
               </p>
               <h1 className="font-heading text-2xl font-bold text-foreground text-balance">
-                {nextJourney ? "Welcome to the Next Leap" : journey.completionTitle}
+                {nextJourney
+                  ? dict.dashboard.welcomeToNextLeap
+                  : journey.completionTitle}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {nextJourney
                   ? `${nextJourney.title} — ${truncate(nextJourney.teaser ?? nextJourney.purpose, 100)}`
-                  : "You've begun the journey of following Christ. This is only the beginning."}
+                  : dict.dashboard.onlyBeginning}
               </p>
             </div>
             <div className="size-20 shrink-0 overflow-hidden rounded-2xl bg-muted">
@@ -259,8 +268,8 @@ export function DashboardView({
               <div className="absolute top-1/2 right-0 size-3 -translate-y-1/2 translate-x-1/2 rounded-full border-2 border-background bg-primary shadow-sm" />
             </div>
             <div className="flex items-center justify-between text-[11px] font-medium text-muted-foreground">
-              <span>100% complete</span>
-              <span>Done</span>
+              <span>{dict.dashboard.percentComplete(100)}</span>
+              <span>{dict.dashboard.done}</span>
             </div>
           </div>
 
@@ -279,7 +288,7 @@ export function DashboardView({
             size="lg"
             className="w-full rounded-full"
           >
-            Continue
+            {dict.dashboard.continueButton}
             <ArrowRight className="size-4" />
           </Button>
 
@@ -287,7 +296,7 @@ export function DashboardView({
             href="/commit/journeys"
             className="mx-auto block w-fit rounded-full bg-background px-4 py-1.5 text-center text-xs font-medium text-foreground hover:bg-background/80"
           >
-            Browse other journeys
+            {dict.dashboard.browseOtherJourneys}
           </Link>
         </div>
       )}
@@ -308,8 +317,8 @@ export function DashboardView({
                   prayerMovement.active_until,
                 );
                 return daysLeft !== null
-                  ? `${daysLeft} day${daysLeft === 1 ? "" : "s"} left — tap to pray`
-                  : "Tap to pray";
+                  ? dict.dashboard.prayerDaysLeft(daysLeft)
+                  : dict.dashboard.tapToPray;
               })()}
             </p>
           </div>
@@ -318,7 +327,7 @@ export function DashboardView({
 
       <div className="space-y-3">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Today
+          {dict.dashboard.today}
         </p>
         <div className="grid grid-cols-2 gap-3">
           <Link
@@ -326,16 +335,20 @@ export function DashboardView({
             className="flex flex-col items-center gap-1.5 rounded-xl border bg-card p-4 text-center hover:bg-muted/50"
           >
             <BookOpen className="size-5 text-primary" />
-            <p className="text-sm font-medium">Scripture</p>
-            <p className="text-xs text-muted-foreground">Read God&apos;s Word</p>
+            <p className="text-sm font-medium">{dict.dashboard.scripture}</p>
+            <p className="text-xs text-muted-foreground">
+              {dict.dashboard.readGodsWord}
+            </p>
           </Link>
           <Link
             href="/evolve/devotion"
             className="flex flex-col items-center gap-1.5 rounded-xl border bg-card p-4 text-center hover:bg-muted/50"
           >
             <Sparkles className="size-5 text-primary" />
-            <p className="text-sm font-medium">Devotion</p>
-            <p className="text-xs text-muted-foreground">Grow daily</p>
+            <p className="text-sm font-medium">{dict.dashboard.devotion}</p>
+            <p className="text-xs text-muted-foreground">
+              {dict.dashboard.growDaily}
+            </p>
           </Link>
         </div>
       </div>
@@ -349,12 +362,17 @@ export function DashboardView({
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold">
-            {commitmentProgress ? "This week's commitment" : "Make a commitment"}
+            {commitmentProgress
+              ? dict.dashboard.thisWeeksCommitment
+              : dict.dashboard.makeACommitment}
           </p>
           <p className="truncate text-xs text-muted-foreground">
             {commitmentProgress
-              ? `${commitmentProgress.done} of ${commitmentProgress.total} kept this week`
-              : "Study, pray, and share the gospel this week."}
+              ? dict.dashboard.keptThisWeek(
+                  commitmentProgress.done,
+                  commitmentProgress.total,
+                )
+              : dict.dashboard.studyPrayShare}
           </p>
         </div>
       </Link>
@@ -367,9 +385,9 @@ export function DashboardView({
           <MessageCircle className="size-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold">Leap Companion</p>
+          <p className="text-sm font-semibold">{dict.dashboard.leapCompanion}</p>
           <p className="text-xs text-muted-foreground">
-            Ask for help, prayer, or your next step.
+            {dict.dashboard.askForHelp}
           </p>
         </div>
       </Link>

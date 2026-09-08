@@ -7,6 +7,8 @@ import {
   getActiveCommitment,
 } from "@/lib/supabase/commitments";
 import { getActivePrayerMovement } from "@/lib/supabase/prayer-movements";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { WelcomeView } from "./welcome-view";
 import { DashboardView } from "./dashboard-view";
 
@@ -18,7 +20,7 @@ export default async function HomePage() {
   }
 
   const [
-    { progress, currentSession, journeySlug },
+    { progress, journeySlug },
     { data: profile },
     commitment,
     prayerMovement,
@@ -37,6 +39,8 @@ export default async function HomePage() {
   if (!journey) {
     return <WelcomeView />;
   }
+
+  const dict = getDictionary(await getLocale());
 
   // Only needed to power the completed-state "recommended next journey" card
   // — skip the extra query on every other Home render.
@@ -63,7 +67,7 @@ export default async function HomePage() {
     <DashboardView
       journey={journey}
       progress={progress}
-      scriptureReference={currentSession?.scriptureReference ?? null}
+      dict={dict}
       displayName={profile?.display_name ?? null}
       avatarUrl={profile?.avatar_url ?? null}
       nextJourney={nextJourney}

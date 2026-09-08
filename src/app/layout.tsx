@@ -5,6 +5,8 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { BottomNav } from "@/components/bottom-nav";
 import { CompanionLauncher } from "@/components/companion-launcher";
 import { getAuthedUser, getProfile } from "@/lib/supabase/authorize";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import "./globals.css";
 
 const sora = Sora({
@@ -56,9 +58,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     isAdmin = profile?.role === "admin";
   }
 
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
+
   return (
     <html
-      lang="en"
+      lang={locale}
       className={`${sora.variable} ${karla.variable} ${jetbrainsMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
@@ -70,8 +75,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <div className={user ? "flex flex-1 flex-col pb-16" : "flex flex-1 flex-col"}>
             {children}
           </div>
-          {user && <CompanionLauncher />}
-          {user && <BottomNav isAdmin={isAdmin} />}
+          {user && <CompanionLauncher dict={dict.companion} />}
+          {user && <BottomNav isAdmin={isAdmin} dict={dict.nav} />}
         </ThemeProvider>
       </body>
     </html>

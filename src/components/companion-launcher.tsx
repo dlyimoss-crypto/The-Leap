@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Sparkles, X } from "lucide-react";
 import { COMPANION_INTENTS } from "@/lib/companion-intents";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 
 // Companion is cross-cutting (ticket 10), not a nav tab — only float it on
 // the surfaces the ticket names, and never on /companion itself.
@@ -16,7 +17,11 @@ const FLOAT_ALLOWLIST = [
   /^\/journeys\/[^/]+\/day\/[^/]+$/,
 ];
 
-export function CompanionLauncher() {
+export function CompanionLauncher({
+  dict,
+}: {
+  dict: Dictionary["companion"];
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -41,13 +46,11 @@ export function CompanionLauncher() {
       {open && (
         <div className="fixed inset-x-4 bottom-24 z-50 mx-auto max-w-md space-y-1 rounded-2xl border bg-card p-3 shadow-lg">
           <div className="flex items-center justify-between px-1 pb-1">
-            <p className="text-sm font-semibold">
-              What would you like to do?
-            </p>
+            <p className="text-sm font-semibold">{dict.menuHeading}</p>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              aria-label="Close"
+              aria-label={dict.close}
               className="text-muted-foreground hover:text-foreground"
             >
               <X className="size-4" />
@@ -61,7 +64,7 @@ export function CompanionLauncher() {
               className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm hover:bg-muted"
             >
               <Icon className="size-4 text-primary" />
-              {label}
+              {dict.intents[slug] ?? label}
             </Link>
           ))}
         </div>
@@ -70,11 +73,11 @@ export function CompanionLauncher() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        aria-label="Open Leap Companion"
+        aria-label={dict.openAriaLabel}
         className="fixed right-4 bottom-20 z-40 flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg hover:bg-primary/90"
       >
         <Sparkles className="size-4" />
-        Companion
+        {dict.button}
       </button>
     </>
   );

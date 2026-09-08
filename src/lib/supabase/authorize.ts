@@ -28,7 +28,7 @@ export const getProfile = cache(async (userId: string) => {
   const supabase = await createClient();
   const { data } = await supabase
     .from("profiles")
-    .select("role, is_banned")
+    .select("role, is_banned, preferred_language")
     .eq("id", userId)
     .maybeSingle();
 
