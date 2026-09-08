@@ -125,6 +125,13 @@ type ProfileRow = {
   id: string;
   display_name: string | null;
   is_banned: boolean;
+  gospel_invite_shown_at: string | null;
+  gospel_prayer_at: string | null;
+};
+
+type ProfileEmailRow = {
+  id: string;
+  email: string;
 };
 
 type AuthorApplicationRow = {
@@ -511,55 +518,111 @@ async function ModerationQueue() {
 async function UsersList() {
   const supabase = await createClient();
 
-  const { data: profiles, error } = await supabase
-    .from("profiles")
-    .select("id, display_name, is_banned")
-    .order("display_name", { ascending: true })
-    .returns<ProfileRow[]>();
+  const [{ data: profiles, error }, { data: emails, error: emailsError }] =
+    await Promise.all([
+      supabase
+        .from("profiles")
+        .select(
+          "id, display_name, is_banned, gospel_invite_shown_at, gospel_prayer_at",
+        )
+        .order("display_name", { ascending: true })
+        .returns<ProfileRow[]>(),
+      supabase
+        .from("profile_emails")
+        .select("id, email")
+        .returns<ProfileEmailRow[]>(),
+    ]);
 
   if (error) {
     console.error("Failed to load users", error);
   }
+  if (emailsError) {
+    console.error("Failed to load user emails", emailsError);
+  }
+
+  const emailById = new Map((emails ?? []).map((e) => [e.id, e.email]));
+  const rows = profiles ?? [];
+  const prayedCount = rows.filter((p) => p.gospel_prayer_at).length;
+  const maybeLaterCount = rows.filter(
+    (p) => p.gospel_invite_shown_at && !p.gospel_prayer_at,
+  ).length;
+  const notYetShownCount = rows.length - prayedCount - maybeLaterCount;
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-card">
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b text-left text-xs text-muted-foreground">
-            <th className="p-3 font-normal">Name</th>
-            <th className="p-3 font-normal">Status</th>
-            <th className="p-3"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {(profiles ?? []).map((p) => (
-            <tr key={p.id} className="border-b last:border-0">
-              <td className="p-3">
-                <div className="flex items-center gap-2.5">
-                  <Avatar name={p.display_name} className="size-7 text-[10px]" />
-                  {p.display_name ?? "(no name)"}
-                </div>
-              </td>
-              <td className="p-3">
-                <Badge variant={p.is_banned ? "destructive" : "secondary"}>
-                  {p.is_banned ? "Banned" : "Active"}
-                </Badge>
-              </td>
-              <td className="p-3 text-right">
-                <form action={(p.is_banned ? unbanUser : banUser).bind(null, p.id)}>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    variant={p.is_banned ? "outline" : "destructive"}
-                  >
-                    {p.is_banned ? "Unban" : "Ban"}
-                  </Button>
-                </form>
-              </td>
+    <div className="space-y-4">
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-xl border bg-card p-4 text-center">
+          <p className="text-2xl font-bold text-foreground">{prayedCount}</p>
+          <p className="text-xs text-muted-foreground">Prayed</p>
+        </div>
+        <div className="rounded-xl border bg-card p-4 text-center">
+          <p className="text-2xl font-bold text-foreground">
+            {maybeLaterCount}
+          </p>
+          <p className="text-xs text-muted-foreground">Maybe later</p>
+        </div>
+        <div className="rounded-xl border bg-card p-4 text-center">
+          <p className="text-2xl font-bold text-foreground">
+            {notYetShownCount}
+          </p>
+          <p className="text-xs text-muted-foreground">Not yet asked</p>
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-xl border bg-card">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b text-left text-xs text-muted-foreground">
+              <th className="p-3 font-normal">Name</th>
+              <th className="p-3 font-normal">Status</th>
+              <th className="p-3"></th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((p) => (
+              <tr key={p.id} className="border-b last:border-0">
+                <td className="p-3">
+                  <div className="flex items-center gap-2.5">
+                    <Avatar
+                      name={p.display_name}
+                      className="size-7 text-[10px]"
+                    />
+                    <div>
+                      <div>{p.display_name ?? "(no name)"}</div>
+                      {emailById.get(p.id) && (
+                        <div className="text-xs text-muted-foreground">
+                          {emailById.get(p.id)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </td>
+                <td className="p-3">
+                  <Badge variant={p.is_banned ? "destructive" : "secondary"}>
+                    {p.is_banned ? "Banned" : "Active"}
+                  </Badge>
+                </td>
+                <td className="p-3 text-right">
+                  <form
+                    action={(p.is_banned ? unbanUser : banUser).bind(
+                      null,
+                      p.id,
+                    )}
+                  >
+                    <Button
+                      type="submit"
+                      size="sm"
+                      variant={p.is_banned ? "outline" : "destructive"}
+                    >
+                      {p.is_banned ? "Unban" : "Ban"}
+                    </Button>
+                  </form>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
