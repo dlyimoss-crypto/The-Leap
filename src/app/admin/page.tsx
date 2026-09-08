@@ -157,6 +157,7 @@ type JourneyRow = {
   purpose: string;
   duration_days: number;
   completion_title: string;
+  teaser: string | null;
   status: string;
 };
 
@@ -1629,7 +1630,7 @@ async function JourneysAdmin({
   const { data: journeys, error } = await supabase
     .from("journeys")
     .select(
-      "id, slug, title, purpose, duration_days, completion_title, status",
+      "id, slug, title, purpose, duration_days, completion_title, teaser, status",
     )
     .order("created_at", { ascending: false })
     .returns<JourneyRow[]>();
@@ -1700,6 +1701,18 @@ async function JourneysAdmin({
             rows={3}
             defaultValue={editing?.purpose}
             required
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="teaser">
+            Card teaser (optional — short blurb shown on Home&apos;s
+            dashboard cards; falls back to Purpose, trimmed, if left blank)
+          </Label>
+          <Textarea
+            id="teaser"
+            name="teaser"
+            rows={2}
+            defaultValue={editing?.teaser ?? ""}
           />
         </div>
         <div className="space-y-1.5">

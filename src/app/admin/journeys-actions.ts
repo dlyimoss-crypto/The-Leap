@@ -9,6 +9,7 @@ function journeyFields(formData: FormData) {
     slug: String(formData.get("slug") ?? "").trim(),
     title: String(formData.get("title") ?? "").trim(),
     purpose: String(formData.get("purpose") ?? "").trim(),
+    teaser: String(formData.get("teaser") ?? "").trim() || null,
     duration_days: Number.parseInt(
       String(formData.get("duration_days") ?? "0"),
       10,

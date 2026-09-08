@@ -17,6 +17,7 @@ type JourneyRow = {
   purpose: string;
   duration_days: number;
   completion_title: string;
+  teaser: string | null;
 };
 
 type JourneyDayRow = {
@@ -38,6 +39,7 @@ function mapDbJourney(row: JourneyRow): JourneyMeta {
     purpose: row.purpose,
     durationDays: row.duration_days,
     completionTitle: row.completion_title,
+    teaser: row.teaser,
   };
 }
 
@@ -65,7 +67,7 @@ export async function findJourneyMeta(
 
   const { data } = await supabase
     .from("journeys")
-    .select("slug, title, purpose, duration_days, completion_title")
+    .select("slug, title, purpose, duration_days, completion_title, teaser")
     .eq("slug", slug)
     .maybeSingle<JourneyRow>();
 
@@ -113,7 +115,7 @@ export async function findAvailableJourneys(
 
   const { data, error } = await supabase
     .from("journeys")
-    .select("slug, title, purpose, duration_days, completion_title")
+    .select("slug, title, purpose, duration_days, completion_title, teaser")
     .eq("status", "published")
     .returns<JourneyRow[]>();
 

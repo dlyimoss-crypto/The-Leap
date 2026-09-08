@@ -81,7 +81,12 @@ function JourneyProgressBar({
   );
 }
 
-type NextJourney = { slug: string; title: string; purpose: string };
+type NextJourney = {
+  slug: string;
+  title: string;
+  purpose: string;
+  teaser?: string | null;
+};
 
 export function DashboardView({
   journey,
@@ -151,7 +156,7 @@ export function DashboardView({
                 Let&apos;s begin your journey
               </h1>
               <p className="text-sm text-muted-foreground">
-                {journey.purpose}
+                {truncate(journey.teaser ?? journey.purpose, 100)}
               </p>
             </div>
             <div className="size-20 shrink-0 overflow-hidden rounded-2xl bg-card">
@@ -228,14 +233,14 @@ export function DashboardView({
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 space-y-1">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Journey Complete
+                {nextJourney ? "Next Leap" : "Journey Complete"}
               </p>
               <h1 className="font-heading text-2xl font-bold text-foreground text-balance">
                 {nextJourney ? "Welcome to the Next Leap" : journey.completionTitle}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {nextJourney
-                  ? `${nextJourney.title} — ${truncate(nextJourney.purpose, 100)}`
+                  ? `${nextJourney.title} — ${truncate(nextJourney.teaser ?? nextJourney.purpose, 100)}`
                   : "You've begun the journey of following Christ. This is only the beginning."}
               </p>
             </div>

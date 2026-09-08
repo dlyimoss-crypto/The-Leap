@@ -8,6 +8,8 @@ export type JourneyMeta = {
   purpose: string;
   durationDays: number;
   completionTitle: string;
+  // Short blurb for Home's dashboard cards — falls back to purpose when unset.
+  teaser?: string | null;
 };
 
 const CONTENT_ROOT = path.join(process.cwd(), "content", "en");

@@ -40,13 +40,22 @@ export default async function HomePage() {
 
   // Only needed to power the completed-state "recommended next journey" card
   // — skip the extra query on every other Home render.
-  let nextJourney: { slug: string; title: string; purpose: string } | null =
-    null;
+  let nextJourney: {
+    slug: string;
+    title: string;
+    purpose: string;
+    teaser?: string | null;
+  } | null = null;
   if (progress?.completed_at) {
     const available = await findAvailableJourneys(supabase);
     const match = available.find((j) => j.slug !== journeySlug) ?? null;
     nextJourney = match
-      ? { slug: match.slug, title: match.title, purpose: match.purpose }
+      ? {
+          slug: match.slug,
+          title: match.title,
+          purpose: match.purpose,
+          teaser: match.teaser,
+        }
       : null;
   }
 
