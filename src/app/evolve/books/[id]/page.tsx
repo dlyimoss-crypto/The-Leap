@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { BookOpen, Library } from "lucide-react";
+import { notFound } from "next/navigation";
+import { BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/authorize";
+import { CoverZoom } from "./cover-zoom";
 
 type BookDetailRow = {
   id: string;
@@ -23,14 +24,7 @@ export default async function BookDetailPage(
 ) {
   const { id } = await props.params;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase } = await requireUser();
 
   const { data: book } = await supabase
     .from("books")
@@ -57,14 +51,7 @@ export default async function BookDetailPage(
       <BackLink href="/evolve/books" label="Library" />
 
       <div className="flex gap-4">
-        <div className="flex aspect-[3/4] w-28 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted">
-          {coverUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={coverUrl} alt="" className="size-full object-cover" />
-          ) : (
-            <Library className="size-8 text-muted-foreground/40" />
-          )}
-        </div>
+        <CoverZoom coverUrl={coverUrl} title={book.title} />
         <div className="min-w-0 space-y-1.5">
           <h1 className="font-heading text-xl font-bold text-balance">
             {book.title}
