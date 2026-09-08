@@ -256,14 +256,12 @@ export function DashboardView({
             <ArrowRight className="size-4" />
           </Button>
 
-          {!nextJourney && (
-            <Link
-              href="/evolve/journeys"
-              className="mx-auto block w-fit rounded-full bg-background px-4 py-1.5 text-center text-xs font-medium text-foreground hover:bg-background/80"
-            >
-              Browse other journeys
-            </Link>
-          )}
+          <Link
+            href="/evolve/journeys"
+            className="mx-auto block w-fit rounded-full bg-background px-4 py-1.5 text-center text-xs font-medium text-foreground hover:bg-background/80"
+          >
+            Browse other journeys
+          </Link>
         </div>
       )}
 
