@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { BackLink } from "@/components/back-link";
 import { getReadableManuscript } from "../../manuscript-access";
+import { EpubFrame } from "./epub-frame";
 import { PdfFrame } from "./pdf-frame";
 
 export default async function BookReadPage(
@@ -19,7 +20,7 @@ export default async function BookReadPage(
     .eq("id", id)
     .single<{ title: string }>();
 
-  const isPdf = manuscript.filename.toLowerCase().endsWith(".pdf");
+  const isEpub = manuscript.filename.toLowerCase().endsWith(".epub");
 
   return (
     <main className="relative flex h-dvh flex-col overflow-hidden">
@@ -28,20 +29,16 @@ export default async function BookReadPage(
         <p className="truncate text-sm font-medium">{book?.title}</p>
       </div>
 
-      {isPdf ? (
-        <PdfFrame
-          src={`/evolve/books/${id}/read/file#toolbar=0`}
+      {isEpub ? (
+        <EpubFrame
+          src={`/evolve/books/${id}/read/file`}
           title={book?.title ?? "Book"}
         />
       ) : (
-        <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">
-          <p className="text-sm font-medium">
-            This file format can&apos;t be previewed in-app yet.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            We currently support reading PDF manuscripts inline.
-          </p>
-        </div>
+        <PdfFrame
+          src={`/evolve/books/${id}/read/file`}
+          title={book?.title ?? "Book"}
+        />
       )}
     </main>
   );

@@ -1,5 +1,11 @@
 import { getReadableManuscript } from "../../../manuscript-access";
 
+function fallbackContentType(filename: string): string {
+  return filename.toLowerCase().endsWith(".epub")
+    ? "application/epub+zip"
+    : "application/pdf";
+}
+
 /**
  * Streams the manuscript bytes through our own origin instead of redirecting
  * to Supabase Storage's signed URL — so the URL a reader could copy out of
@@ -40,7 +46,8 @@ export async function GET(
 
   return new Response(upstream.body, {
     headers: {
-      "Content-Type": upstream.headers.get("content-type") ?? "application/pdf",
+      "Content-Type":
+        upstream.headers.get("content-type") ?? fallbackContentType(filename),
       "Content-Disposition": `inline; filename="${filename.replace(/"/g, "")}"`,
       "Cache-Control": "private, no-store",
     },
