@@ -9,6 +9,7 @@ describe("getJourneyMeta", () => {
       title: "Faith in Christ",
       purpose:
         "To help a person understand who Jesus is, what He has accomplished, what it means to place faith in Him, and what it means to begin following Him.",
+      teaser: "Discover who Jesus is, what He's done for you, and what it means to follow Him.",
       durationDays: 7,
       completionTitle: "You've taken your first Leap.",
     });
