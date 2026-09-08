@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthedUser } from "@/lib/supabase/authorize";
 
 export async function completeSession(
   journeySlug: string,
@@ -9,10 +9,7 @@ export async function completeSession(
   durationDays: number,
 ) {
   const isLastDay = dayNumber >= durationDays;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await getAuthedUser();
 
   if (user) {
     const { error } = await supabase.rpc("record_session_completion", {

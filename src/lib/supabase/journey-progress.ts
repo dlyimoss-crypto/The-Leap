@@ -73,3 +73,42 @@ export async function getCurrentJourneyState(
 
   return { progress: null, currentSession: null, journeySlug: JOURNEY_SLUG };
 }
+
+/**
+ * One session a day: pacing the formation loop matters more than speed, so a
+ * day only unlocks once the previous one's completion has fallen off
+ * "today" — otherwise a reader could clear all seven days in one sitting
+ * with no room to actually pray or reflect between them.
+ */
+export async function isDayGatedUntilTomorrow(
+  supabase: SupabaseClient,
+  userId: string,
+  journeySlug: string,
+  dayNumber: number,
+): Promise<boolean> {
+  if (dayNumber <= 1) {
+    return false;
+  }
+
+  const { data: completions } = await supabase
+    .from("session_completions")
+    .select("session_number, completed_at")
+    .eq("user_id", userId)
+    .eq("journey_slug", journeySlug)
+    .in("session_number", [dayNumber - 1, dayNumber])
+    .returns<{ session_number: number; completed_at: string }[]>();
+
+  const previousCompletedAt = completions?.find(
+    (c) => c.session_number === dayNumber - 1,
+  )?.completed_at;
+  const thisAlreadyDone = completions?.some(
+    (c) => c.session_number === dayNumber,
+  );
+
+  if (!previousCompletedAt || thisAlreadyDone) {
+    return false;
+  }
+
+  const today = new Date().toISOString().slice(0, 10);
+  return previousCompletedAt.slice(0, 10) === today;
+}

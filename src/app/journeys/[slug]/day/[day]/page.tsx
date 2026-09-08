@@ -1,10 +1,12 @@
-import { notFound, redirect } from "next/navigation";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Step } from "@/components/step";
 import { PatternBorder } from "@/components/pattern-bg";
 import { findJourneyMeta, findJourneySession } from "@/lib/content/journeys-repo";
-import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/supabase/authorize";
+import { isDayGatedUntilTomorrow } from "@/lib/supabase/journey-progress";
 import { getScripturePassages } from "@/lib/content/scripture";
 import { completeSession } from "./actions";
 
@@ -14,14 +16,7 @@ export default async function JourneySessionPage(
   const { slug, day } = await props.params;
   const dayNumber = Number(day);
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
+  const { supabase, user } = await requireUser();
 
   const [journey, session] = await Promise.all([
     findJourneyMeta(supabase, slug),
@@ -30,6 +25,34 @@ export default async function JourneySessionPage(
 
   if (!journey || !session) {
     notFound();
+  }
+
+  const gated = await isDayGatedUntilTomorrow(
+    supabase,
+    user.id,
+    slug,
+    dayNumber,
+  );
+
+  if (gated) {
+    return (
+      <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-4 overflow-hidden px-6 py-16 text-center">
+        <PatternBorder />
+        <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+          Day {dayNumber} of {journey.durationDays} &middot; {journey.title}
+        </p>
+        <h1 className="text-2xl font-heading font-semibold text-balance">
+          Welcome back tomorrow
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Take today to pray and sit with what you&apos;ve just read — the
+          next step opens when you return tomorrow.
+        </p>
+        <Button render={<Link href="/" />} nativeButton={false} size="lg">
+          Back to Home
+        </Button>
+      </main>
+    );
   }
 
   const isLastDay = dayNumber >= journey.durationDays;
