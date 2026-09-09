@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Sora, Karla, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -47,6 +47,15 @@ export const metadata: Metadata = {
     title: "The Leap — Your Essential Companion in Christ",
     description: SHARE_DESCRIPTION,
   },
+  appleWebApp: {
+    capable: true,
+    title: "The Leap",
+    statusBarStyle: "black-translucent",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1c1a18",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
