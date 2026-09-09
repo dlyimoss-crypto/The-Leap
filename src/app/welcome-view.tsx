@@ -22,8 +22,7 @@ export function WelcomeView() {
             Welcome to The Leap
           </h1>
           <p className="max-w-xs text-sm text-white/70">
-            Your Essential Companion in Christ — take your next step, every
-            person, every country, every tribe.
+            Your Essential Companion in Christ
           </p>
         </div>
       </div>
