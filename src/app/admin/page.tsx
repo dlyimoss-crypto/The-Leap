@@ -9,6 +9,7 @@ import {
   Compass,
   HeartHandshake,
   Heart,
+  TrendingUp,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -69,7 +70,10 @@ type Tab =
   | "churches"
   | "journeys"
   | "opportunities"
-  | "prayer";
+  | "prayer"
+  | "reports";
+
+type ReportPeriod = "month" | "quarter" | "year";
 
 type ChurchRow = {
   id: string;
@@ -177,6 +181,21 @@ type PrayerMovementRow = {
   active_until: string | null;
 };
 
+type EngagementReportRow = {
+  new_signups: number;
+  active_users: number;
+  sessions_completed: number;
+  journeys_started: number;
+  journeys_completed: number;
+  commitments_created: number;
+  commitments_completed: number;
+  prayer_requests_count: number;
+  posts_count: number;
+  comments_count: number;
+  companion_messages_count: number;
+  gospel_prayers_count: number;
+};
+
 type JourneyDayRow = {
   day_number: number;
   title: string;
@@ -216,7 +235,9 @@ export default async function AdminPage(props: PageProps<"/admin">) {
                 ? "opportunities"
                 : tabParam === "prayer"
                   ? "prayer"
-                  : "queue";
+                  : tabParam === "reports"
+                    ? "reports"
+                    : "queue";
   const editIdParam = Array.isArray(searchParams.edit)
     ? searchParams.edit[0]
     : searchParams.edit;
@@ -229,6 +250,11 @@ export default async function AdminPage(props: PageProps<"/admin">) {
   const publishErrorParam = Array.isArray(searchParams.publish_error)
     ? searchParams.publish_error[0]
     : searchParams.publish_error;
+  const periodParam = Array.isArray(searchParams.period)
+    ? searchParams.period[0]
+    : searchParams.period;
+  const period: ReportPeriod =
+    periodParam === "quarter" ? "quarter" : periodParam === "year" ? "year" : "month";
 
   await requireAdmin();
 
@@ -341,6 +367,16 @@ export default async function AdminPage(props: PageProps<"/admin">) {
         >
           Prayer
         </Link>
+        <Link
+          href="/admin?tab=reports"
+          className={
+            tab === "reports"
+              ? "shrink-0 rounded-t-md border-b-2 border-primary px-2 -mx-2 pb-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 hover:shadow-sm"
+              : "shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
+          }
+        >
+          Reports
+        </Link>
       </div>
 
       {tab === "queue" ? (
@@ -357,6 +393,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
         <OpportunitiesAdmin editId={editIdParam} />
       ) : tab === "prayer" ? (
         <PrayerMovementsAdmin editId={editIdParam} />
+      ) : tab === "reports" ? (
+        <ReportsAdmin period={period} />
       ) : (
         <JourneysAdmin
           editId={editIdParam}
@@ -2119,6 +2157,187 @@ async function JourneyDayEditor({
           </Button>
         </div>
       </form>
+    </div>
+  );
+}
+
+// Boundaries computed in UTC — a summary report, not a timezone-precise
+// ledger, so calendar-month/quarter/year in UTC is close enough and keeps
+// the boundary math simple.
+function getReportRange(period: ReportPeriod): {
+  start: Date;
+  end: Date;
+  label: string;
+} {
+  const now = new Date();
+  const end = now;
+  const year = now.getUTCFullYear();
+
+  if (period === "year") {
+    return {
+      start: new Date(Date.UTC(year, 0, 1)),
+      end,
+      label: `${year}`,
+    };
+  }
+
+  if (period === "quarter") {
+    const quarterStartMonth = Math.floor(now.getUTCMonth() / 3) * 3;
+    const quarterNumber = quarterStartMonth / 3 + 1;
+    return {
+      start: new Date(Date.UTC(year, quarterStartMonth, 1)),
+      end,
+      label: `Q${quarterNumber} ${year}`,
+    };
+  }
+
+  return {
+    start: new Date(Date.UTC(year, now.getUTCMonth(), 1)),
+    end,
+    label: now.toLocaleString("en-US", {
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    }),
+  };
+}
+
+function ReportStat({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="rounded-xl border bg-card p-4 text-center">
+      <p className="text-2xl font-bold text-foreground">{value}</p>
+      <p className="text-xs text-muted-foreground">{label}</p>
+    </div>
+  );
+}
+
+async function ReportsAdmin({ period }: { period: ReportPeriod }) {
+  const supabase = await createClient();
+  const { start, end, label } = getReportRange(period);
+
+  const { data, error } = await supabase.rpc("admin_engagement_report", {
+    p_start: start.toISOString(),
+    p_end: end.toISOString(),
+  });
+
+  if (error) {
+    console.error("Failed to load engagement report", error);
+  }
+
+  const report = (data as EngagementReportRow[] | null)?.[0] ?? null;
+
+  const periods: { value: ReportPeriod; label: string }[] = [
+    { value: "month", label: "Monthly" },
+    { value: "quarter", label: "Quarterly" },
+    { value: "year", label: "Annual" },
+  ];
+
+  return (
+    <div className="space-y-5">
+      <div className="flex gap-2">
+        {periods.map((p) => (
+          <Link
+            key={p.value}
+            href={`/admin?tab=reports&period=${p.value}`}
+            className={
+              period === p.value
+                ? "rounded-full bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
+                : "rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+            }
+          >
+            {p.label}
+          </Link>
+        ))}
+      </div>
+
+      {!report ? (
+        <div className="flex flex-col items-center gap-3 py-16 text-center">
+          <TrendingUp className="size-8 text-muted-foreground/50" />
+          <p className="text-sm text-muted-foreground">
+            Couldn&apos;t load the report — check server logs.
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <TrendingUp className="size-4" />
+            <span>Summary for {label}</span>
+          </div>
+
+          <div className="rounded-xl border bg-primary/10 p-4 text-center">
+            <p className="text-3xl font-bold text-foreground">
+              {report.gospel_prayers_count}
+            </p>
+            <p className="text-xs font-medium text-muted-foreground">
+              Decisions for Christ
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              Connect
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <ReportStat value={report.new_signups} label="New sign-ups" />
+              <ReportStat value={report.active_users} label="Active users" />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              Commit
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <ReportStat
+                value={report.commitments_created}
+                label="Commitments made"
+              />
+              <ReportStat
+                value={report.commitments_completed}
+                label="Commitments kept"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              Evolve
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <ReportStat
+                value={report.sessions_completed}
+                label="Sessions completed"
+              />
+              <ReportStat
+                value={report.journeys_started}
+                label="Journeys started"
+              />
+              <ReportStat
+                value={report.journeys_completed}
+                label="Journeys completed"
+              />
+              <ReportStat
+                value={report.companion_messages_count}
+                label="Companion messages"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+              Engage
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <ReportStat
+                value={report.prayer_requests_count}
+                label="Prayer requests"
+              />
+              <ReportStat value={report.posts_count} label="Community posts" />
+              <ReportStat value={report.comments_count} label="Comments" />
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
