@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { BottomNav } from "@/components/bottom-nav";
 import { CompanionLauncher } from "@/components/companion-launcher";
+import { PrivacyShield } from "@/components/privacy-shield";
 import { getAuthedUser, getProfile } from "@/lib/supabase/authorize";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -86,6 +87,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           </div>
           {user && <CompanionLauncher dict={dict.companion} />}
           {user && <BottomNav isAdmin={isAdmin} dict={dict.nav} />}
+          {user && <PrivacyShield />}
         </ThemeProvider>
       </body>
     </html>
