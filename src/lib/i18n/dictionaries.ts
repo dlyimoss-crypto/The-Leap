@@ -93,6 +93,7 @@ export type Dictionary = {
     prayerText: string;
     prayedButton: string;
     maybeLater: string;
+    close: string;
     beganHeading: string;
     beganSubheading: string;
     whereNext: string;
@@ -207,6 +208,7 @@ const en: Dictionary = {
       "Lord Jesus, I believe You are the Son of God. I ask You to forgive my sins and come into my heart. I receive You as my Lord and Savior. Thank You for eternal life. In Jesus' name, Amen.",
     prayedButton: "I Prayed This Prayer",
     maybeLater: "Maybe Later",
+    close: "Close",
     beganHeading: "Your Journey Has Begun",
     beganSubheading: "You have taken an important step today.",
     whereNext: "Where would you like to go next?",
@@ -326,6 +328,7 @@ const sw: Dictionary = {
       "Bwana Yesu, ninaamini Wewe ni Mwana wa Mungu. Nakuomba unisamehe dhambi zangu na uje moyoni mwangu. Ninakupokea kuwa Bwana na Mwokozi wangu. Asante kwa uzima wa milele. Kwa jina la Yesu, Amina.",
     prayedButton: "Nimeomba Ombi Hili",
     maybeLater: "Labda Baadaye",
+    close: "Funga",
     beganHeading: "Safari Yako Imeanza",
     beganSubheading: "Umechukua hatua muhimu leo.",
     whereNext: "Ungependa kwenda wapi sasa?",

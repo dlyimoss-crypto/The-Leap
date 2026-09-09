@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Heart, PartyPopper, CheckCircle2, Compass, MessageCircle, BookOpen } from "lucide-react";
+import { Heart, PartyPopper, CheckCircle2, Compass, MessageCircle, BookOpen, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HubCard } from "@/components/hub-card";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
@@ -38,18 +38,38 @@ export function GospelInviteCard({
     });
   }
 
+  // Since the card now pops up on every open (not just once), anyone who
+  // has already prayed the prayer needs a one-tap way out instead of
+  // stepping back through "invite" each time.
+  function handleClose() {
+    if (step === "invite") {
+      handleMaybeLater();
+    } else {
+      setOpen(false);
+    }
+  }
+
   return (
     <div
       className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4"
-      onClick={step === "invite" ? handleMaybeLater : () => setOpen(false)}
+      onClick={handleClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="gospel-invite-title"
         onClick={(e) => e.stopPropagation()}
-        className="max-h-[90vh] w-full max-w-sm space-y-5 overflow-y-auto rounded-2xl bg-card p-6 shadow-xl"
+        className="relative max-h-[90vh] w-full max-w-sm space-y-5 overflow-y-auto rounded-2xl bg-card p-6 shadow-xl"
       >
+        <button
+          type="button"
+          onClick={handleClose}
+          aria-label={dict.close}
+          className="absolute top-3 right-3 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+        >
+          <X className="size-4" />
+        </button>
+
         {step === "invite" ? (
           <>
             <div className="flex flex-col items-center gap-3 text-center">
