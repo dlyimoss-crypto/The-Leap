@@ -3,8 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/supabase/authorize";
 
-// Marks the invitation as seen so it never pops up again for this user —
-// called on "Maybe Later" and implicitly by recordGospelPrayer below.
+// Records that this user has seen (and passed on) the invitation, for the
+// admin "responded" analytics — the card itself now pops up on every app
+// open regardless of this timestamp; it's tracking only, not a gate.
+// Called on "Maybe Later" and implicitly by recordGospelPrayer below.
 export async function dismissGospelInvite() {
   const { supabase, user } = await requireUser();
 
