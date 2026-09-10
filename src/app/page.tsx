@@ -27,23 +27,35 @@ export default async function HomePage(props: PageProps<"/">) {
     : searchParams.gospel_invite;
   const showGospelInvite = gospelInviteParam === "1";
 
+  // findJourneyMeta only depends on journeySlug (from getCurrentJourneyState),
+  // not on the profile/commitment/prayerMovement queries below it — chaining
+  // it off that one promise, then awaiting everything together, lets it run
+  // concurrently with those instead of waiting for all of them to finish
+  // first. Every serial round trip here is a few hundred ms on top of the
+  // two Supabase Auth calls (middleware + getAuthedUser) already paid above.
+  const journeyState = getCurrentJourneyState(supabase, user.id);
+  const journeyMeta = journeyState.then(({ journeySlug }) =>
+    findJourneyMeta(supabase, journeySlug),
+  );
+
   const [
     { progress, journeySlug },
     { data: profile },
     commitment,
     prayerMovement,
+    journey,
   ] = await Promise.all([
-    getCurrentJourneyState(supabase, user.id),
-    supabase
-      .from("profiles")
-      .select("display_name, avatar_url")
-      .eq("id", user.id)
-      .single(),
-    getActiveCommitment(supabase, user.id),
-    getActivePrayerMovement(supabase),
-  ]);
+      journeyState,
+      supabase
+        .from("profiles")
+        .select("display_name, avatar_url")
+        .eq("id", user.id)
+        .single(),
+      getActiveCommitment(supabase, user.id),
+      getActivePrayerMovement(supabase),
+      journeyMeta,
+    ]);
 
-  const journey = await findJourneyMeta(supabase, journeySlug);
   if (!journey) {
     return <WelcomeView />;
   }
