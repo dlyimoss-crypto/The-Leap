@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { requireAdmin } from "@/lib/supabase/authorize";
 
 const RESTORED_STATUS_BY_TYPE: Record<string, string> = {
@@ -160,6 +160,7 @@ export async function createPrayerMovement(formData: FormData) {
   }
 
   revalidatePath("/admin");
+  revalidateTag("prayer-movement", { expire: 0 });
 }
 
 export async function updatePrayerMovement(id: string, formData: FormData) {
@@ -175,6 +176,7 @@ export async function updatePrayerMovement(id: string, formData: FormData) {
   }
 
   revalidatePath("/admin");
+  revalidateTag("prayer-movement", { expire: 0 });
 }
 
 // Only one movement is featured at a time, so activating one archives
@@ -209,6 +211,7 @@ export async function activatePrayerMovement(id: string, formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/prayer-room");
   revalidatePath("/");
+  revalidateTag("prayer-movement", { expire: 0 });
 }
 
 export async function archivePrayerMovement(id: string) {
@@ -226,6 +229,7 @@ export async function archivePrayerMovement(id: string) {
   revalidatePath("/admin");
   revalidatePath("/prayer-room");
   revalidatePath("/");
+  revalidateTag("prayer-movement", { expire: 0 });
 }
 
 export async function deletePrayerMovement(id: string) {
@@ -241,6 +245,7 @@ export async function deletePrayerMovement(id: string) {
   }
 
   revalidatePath("/admin");
+  revalidateTag("prayer-movement", { expire: 0 });
 }
 
 export async function approveAuthorApplication(

@@ -1,12 +1,15 @@
 import { getAuthedUser } from "@/lib/supabase/authorize";
-import { findAvailableJourneys, findJourneyMeta } from "@/lib/content/journeys-repo";
+import {
+  findAvailableJourneysCached,
+  findJourneyMetaCached,
+} from "@/lib/content/journeys-repo";
 import { getCurrentJourneyState } from "@/lib/supabase/journey-progress";
 import {
   commitmentItemsDone,
   COMMITMENT_ITEMS,
   getActiveCommitment,
 } from "@/lib/supabase/commitments";
-import { getActivePrayerMovement } from "@/lib/supabase/prayer-movements";
+import { getActivePrayerMovementCached } from "@/lib/supabase/prayer-movements";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { WelcomeView } from "./welcome-view";
@@ -35,7 +38,7 @@ export default async function HomePage(props: PageProps<"/">) {
   // two Supabase Auth calls (middleware + getAuthedUser) already paid above.
   const journeyState = getCurrentJourneyState(supabase, user.id);
   const journeyMeta = journeyState.then(({ journeySlug }) =>
-    findJourneyMeta(supabase, journeySlug),
+    findJourneyMetaCached(journeySlug),
   );
 
   const [
@@ -52,7 +55,7 @@ export default async function HomePage(props: PageProps<"/">) {
         .eq("id", user.id)
         .single(),
       getActiveCommitment(supabase, user.id),
-      getActivePrayerMovement(supabase),
+      getActivePrayerMovementCached(),
       journeyMeta,
     ]);
 
@@ -71,7 +74,7 @@ export default async function HomePage(props: PageProps<"/">) {
     teaser?: string | null;
   } | null = null;
   if (progress?.completed_at) {
-    const available = await findAvailableJourneys(supabase);
+    const available = await findAvailableJourneysCached();
     const match = available.find((j) => j.slug !== journeySlug) ?? null;
     nextJourney = match
       ? {

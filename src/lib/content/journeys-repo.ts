@@ -1,4 +1,6 @@
+import { createClient as createSupabaseJsClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { unstable_cache } from "next/cache";
 import {
   getJourneyMeta,
   getJourneySession,
@@ -128,3 +130,28 @@ export async function findAvailableJourneys(
     ...(data ?? []).map(mapDbJourney),
   ];
 }
+
+// "published journeys are publicly readable" (migration 0018) — same result
+// for every user, so a plain anon client (rather than the caller's
+// cookie-bound one) lets these be cached across requests/users instead of
+// hitting Supabase on every Home render. Admin's journey create/update/
+// publish/delete actions call revalidateTag("journeys") to invalidate
+// immediately; the 60s revalidate is just a safety net.
+function publicJourneysClient() {
+  return createSupabaseJsClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+}
+
+export const findJourneyMetaCached = unstable_cache(
+  async (slug: string) => findJourneyMeta(publicJourneysClient(), slug),
+  ["journey-meta"],
+  { tags: ["journeys"], revalidate: 60 },
+);
+
+export const findAvailableJourneysCached = unstable_cache(
+  async () => findAvailableJourneys(publicJourneysClient()),
+  ["available-journeys"],
+  { tags: ["journeys"], revalidate: 60 },
+);

@@ -1,4 +1,6 @@
+import { createClient as createSupabaseJsClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { unstable_cache } from "next/cache";
 
 export type PrayerMovement = {
   id: string;
@@ -35,6 +37,27 @@ export async function getActivePrayerMovement(
 
   return data ?? null;
 }
+
+// "active prayer movements are publicly readable" (migration 0023) — this
+// is the exact same row for every visitor, so it doesn't need the caller's
+// own session to read it. A plain anon client here (instead of the
+// per-request cookie-bound one) lets unstable_cache actually reuse the
+// result across requests/users instead of re-fetching on every Home or
+// Prayer Room render. Admin's create/update/activate/archive/delete actions
+// call revalidateTag("prayer-movement") to invalidate this immediately;
+// the 60s revalidate is just a safety net.
+function publicPrayerMovementsClient() {
+  return createSupabaseJsClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+}
+
+export const getActivePrayerMovementCached = unstable_cache(
+  async () => getActivePrayerMovement(publicPrayerMovementsClient()),
+  ["active-prayer-movement"],
+  { tags: ["prayer-movement"], revalidate: 60 },
+);
 
 export async function getPrayerMovementParticipation(
   supabase: SupabaseClient,

@@ -4,7 +4,7 @@ import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
 import {
-  getActivePrayerMovement,
+  getActivePrayerMovementCached,
   getPrayerMovementParticipation,
 } from "@/lib/supabase/prayer-movements";
 import { PrayerComposer } from "./prayer-composer";
@@ -48,7 +48,7 @@ export default async function PrayerRoomPage(
 
   const { supabase, user } = await requireUser();
 
-  const activeMovement = await getActivePrayerMovement(supabase);
+  const activeMovement = await getActivePrayerMovementCached();
   const movementParticipation = activeMovement
     ? await getPrayerMovementParticipation(supabase, activeMovement.id, user.id)
     : null;
