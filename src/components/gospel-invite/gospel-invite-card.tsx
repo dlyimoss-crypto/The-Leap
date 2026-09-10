@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Heart, PartyPopper, CheckCircle2, Compass, MessageCircle, BookOpen, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HubCard } from "@/components/hub-card";
@@ -19,6 +20,17 @@ export function GospelInviteCard({
   const [open, setOpen] = useState(shouldShow);
   const [step, setStep] = useState<"invite" | "began">("invite");
   const [, startTransition] = useTransition();
+  const router = useRouter();
+
+  // Home renders this with shouldShow driven by the one-shot
+  // ?gospel_invite=1 redirect param (see sign-in/actions.ts). Strip it right
+  // away so refreshing or revisiting "/" in the same session doesn't
+  // re-trigger the card.
+  useEffect(() => {
+    if (shouldShow) {
+      router.replace("/", { scroll: false });
+    }
+  }, [shouldShow, router]);
 
   if (!open) {
     return null;
@@ -38,9 +50,8 @@ export function GospelInviteCard({
     });
   }
 
-  // Since the card now pops up on every open (not just once), anyone who
-  // has already prayed the prayer needs a one-tap way out instead of
-  // stepping back through "invite" each time.
+  // Anyone who has already prayed the prayer in a prior session needs a
+  // one-tap way out instead of stepping back through "invite".
   function handleClose() {
     if (step === "invite") {
       handleMaybeLater();

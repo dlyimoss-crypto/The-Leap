@@ -22,7 +22,7 @@ export async function signIn(
     return { error: error.message };
   }
 
-  redirect("/");
+  redirect("/?gospel_invite=1");
 }
 
 export async function signUp(
@@ -53,7 +53,7 @@ export async function signUp(
     };
   }
 
-  redirect("/");
+  redirect("/?gospel_invite=1");
 }
 
 export async function signOut() {

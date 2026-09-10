@@ -12,12 +12,20 @@ import { getDictionary } from "@/lib/i18n/dictionaries";
 import { WelcomeView } from "./welcome-view";
 import { DashboardView } from "./dashboard-view";
 
-export default async function HomePage() {
+export default async function HomePage(props: PageProps<"/">) {
   const { supabase, user } = await getAuthedUser();
 
   if (!user) {
     return <WelcomeView />;
   }
+
+  // Sign-in/sign-up redirect here with ?gospel_invite=1 so the card shows
+  // once per sign-in event, not on every Home render — see sign-in/actions.ts.
+  const searchParams = await props.searchParams;
+  const gospelInviteParam = Array.isArray(searchParams.gospel_invite)
+    ? searchParams.gospel_invite[0]
+    : searchParams.gospel_invite;
+  const showGospelInvite = gospelInviteParam === "1";
 
   const [
     { progress, journeySlug },
@@ -77,7 +85,7 @@ export default async function HomePage() {
           : null
       }
       prayerMovement={prayerMovement}
-      showGospelInvite
+      showGospelInvite={showGospelInvite}
     />
   );
 }
