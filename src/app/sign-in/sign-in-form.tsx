@@ -9,6 +9,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
+import { COUNTRIES } from "@/lib/countries";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { signIn, signUp, type AuthState } from "./actions";
 
@@ -68,6 +69,28 @@ function AuthFields({
           <Field>
             <FieldLabel htmlFor="displayName">{dict.name}</FieldLabel>
             <Input id="displayName" name="displayName" autoComplete="name" />
+          </Field>
+        )}
+        {!isSignIn && (
+          <Field>
+            <FieldLabel htmlFor="nationality">{dict.nationality}</FieldLabel>
+            <select
+              id="nationality"
+              name="nationality"
+              autoComplete="country"
+              required
+              defaultValue=""
+              className="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30"
+            >
+              <option value="" disabled>
+                {dict.selectNationality}
+              </option>
+              {COUNTRIES.map((country) => (
+                <option key={country.code} value={country.code}>
+                  {country.name}
+                </option>
+              ))}
+            </select>
           </Field>
         )}
         <Field>

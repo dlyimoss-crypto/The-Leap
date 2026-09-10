@@ -42,6 +42,8 @@ export type Dictionary = {
     newHere: string;
     alreadyHaveAccount: string;
     name: string;
+    nationality: string;
+    selectNationality: string;
     email: string;
     password: string;
     signInButton: string;
@@ -154,6 +156,8 @@ const en: Dictionary = {
     newHere: "New here? Create an account",
     alreadyHaveAccount: "Already have an account? Sign in",
     name: "Name",
+    nationality: "Nationality",
+    selectNationality: "Select your country",
     email: "Email",
     password: "Password",
     signInButton: "Sign in",
@@ -270,6 +274,8 @@ const sw: Dictionary = {
     newHere: "Mgeni hapa? Fungua akaunti",
     alreadyHaveAccount: "Una akaunti tayari? Ingia",
     name: "Jina",
+    nationality: "Uraia",
+    selectNationality: "Chagua nchi yako",
     email: "Barua pepe",
     password: "Nywila",
     signInButton: "Ingia",

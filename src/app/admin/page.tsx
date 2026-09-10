@@ -23,6 +23,7 @@ import { ChipListInput } from "@/components/admin/chip-list-input";
 import { SuggestibleTextarea } from "@/components/admin/suggestible-textarea";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/supabase/authorize";
+import { COUNTRIES, countryFlag } from "@/lib/countries";
 import { getDevotionStatus } from "@/lib/devotion";
 import { getPrayerMovementDaysLeft } from "@/lib/supabase/prayer-movements";
 import {
@@ -136,6 +137,7 @@ type ProfileRow = {
 type ProfileEmailRow = {
   id: string;
   email: string;
+  nationality: string | null;
 };
 
 type AuthorApplicationRow = {
@@ -567,7 +569,7 @@ async function UsersList() {
         .returns<ProfileRow[]>(),
       supabase
         .from("profile_emails")
-        .select("id, email")
+        .select("id, email, nationality")
         .returns<ProfileEmailRow[]>(),
     ]);
 
@@ -579,6 +581,10 @@ async function UsersList() {
   }
 
   const emailById = new Map((emails ?? []).map((e) => [e.id, e.email]));
+  const nationalityById = new Map(
+    (emails ?? []).map((e) => [e.id, e.nationality]),
+  );
+  const countryNameByCode = new Map(COUNTRIES.map((c) => [c.code, c.name]));
   const rows = profiles ?? [];
   const prayedCount = rows.filter((p) => p.gospel_prayer_at).length;
   const maybeLaterCount = rows.filter(
@@ -628,8 +634,19 @@ async function UsersList() {
                     <div>
                       <div>{p.display_name ?? "(no name)"}</div>
                       {emailById.get(p.id) && (
-                        <div className="text-xs text-muted-foreground">
-                          {emailById.get(p.id)}
+                        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                          <span>{emailById.get(p.id)}</span>
+                          {nationalityById.get(p.id) && (
+                            <span
+                              title={
+                                countryNameByCode.get(
+                                  nationalityById.get(p.id)!,
+                                ) ?? nationalityById.get(p.id)!
+                              }
+                            >
+                              {countryFlag(nationalityById.get(p.id)!)}
+                            </span>
+                          )}
                         </div>
                       )}
                     </div>

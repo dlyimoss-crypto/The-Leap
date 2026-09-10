@@ -2,6 +2,9 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { COUNTRIES } from "@/lib/countries";
+
+const VALID_COUNTRY_CODES = new Set(COUNTRIES.map((c) => c.code));
 
 export type AuthState = { error?: string };
 
@@ -32,13 +35,15 @@ export async function signUp(
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
   const displayName = String(formData.get("displayName") ?? "").trim();
+  const nationalityInput = String(formData.get("nationality") ?? "").trim().toUpperCase();
+  const nationality = VALID_COUNTRY_CODES.has(nationalityInput) ? nationalityInput : null;
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
-      data: { display_name: displayName || null },
+      data: { display_name: displayName || null, nationality },
     },
   });
 
