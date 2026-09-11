@@ -125,11 +125,8 @@ const en: Dictionary = {
     button: "Companion",
     intents: {
       "new-believer": "I just prayed to receive Jesus",
-      pray: "Pray with me",
       scripture: "Help me understand Scripture",
       devotion: "Reflect on today's devotion",
-      apply: "Help me apply this",
-      encourage: "Encourage me",
       "next-step": "Help me take my next step",
       materials: "Get Christian materials",
     },
@@ -243,11 +240,8 @@ const sw: Dictionary = {
     button: "Rafiki",
     intents: {
       "new-believer": "Nimeomba kumpokea Yesu",
-      pray: "Niombee",
       scripture: "Nisaidie kuelewa Maandiko",
       devotion: "Tafakari kuhusu ibada ya leo",
-      apply: "Nisaidie kutumia hili",
-      encourage: "Nitie moyo",
       "next-step": "Nisaidie kuchukua hatua yangu inayofuata",
       materials: "Pata vitabu vya Kikristo",
     },

@@ -1,9 +1,6 @@
 import {
-  HandHeart,
   BookOpen,
   Sparkles,
-  CheckCircle2,
-  HeartHandshake,
   Compass,
   Library,
   Flower2,
@@ -28,12 +25,6 @@ export const COMPANION_INTENTS: CompanionIntent[] = [
       "I just prayed to receive Jesus. Where do I begin? I'm not sure yet whether I'm just beginning to follow Jesus, want to understand the Bible, want to learn how to pray, want to grow in my faith, or just have questions about Jesus — can you help me figure out where to start?",
   },
   {
-    slug: "pray",
-    label: "Pray with me",
-    icon: HandHeart,
-    message: "Will you help me pray about what's on my heart right now?",
-  },
-  {
     slug: "scripture",
     label: "Help me understand Scripture",
     icon: BookOpen,
@@ -44,18 +35,6 @@ export const COMPANION_INTENTS: CompanionIntent[] = [
     label: "Reflect on today's devotion",
     icon: Sparkles,
     message: "Can you help me reflect on today's devotion?",
-  },
-  {
-    slug: "apply",
-    label: "Help me apply this",
-    icon: CheckCircle2,
-    message: "Can you help me apply what I'm learning to my life right now?",
-  },
-  {
-    slug: "encourage",
-    label: "Encourage me",
-    icon: HeartHandshake,
-    message: "I could use some encouragement right now.",
   },
   {
     slug: "next-step",
