@@ -83,7 +83,7 @@ export default async function CommunityPage(
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
       <PatternBorder />
-      <BackLink href="/connect" label="Connect" />
+      <BackLink href="/" label="Home" />
       <h1 className="text-2xl font-heading font-semibold">Community</h1>
 
       <Composer prompt={prompt} />

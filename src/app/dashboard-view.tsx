@@ -3,7 +3,7 @@ import {
   LogOut,
   BookOpen,
   Sparkles,
-  MessageCircle,
+  Users,
   ArrowRight,
   Flag,
   HeartHandshake,
@@ -378,16 +378,16 @@ export function DashboardView({
       </Link>
 
       <Link
-        href="/companion"
+        href="/community"
         className="flex items-center gap-3 rounded-xl border bg-card p-4 hover:bg-muted/50"
       >
         <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
-          <MessageCircle className="size-4" />
+          <Users className="size-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold">{dict.dashboard.leapCompanion}</p>
+          <p className="text-sm font-semibold">{dict.dashboard.community}</p>
           <p className="text-xs text-muted-foreground">
-            {dict.dashboard.askForHelp}
+            {dict.dashboard.joinTheConversation}
           </p>
         </div>
       </Link>

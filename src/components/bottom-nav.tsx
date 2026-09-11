@@ -22,7 +22,7 @@ const BASE_ITEMS = [
     icon: Users,
     isActive: (pathname: string) =>
       pathname.startsWith("/connect") ||
-      pathname.startsWith("/community") ||
+      pathname.startsWith("/companion") ||
       pathname.startsWith("/prayer-room"),
   },
   {

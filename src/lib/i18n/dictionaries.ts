@@ -82,8 +82,8 @@ export type Dictionary = {
     makeACommitment: string;
     keptThisWeek: (done: number, total: number) => string;
     studyPrayShare: string;
-    leapCompanion: string;
-    askForHelp: string;
+    community: string;
+    joinTheConversation: string;
   };
   gospelInvite: {
     heading: string;
@@ -197,8 +197,8 @@ const en: Dictionary = {
     makeACommitment: "Make a commitment",
     keptThisWeek: (done, total) => `${done} of ${total} kept this week`,
     studyPrayShare: "Study, pray, and share the gospel this week.",
-    leapCompanion: "Leap Companion",
-    askForHelp: "Ask for help, prayer, or your next step.",
+    community: "Community",
+    joinTheConversation: "Encourage, share, and grow together.",
   },
   gospelInvite: {
     heading: "Do You Know Jesus?",
@@ -319,8 +319,8 @@ const sw: Dictionary = {
     keptThisWeek: (done, total) =>
       `${done} kati ya ${total} zimetimizwa wiki hii`,
     studyPrayShare: "Jifunze, omba, na shiriki injili wiki hii.",
-    leapCompanion: "Rafiki wa Leap",
-    askForHelp: "Omba msaada, maombi, au hatua yako ifuatayo.",
+    community: "Jumuiya",
+    joinTheConversation: "Tia moyo, shiriki, na kukua pamoja.",
   },
   gospelInvite: {
     heading: "Je, Unamjua Yesu?",
