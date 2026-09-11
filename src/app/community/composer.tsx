@@ -1,6 +1,7 @@
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { getCommunityPlaceholder } from "@/lib/content/community-placeholder-prompts";
 import { createPost } from "./actions";
 
 export function Composer({ prompt }: { prompt: string | null }) {
@@ -16,7 +17,7 @@ export function Composer({ prompt }: { prompt: string | null }) {
       )}
       <Textarea
         name="body"
-        placeholder={prompt ?? "Share what's on your mind…"}
+        placeholder={prompt ?? getCommunityPlaceholder(new Date())}
         required
         rows={2}
       />
