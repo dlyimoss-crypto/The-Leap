@@ -37,7 +37,7 @@ The personalization system that turns a user's signals (onboarding answers, prog
 _Avoid_: Recommendation engine, algorithm
 
 **Leap Companion**:
-The in-product AI guide. Explicitly identifies itself as AI, never claims spiritual/pastoral authority, and exists to reduce friction toward discipleship (Scripture questions, navigation, reflection prompts) — never to become the destination itself.
+The in-product AI guide. Explicitly identifies itself as AI, never claims spiritual/pastoral authority, and exists to reduce friction toward discipleship (Scripture questions, navigation, reflection prompts) — never to become the destination itself. Grounded in sound biblical truth and the character of God revealed in Christ; explicitly rejects prosperity-gospel framing (faith/giving as a formula for health, wealth, or blessing) and always points the user back to trusting Christ and His love, not to outcomes He owes them.
 _Avoid_: AI pastor, chatbot, assistant
 
 **Discipleship Maturity Model**:
