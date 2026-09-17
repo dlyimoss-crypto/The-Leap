@@ -6,6 +6,12 @@ import Cropper, { type Area } from "react-easy-crop";
 import { Camera } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { updateAvatar } from "./actions";
 
@@ -149,7 +155,34 @@ export function AvatarCropper({
 
   return (
     <div className="flex items-center gap-4">
-      <Avatar name={displayName} src={avatarUrl} className="size-16 text-lg" />
+      {avatarUrl ? (
+        <Dialog>
+          <DialogTrigger
+            className="cursor-zoom-in rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            aria-label={dict.viewPhoto}
+          >
+            <Avatar
+              name={displayName}
+              src={avatarUrl}
+              className="size-16 text-lg"
+            />
+          </DialogTrigger>
+          <DialogContent
+            showCloseButton
+            className="flex max-w-sm items-center justify-center bg-transparent p-0 ring-0 sm:max-w-md"
+          >
+            <DialogTitle className="sr-only">{dict.viewPhoto}</DialogTitle>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={avatarUrl}
+              alt=""
+              className="max-h-[80vh] w-full rounded-xl object-contain"
+            />
+          </DialogContent>
+        </Dialog>
+      ) : (
+        <Avatar name={displayName} src={avatarUrl} className="size-16 text-lg" />
+      )}
       <div className="space-y-1.5">
         <Button
           type="button"

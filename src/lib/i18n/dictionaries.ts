@@ -34,6 +34,7 @@ export type Dictionary = {
     savePhoto: string;
     saving: string;
     zoom: string;
+    viewPhoto: string;
   };
   signIn: {
     back: string;
@@ -145,6 +146,7 @@ const en: Dictionary = {
     savePhoto: "Save photo",
     saving: "Saving…",
     zoom: "Zoom",
+    viewPhoto: "View larger photo",
   },
   signIn: {
     back: "Back",
@@ -260,6 +262,7 @@ const sw: Dictionary = {
     savePhoto: "Hifadhi picha",
     saving: "Inahifadhi…",
     zoom: "Kuza",
+    viewPhoto: "Ona picha kubwa",
   },
   signIn: {
     back: "Rudi",
