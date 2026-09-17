@@ -27,7 +27,15 @@ export async function updateSession(request: NextRequest) {
 
   // Refreshes the session cookie if it's expired. Required reading for any
   // Supabase + Next.js middleware — skipping this call is a silent no-op.
-  await supabase.auth.getUser();
+  //
+  // Swallow errors here: a transient network blip or refresh-token race
+  // shouldn't drop the existing cookie. Worst case this request sees a
+  // stale session and the next proxy pass refreshes it.
+  try {
+    await supabase.auth.getUser();
+  } catch {
+    // Leave supabaseResponse (and the untouched request cookies) as-is.
+  }
 
   return supabaseResponse;
 }

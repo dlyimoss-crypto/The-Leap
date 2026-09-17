@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { redirect } from "next/navigation";
+import { isAuthRetryableFetchError } from "@supabase/supabase-js";
 import { createClient } from "./server";
 
 /**
@@ -8,14 +9,21 @@ import { createClient } from "./server";
  * every request paid for auth.getUser()'s network round trip (a real call to
  * Supabase Auth, not a local JWT decode) two or three times over. `cache()`
  * makes every caller within one request share the same in-flight call.
+ *
+ * A network blip or refresh-token race is retried once rather than treated
+ * as "signed out" — requireUser() redirects to /sign-in on a null user, and
+ * a transient failure shouldn't cost a real session its sign-in.
  */
 export const getAuthedUser = cache(async () => {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
-  return { supabase, user };
+  let { data, error } = await supabase.auth.getUser();
+
+  if (error && isAuthRetryableFetchError(error)) {
+    ({ data, error } = await supabase.auth.getUser());
+  }
+
+  return { supabase, user: data.user };
 });
 
 /**
