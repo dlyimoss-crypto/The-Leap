@@ -5,6 +5,10 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { BottomNav } from "@/components/bottom-nav";
 import { CompanionLauncher } from "@/components/companion-launcher";
 import { getAuthedUser, getProfile } from "@/lib/supabase/authorize";
+import {
+  getAdminNotificationCounts,
+  totalAdminNotificationCount,
+} from "@/lib/supabase/admin-notifications";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import "./globals.css";
@@ -60,12 +64,18 @@ export const viewport: Viewport = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const { user } = await getAuthedUser();
+  const { supabase, user } = await getAuthedUser();
 
   let isAdmin = false;
+  let adminNotificationCount = 0;
   if (user) {
     const profile = await getProfile(user.id);
     isAdmin = profile?.role === "admin";
+    if (isAdmin) {
+      adminNotificationCount = totalAdminNotificationCount(
+        await getAdminNotificationCounts(supabase),
+      );
+    }
   }
 
   const locale = await getLocale();
@@ -86,7 +96,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             {children}
           </div>
           {user && <CompanionLauncher dict={dict.companion} />}
-          {user && <BottomNav isAdmin={isAdmin} dict={dict.nav} />}
+          {user && (
+            <BottomNav
+              isAdmin={isAdmin}
+              adminNotificationCount={adminNotificationCount}
+              dict={dict.nav}
+            />
+          )}
         </ThemeProvider>
       </body>
     </html>

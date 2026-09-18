@@ -23,6 +23,7 @@ import { ChipListInput } from "@/components/admin/chip-list-input";
 import { SuggestibleTextarea } from "@/components/admin/suggestible-textarea";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/supabase/authorize";
+import { getAdminNotificationCounts } from "@/lib/supabase/admin-notifications";
 import { COUNTRIES, countryFlag } from "@/lib/countries";
 import { getDevotionStatus } from "@/lib/devotion";
 import { getPrayerMovementDaysLeft } from "@/lib/supabase/prayer-movements";
@@ -261,21 +262,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
   await requireAdmin();
 
   const supabase = await createClient();
-  const [{ count: openReportsCount }, { count: pendingApplicationsCount }, { count: pendingBooksCount }] =
-    await Promise.all([
-      supabase
-        .from("reports")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "open"),
-      supabase
-        .from("author_applications")
-        .select("id", { count: "exact", head: true })
-        .in("status", ["pending", "more_info_requested"]),
-      supabase
-        .from("books")
-        .select("id", { count: "exact", head: true })
-        .eq("status", "pending_review"),
-    ]);
+  const { openReportsCount, pendingApplicationsCount, pendingBooksCount } =
+    await getAdminNotificationCounts(supabase);
 
   const booksNotificationCount =
     (pendingApplicationsCount ?? 0) + (pendingBooksCount ?? 0);

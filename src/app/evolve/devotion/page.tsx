@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { Lock, Sparkles } from "lucide-react";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
@@ -32,14 +32,52 @@ export default async function DevotionPage(
     ? searchParams.id[0]
     : searchParams.id;
 
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
 
   const today = new Date().toISOString().slice(0, 10);
 
-  let featured: DevotionRow | null = null;
-  let past: DevotionRow[] = [];
+  const { data: todaysRow, error: todaysError } = await supabase
+    .from("devotions")
+    .select(
+      "id, title, scripture_reference, body, reflection, prayer, practice, publish_date",
+    )
+    .lte("publish_date", today)
+    .order("publish_date", { ascending: false })
+    .limit(1)
+    .maybeSingle<DevotionRow>();
 
-  if (idParam) {
+  if (todaysError) {
+    console.error("Failed to load today's devotion", todaysError);
+  }
+
+  const isArchiveRequest = Boolean(idParam) && idParam !== todaysRow?.id;
+
+  const { data: existingChoice } = await supabase
+    .from("devotion_archive_reads")
+    .select("devotion_id")
+    .eq("user_id", user.id)
+    .eq("read_date", today)
+    .maybeSingle<{ devotion_id: string }>();
+
+  let featured: DevotionRow | null = null;
+  // Set only when an archive pick was requested but a *different* one was
+  // already chosen today — used to render the locked state instead of the
+  // devotion, and to grey out the rest of the archive list below.
+  let lockedOutUntilTomorrow = false;
+  let chosenArchiveId: string | null = existingChoice?.devotion_id ?? null;
+
+  if (!isArchiveRequest) {
+    featured = todaysRow ?? null;
+  } else if (!existingChoice) {
+    const { error: insertError } = await supabase
+      .from("devotion_archive_reads")
+      .insert({ user_id: user.id, read_date: today, devotion_id: idParam });
+
+    if (insertError) {
+      console.error("Failed to record devotion archive pick", insertError);
+    }
+    chosenArchiveId = idParam ?? null;
+
     const { data } = await supabase
       .from("devotions")
       .select(
@@ -48,37 +86,31 @@ export default async function DevotionPage(
       .eq("id", idParam)
       .maybeSingle<DevotionRow>();
     featured = data ?? null;
-
-    const { data: pastRows } = await supabase
+  } else if (existingChoice.devotion_id === idParam) {
+    const { data } = await supabase
       .from("devotions")
       .select(
         "id, title, scripture_reference, body, reflection, prayer, practice, publish_date",
       )
-      .lte("publish_date", today)
-      .neq("id", idParam)
-      .order("publish_date", { ascending: false })
-      .limit(10)
-      .returns<DevotionRow[]>();
-    past = pastRows ?? [];
+      .eq("id", idParam)
+      .maybeSingle<DevotionRow>();
+    featured = data ?? null;
   } else {
-    const { data, error } = await supabase
-      .from("devotions")
-      .select(
-        "id, title, scripture_reference, body, reflection, prayer, practice, publish_date",
-      )
-      .lte("publish_date", today)
-      .order("publish_date", { ascending: false })
-      .limit(11)
-      .returns<DevotionRow[]>();
-
-    if (error) {
-      console.error("Failed to load devotions", error);
-    }
-
-    const rows = data ?? [];
-    featured = rows[0] ?? null;
-    past = rows.slice(1);
+    lockedOutUntilTomorrow = true;
   }
+
+  const { data: pastRows } = await supabase
+    .from("devotions")
+    .select(
+      "id, title, scripture_reference, body, reflection, prayer, practice, publish_date",
+    )
+    .lte("publish_date", today)
+    .neq("id", featured?.id ?? todaysRow?.id ?? "")
+    .order("publish_date", { ascending: false })
+    .limit(10)
+    .returns<DevotionRow[]>();
+
+  const past = pastRows ?? [];
 
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-6 overflow-hidden px-6 py-10">
@@ -93,7 +125,24 @@ export default async function DevotionPage(
         </p>
       </div>
 
-      {featured ? (
+      {lockedOutUntilTomorrow ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-3 py-12 text-center">
+          <Lock className="size-8 text-muted-foreground/50" />
+          <h2 className="text-lg font-heading font-semibold">
+            You&apos;ve already picked one from the archive today
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            You can read one past devotion a day — this one unlocks again
+            tomorrow. Today&apos;s devotion is still open below.
+          </p>
+          <Link
+            href="/evolve/devotion"
+            className="text-sm font-medium text-primary underline underline-offset-4"
+          >
+            Back to today&apos;s devotion
+          </Link>
+        </div>
+      ) : featured ? (
         <div className="space-y-4 rounded-xl border bg-card p-5">
           <div className="space-y-1">
             <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
@@ -164,20 +213,38 @@ export default async function DevotionPage(
             Past Devotions
           </p>
           <div className="divide-y rounded-xl border bg-card">
-            {past.map((d) => (
-              <Link
-                key={d.id}
-                href={`/evolve/devotion?id=${d.id}`}
-                className="flex items-center justify-between gap-3 p-3 hover:bg-muted/50"
-              >
-                <span className="truncate text-sm font-medium">
-                  {d.title}
-                </span>
-                <span className="shrink-0 font-mono text-[10.5px] text-muted-foreground">
-                  {d.publish_date}
-                </span>
-              </Link>
-            ))}
+            {past.map((d) => {
+              const locked =
+                chosenArchiveId !== null && chosenArchiveId !== d.id;
+
+              return locked ? (
+                <div
+                  key={d.id}
+                  className="flex items-center justify-between gap-3 p-3 text-muted-foreground"
+                >
+                  <span className="truncate text-sm font-medium">
+                    {d.title}
+                  </span>
+                  <span className="flex shrink-0 items-center gap-1 text-[10.5px]">
+                    <Lock className="size-3" />
+                    Tomorrow
+                  </span>
+                </div>
+              ) : (
+                <Link
+                  key={d.id}
+                  href={`/evolve/devotion?id=${d.id}`}
+                  className="flex items-center justify-between gap-3 p-3 hover:bg-muted/50"
+                >
+                  <span className="truncate text-sm font-medium">
+                    {d.title}
+                  </span>
+                  <span className="shrink-0 font-mono text-[10.5px] text-muted-foreground">
+                    {d.publish_date}
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       )}

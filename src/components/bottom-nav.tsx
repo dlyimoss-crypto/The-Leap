@@ -55,9 +55,11 @@ const ADMIN_ITEM = {
 
 export function BottomNav({
   isAdmin,
+  adminNotificationCount = 0,
   dict,
 }: {
   isAdmin: boolean;
+  adminNotificationCount?: number;
   dict: Dictionary["nav"];
 }) {
   const pathname = usePathname();
@@ -79,6 +81,7 @@ export function BottomNav({
       >
         {items.map(({ href, labelKey, icon: Icon, isActive: matches }) => {
           const active = matches(pathname);
+          const showBadge = href === ADMIN_ITEM.href && adminNotificationCount > 0;
           return (
             <Link
               key={href}
@@ -90,7 +93,14 @@ export function BottomNav({
                   : "text-muted-foreground hover:text-foreground",
               )}
             >
-              <Icon className="size-5" strokeWidth={active ? 2.5 : 2} />
+              <span className="relative inline-flex">
+                <Icon className="size-5" strokeWidth={active ? 2.5 : 2} />
+                {showBadge && (
+                  <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-semibold leading-none text-white">
+                    {adminNotificationCount > 99 ? "99+" : adminNotificationCount}
+                  </span>
+                )}
+              </span>
               {dict[labelKey]}
             </Link>
           );
