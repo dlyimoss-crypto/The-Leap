@@ -57,6 +57,7 @@ export default async function JourneySessionPage(
 
   const isLastDay = dayNumber >= journey.durationDays;
   const passages = getScripturePassages(session.scriptureReference);
+  const hasMatchedPassage = passages.some((p) => p.passage);
 
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-6 overflow-hidden px-6 py-10">
@@ -76,22 +77,36 @@ export default async function JourneySessionPage(
           <p className="text-xs font-medium uppercase tracking-wide text-primary">
             Scripture
           </p>
-          {passages.map(({ reference, passage }) =>
-            passage ? (
-              <blockquote
-                key={reference}
-                className="space-y-1 border-l-2 border-primary/30 pl-3"
-              >
-                <p className="text-foreground italic">{passage.text}</p>
-                <cite className="block text-sm text-muted-foreground not-italic">
-                  {passage.reference} ({passage.translation})
-                </cite>
-              </blockquote>
-            ) : (
-              <p key={reference} className="text-sm text-muted-foreground">
-                {reference}
+          {hasMatchedPassage ? (
+            passages.map(({ reference, passage }) =>
+              passage ? (
+                <div
+                  key={reference}
+                  className="space-y-1 rounded-lg border border-primary/20 bg-primary/5 p-3"
+                >
+                  <p className="text-foreground italic">{passage.text}</p>
+                  <cite className="block text-sm text-muted-foreground italic">
+                    {passage.reference} ({passage.translation})
+                  </cite>
+                </div>
+              ) : (
+                <div
+                  key={reference}
+                  className="rounded-lg border border-primary/20 bg-primary/5 p-3"
+                >
+                  <p className="text-foreground italic">{reference}</p>
+                </div>
+              ),
+            )
+          ) : (
+            // None of the ";"-split segments matched the curated dataset —
+            // the reference is likely free text (e.g. a quote containing
+            // semicolons), so show it as one block instead of fragments.
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+              <p className="text-foreground italic">
+                {session.scriptureReference}
               </p>
-            ),
+            </div>
           )}
         </div>
         <Step label="Message">{session.message}</Step>

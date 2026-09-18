@@ -10,7 +10,7 @@ export function Step({
       <p className="text-xs font-medium uppercase tracking-wide text-primary">
         {label}
       </p>
-      <p className="text-foreground">{children}</p>
+      <p className="whitespace-pre-line text-foreground">{children}</p>
     </div>
   );
 }
