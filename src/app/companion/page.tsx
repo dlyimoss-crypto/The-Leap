@@ -16,14 +16,16 @@ type MessageRow = {
 
 function renderMessageContent(content: string) {
   return content
-    .split(/(\*\*[^*]+\*\*)/g)
-    .map((part, i) =>
-      part.startsWith("**") && part.endsWith("**") ? (
-        <strong key={i}>{part.slice(2, -2)}</strong>
-      ) : (
-        part
-      ),
-    );
+    .split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g)
+    .map((part, i) => {
+      if (part.startsWith("**") && part.endsWith("**")) {
+        return <strong key={i}>{part.slice(2, -2)}</strong>;
+      }
+      if (part.startsWith("*") && part.endsWith("*")) {
+        return <em key={i}>{part.slice(1, -1)}</em>;
+      }
+      return part;
+    });
 }
 
 const QUICK_PROMPTS = [
