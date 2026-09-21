@@ -111,8 +111,8 @@ export default async function CompanionPage(
             key={message.id}
             className={
               message.role === "user"
-                ? "ml-auto max-w-[85%] rounded-xl bg-primary px-3 py-2 text-sm text-primary-foreground"
-                : "mr-auto max-w-[85%] rounded-xl border bg-card px-3 py-2 text-sm"
+                ? "ml-auto max-w-[85%] whitespace-pre-wrap rounded-xl bg-primary px-3 py-2 text-sm text-primary-foreground"
+                : "mr-auto max-w-[85%] whitespace-pre-wrap rounded-xl border bg-card px-3 py-2 text-sm"
             }
           >
             {message.content}
