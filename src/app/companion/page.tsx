@@ -14,6 +14,18 @@ type MessageRow = {
   created_at: string;
 };
 
+function renderMessageContent(content: string) {
+  return content
+    .split(/(\*\*[^*]+\*\*)/g)
+    .map((part, i) =>
+      part.startsWith("**") && part.endsWith("**") ? (
+        <strong key={i}>{part.slice(2, -2)}</strong>
+      ) : (
+        part
+      ),
+    );
+}
+
 const QUICK_PROMPTS = [
   {
     icon: BookOpen,
@@ -115,7 +127,7 @@ export default async function CompanionPage(
                 : "mr-auto max-w-[85%] whitespace-pre-wrap rounded-xl border bg-card px-3 py-2 text-sm"
             }
           >
-            {message.content}
+            {renderMessageContent(message.content)}
           </div>
         ))}
       </div>
