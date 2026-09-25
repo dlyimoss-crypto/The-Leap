@@ -16,6 +16,10 @@ npm run dev
 
 Apply the schema in [supabase/migrations/0001_init.sql](supabase/migrations/0001_init.sql) to your Supabase project (SQL editor, or the Supabase CLI).
 
+## Ops
+
+Anthropic API keys expire periodically. When one's about to, run [scripts/rotate-anthropic-key.sh](scripts/rotate-anthropic-key.sh) — it walks you through creating the replacement, updating `.env.local` and Vercel, redeploying, and retiring the old key.
+
 ## Testing
 
 ```bash
