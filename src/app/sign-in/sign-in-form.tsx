@@ -12,9 +12,16 @@ import {
 } from "@/components/ui/field";
 import { COUNTRIES } from "@/lib/countries";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
-import { signIn, signUp, type AuthState } from "./actions";
+import {
+  resendConfirmation,
+  signIn,
+  signUp,
+  type AuthState,
+  type ResendState,
+} from "./actions";
 
 const initialState: AuthState = {};
+const initialResendState: ResendState = {};
 
 type Mode = "sign-in" | "sign-up";
 
@@ -62,6 +69,10 @@ function AuthFields({
     isSignIn ? signIn : signUp,
     initialState,
   );
+
+  if (state.awaitingConfirmation) {
+    return <CheckEmail email={state.awaitingConfirmation} dict={dict} />;
+  }
 
   return (
     <form action={formAction} className="w-full">
@@ -131,5 +142,50 @@ function AuthFields({
         )}
       </FieldGroup>
     </form>
+  );
+}
+
+function CheckEmail({
+  email,
+  dict,
+}: {
+  email: string;
+  dict: Dictionary["signIn"];
+}) {
+  const [state, formAction, pending] = useActionState(
+    resendConfirmation,
+    initialResendState,
+  );
+
+  return (
+    <div className="flex w-full flex-col items-center gap-4 text-center">
+      <h2 className="text-lg font-heading font-semibold">
+        {dict.checkEmailTitle}
+      </h2>
+      <p className="text-sm text-muted-foreground">
+        {dict.checkEmailSentTo}{" "}
+        <span className="font-medium text-foreground">{email}</span>.{" "}
+        {dict.checkEmailBody}
+      </p>
+      <form action={formAction} className="w-full">
+        <input type="hidden" name="email" value={email} />
+        <FieldGroup>
+          {state.error && <FieldError>{state.error}</FieldError>}
+          {state.sent && (
+            <p className="text-sm text-muted-foreground">
+              {dict.confirmationResent}
+            </p>
+          )}
+          <Button
+            type="submit"
+            variant="outline"
+            className="w-full"
+            disabled={pending}
+          >
+            {dict.resendConfirmation}
+          </Button>
+        </FieldGroup>
+      </form>
+    </div>
   );
 }

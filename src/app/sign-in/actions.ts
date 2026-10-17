@@ -7,7 +7,16 @@ import { COUNTRIES } from "@/lib/countries";
 
 const VALID_COUNTRY_CODES = new Set(COUNTRIES.map((c) => c.code));
 
-export type AuthState = { error?: string };
+// awaitingConfirmation holds the email address a confirmation link was sent
+// to — set after sign-up, or when someone signs in before confirming.
+export type AuthState = { error?: string; awaitingConfirmation?: string };
+
+// Where an emailed confirmation link lands. /auth/confirm turns the link
+// into a session, then forwards on to the gospel invite like a sign-in does.
+async function confirmRedirectUrl() {
+  const origin = (await headers()).get("origin") ?? "";
+  return `${origin}/auth/confirm?next=${encodeURIComponent("/?gospel_invite=1")}`;
+}
 
 export async function signIn(
   _prevState: AuthState,
@@ -21,6 +30,10 @@ export async function signIn(
     email,
     password,
   });
+
+  if (error?.code === "email_not_confirmed") {
+    return { awaitingConfirmation: email };
+  }
 
   if (error) {
     return { error: error.message };
@@ -45,6 +58,7 @@ export async function signUp(
     password,
     options: {
       data: { display_name: displayName || null, nationality },
+      emailRedirectTo: await confirmRedirectUrl(),
     },
   });
 
@@ -52,14 +66,35 @@ export async function signUp(
     return { error: error.message };
   }
 
+  // With "Confirm email" on, Supabase holds the session back until the
+  // emailed link is clicked.
   if (!data.session) {
-    return {
-      error:
-        "Account created, but sign-in requires email confirmation, which isn't enabled for this app yet. Contact support.",
-    };
+    return { awaitingConfirmation: email };
   }
 
   redirect("/?gospel_invite=1");
+}
+
+export type ResendState = { error?: string; sent?: boolean };
+
+export async function resendConfirmation(
+  _prevState: ResendState,
+  formData: FormData,
+): Promise<ResendState> {
+  const email = String(formData.get("email") ?? "");
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email,
+    options: { emailRedirectTo: await confirmRedirectUrl() },
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { sent: true };
 }
 
 export type ResetRequestState = { error?: string; sent?: boolean };

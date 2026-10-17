@@ -59,6 +59,11 @@ export type Dictionary = {
     newPasswordTitle: string;
     newPassword: string;
     saveNewPassword: string;
+    checkEmailTitle: string;
+    checkEmailSentTo: string;
+    checkEmailBody: string;
+    resendConfirmation: string;
+    confirmationResent: string;
   };
   dashboard: {
     goodMorning: string;
@@ -185,6 +190,12 @@ const en: Dictionary = {
     newPasswordTitle: "Choose a new password",
     newPassword: "New password",
     saveNewPassword: "Save new password",
+    checkEmailTitle: "Confirm your email",
+    checkEmailSentTo: "We sent a confirmation link to",
+    checkEmailBody:
+      "Open it to finish setting up your account. Check your spam folder if you don't see it.",
+    resendConfirmation: "Resend confirmation email",
+    confirmationResent: "Sent again. Check your inbox.",
   },
   dashboard: {
     goodMorning: "Good morning",
@@ -315,6 +326,12 @@ const sw: Dictionary = {
     newPasswordTitle: "Chagua nywila mpya",
     newPassword: "Nywila mpya",
     saveNewPassword: "Hifadhi nywila mpya",
+    checkEmailTitle: "Thibitisha barua pepe yako",
+    checkEmailSentTo: "Tumetuma kiungo cha uthibitisho kwa",
+    checkEmailBody:
+      "Kifungue ili kukamilisha akaunti yako. Angalia folda ya spam kama hukioni.",
+    resendConfirmation: "Tuma barua ya uthibitisho tena",
+    confirmationResent: "Imetumwa tena. Angalia kisanduku chako.",
   },
   dashboard: {
     goodMorning: "Habari za asubuhi",
