@@ -43,6 +43,15 @@ export function WelcomeView() {
         >
           I already have an account
         </Button>
+        <Button
+          render={<Link href="/forgot-password" />}
+          nativeButton={false}
+          variant="link"
+          size="sm"
+          className="text-white/70"
+        >
+          Forgot my password
+        </Button>
       </div>
     </main>
   );

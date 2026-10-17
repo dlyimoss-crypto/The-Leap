@@ -49,6 +49,16 @@ export type Dictionary = {
     password: string;
     signInButton: string;
     createAccountButton: string;
+    forgotPassword: string;
+    resetTitle: string;
+    resetIntro: string;
+    sendResetLink: string;
+    resetLinkSent: string;
+    resetLinkInvalid: string;
+    backToSignIn: string;
+    newPasswordTitle: string;
+    newPassword: string;
+    saveNewPassword: string;
   };
   dashboard: {
     goodMorning: string;
@@ -162,6 +172,19 @@ const en: Dictionary = {
     password: "Password",
     signInButton: "Sign in",
     createAccountButton: "Create account",
+    forgotPassword: "Forgot my password",
+    resetTitle: "Reset your password",
+    resetIntro:
+      "Enter the email you signed up with and we'll send you a link to choose a new password.",
+    sendResetLink: "Send reset link",
+    resetLinkSent:
+      "If an account exists for that email, a reset link is on its way. Check your inbox (and spam folder).",
+    resetLinkInvalid:
+      "That reset link is invalid or has expired. Please request a new one.",
+    backToSignIn: "Back to sign in",
+    newPasswordTitle: "Choose a new password",
+    newPassword: "New password",
+    saveNewPassword: "Save new password",
   },
   dashboard: {
     goodMorning: "Good morning",
@@ -279,6 +302,19 @@ const sw: Dictionary = {
     password: "Nywila",
     signInButton: "Ingia",
     createAccountButton: "Fungua akaunti",
+    forgotPassword: "Nimesahau nywila yangu",
+    resetTitle: "Badilisha nywila yako",
+    resetIntro:
+      "Weka barua pepe uliyojisajili nayo, tutakutumia kiungo cha kuchagua nywila mpya.",
+    sendResetLink: "Tuma kiungo",
+    resetLinkSent:
+      "Ikiwa akaunti ya barua pepe hiyo ipo, kiungo kimetumwa. Angalia kisanduku chako (na folda ya spam).",
+    resetLinkInvalid:
+      "Kiungo hicho si sahihi au muda wake umeisha. Tafadhali omba kingine.",
+    backToSignIn: "Rudi kuingia",
+    newPasswordTitle: "Chagua nywila mpya",
+    newPassword: "Nywila mpya",
+    saveNewPassword: "Hifadhi nywila mpya",
   },
   dashboard: {
     goodMorning: "Habari za asubuhi",

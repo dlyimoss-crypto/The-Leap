@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { COUNTRIES } from "@/lib/countries";
@@ -59,6 +60,48 @@ export async function signUp(
   }
 
   redirect("/?gospel_invite=1");
+}
+
+export type ResetRequestState = { error?: string; sent?: boolean };
+
+export async function requestPasswordReset(
+  _prevState: ResetRequestState,
+  formData: FormData,
+): Promise<ResetRequestState> {
+  const email = String(formData.get("email") ?? "").trim();
+
+  // The emailed link lands on /auth/confirm, which turns it into a session
+  // and forwards to /reset-password. Built from the request's own origin so
+  // it points at whichever deployment (prod, preview, localhost) sent it.
+  const origin = (await headers()).get("origin") ?? "";
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/confirm?next=/reset-password`,
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  // Same answer whether or not the email has an account, so this form
+  // can't be used to find out who is signed up.
+  return { sent: true };
+}
+
+export async function updatePassword(
+  _prevState: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
+  const password = String(formData.get("password") ?? "");
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  redirect("/");
 }
 
 export async function signOut() {

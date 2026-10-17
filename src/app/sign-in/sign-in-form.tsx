@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -118,6 +119,16 @@ function AuthFields({
         <Button type="submit" className="w-full" disabled={pending}>
           {isSignIn ? dict.signInButton : dict.createAccountButton}
         </Button>
+        {isSignIn && (
+          <Button
+            render={<Link href="/forgot-password" />}
+            nativeButton={false}
+            variant="link"
+            size="sm"
+          >
+            {dict.forgotPassword}
+          </Button>
+        )}
       </FieldGroup>
     </form>
   );
