@@ -1,17 +1,18 @@
 import Link from "next/link";
-import { Bookmark, BookmarkCheck, Search, ListChecks } from "lucide-react";
+import { redirect } from "next/navigation";
+import { Bookmark, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ComingSoon } from "@/components/coming-soon";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
 import {
+  formatReference,
   getScripture,
-  listCuratedReferences,
+  parseReference,
 } from "@/lib/content/scripture";
-import { TRANSLATIONS } from "@/lib/content/translations";
-import { saveBookmark, removeBookmark } from "./actions";
+import { removeBookmark } from "./actions";
+import { BibleTab, bibleHref } from "./bible-tab";
 
 type Tab = "bible" | "plans" | "favorites";
 
@@ -38,6 +39,13 @@ export default async function ScripturePage(
     tabParam === "plans" || tabParam === "favorites" ? tabParam : "bible";
   const q = (Array.isArray(searchParams.q) ? searchParams.q[0] : searchParams.q) ?? "";
   const ref = Array.isArray(searchParams.ref) ? searchParams.ref[0] : searchParams.ref;
+  const book = Array.isArray(searchParams.book) ? searchParams.book[0] : searchParams.book;
+
+  // A search that is really a reference ("john 3:16") goes straight to it.
+  const searchedRef = q ? parseReference(q) : null;
+  if (searchedRef) {
+    redirect(bibleHref({ ref: formatReference(searchedRef) }));
+  }
 
   const { supabase, user } = await requireUser();
 
@@ -57,13 +65,6 @@ export default async function ScripturePage(
     bookmarks.map((b) => `${b.reference}::${b.translation}`),
   );
 
-  const references = listCuratedReferences().filter((reference) =>
-    reference.toLowerCase().includes(q.toLowerCase()),
-  );
-  const selectedPassage = ref ? getScripture(ref) : null;
-  const isBookmarked = ref
-    ? bookmarkedKeys.has(`${ref}::${selectedPassage?.translation ?? "WEB"}`)
-    : false;
 
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
@@ -93,90 +94,12 @@ export default async function ScripturePage(
       </div>
 
       {tab === "bible" && (
-        <div className="space-y-4">
-          <div className="flex flex-wrap gap-1.5">
-            {TRANSLATIONS.map((translation) => (
-              <Badge
-                key={translation.code}
-                variant={translation.available ? "default" : "outline"}
-                className={translation.available ? undefined : "text-muted-foreground"}
-              >
-                {translation.code}
-                {!translation.available && " · Coming soon"}
-              </Badge>
-            ))}
-          </div>
-
-          <form
-            action="/evolve/scripture"
-            method="GET"
-            className="flex items-center gap-2 rounded-full border bg-card px-3 py-2"
-          >
-            <input type="hidden" name="tab" value="bible" />
-            <Search className="size-4 shrink-0 text-muted-foreground" />
-            <input
-              type="text"
-              name="q"
-              defaultValue={q}
-              placeholder="Search today's curated passages…"
-              className="w-full bg-transparent text-sm outline-none"
-            />
-            <Button type="submit" size="xs" variant="secondary">
-              Search
-            </Button>
-          </form>
-
-          <div className="space-y-1">
-            {references.length === 0 && (
-              <p className="py-6 text-center text-sm text-muted-foreground">
-                No curated passages match &ldquo;{q}&rdquo;.
-              </p>
-            )}
-            {references.map((reference) => (
-              <Link
-                key={reference}
-                href={`/evolve/scripture?tab=bible&q=${encodeURIComponent(q)}&ref=${encodeURIComponent(reference)}`}
-                className={
-                  reference === ref
-                    ? "block rounded-lg bg-primary/10 px-3 py-2 text-sm font-medium text-primary"
-                    : "block rounded-lg px-3 py-2 text-sm hover:bg-muted"
-                }
-              >
-                {reference}
-              </Link>
-            ))}
-          </div>
-
-          {selectedPassage && (
-            <div className="space-y-3 rounded-xl border bg-card p-4">
-              <blockquote className="space-y-1 border-l-2 border-primary/30 pl-3">
-                <p className="text-foreground italic">{selectedPassage.text}</p>
-                <cite className="block text-sm text-muted-foreground not-italic">
-                  {selectedPassage.reference} ({selectedPassage.translation})
-                </cite>
-              </blockquote>
-              <form
-                action={(isBookmarked ? removeBookmark : saveBookmark).bind(
-                  null,
-                  selectedPassage.reference,
-                  selectedPassage.translation,
-                )}
-              >
-                <Button type="submit" size="sm" variant={isBookmarked ? "secondary" : "outline"}>
-                  {isBookmarked ? (
-                    <>
-                      <BookmarkCheck className="size-3.5" /> Saved
-                    </>
-                  ) : (
-                    <>
-                      <Bookmark className="size-3.5" /> Save
-                    </>
-                  )}
-                </Button>
-              </form>
-            </div>
-          )}
-        </div>
+        <BibleTab
+          q={q}
+          refParam={ref}
+          bookParam={book}
+          bookmarkedKeys={bookmarkedKeys}
+        />
       )}
 
       {tab === "plans" && (
@@ -204,17 +127,22 @@ export default async function ScripturePage(
                 key={`${bookmark.reference}::${bookmark.translation}`}
                 className="space-y-2 rounded-xl border bg-card p-4"
               >
-                <p className="text-sm font-semibold">
-                  {bookmark.reference}{" "}
-                  <span className="font-normal text-muted-foreground">
-                    ({bookmark.translation})
-                  </span>
-                </p>
-                {passage && (
-                  <p className="text-sm text-muted-foreground italic">
-                    {passage.text}
+                <Link
+                  href={bibleHref({ ref: bookmark.reference })}
+                  className="block space-y-2"
+                >
+                  <p className="text-sm font-semibold">
+                    {bookmark.reference}{" "}
+                    <span className="font-normal text-muted-foreground">
+                      ({bookmark.translation})
+                    </span>
                   </p>
-                )}
+                  {passage && (
+                    <p className="line-clamp-4 text-sm text-muted-foreground italic">
+                      {passage.text}
+                    </p>
+                  )}
+                </Link>
                 <form
                   action={removeBookmark.bind(
                     null,
