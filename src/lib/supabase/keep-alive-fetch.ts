@@ -13,5 +13,22 @@ const agent = new Agent({
   keepAliveMaxTimeout: 60_000,
 });
 
-export const keepAliveFetch: typeof fetch = (input, init) =>
-  undiciFetch(input as never, { ...init, dispatcher: agent } as never) as unknown as Promise<Response>;
+// The npm undici package doesn't recognise the runtime's built-in FormData
+// and sends it as the literal string "[object FormData]" — which silently
+// broke every Supabase Storage upload (manuscripts, covers, avatars). Encode
+// it with the runtime's own Response, then send the multipart bytes.
+async function encodeFormData(init: RequestInit): Promise<RequestInit> {
+  if (!(init.body instanceof FormData)) {
+    return init;
+  }
+  const encoded = new Response(init.body);
+  const headers = new Headers(init.headers);
+  headers.set("content-type", encoded.headers.get("content-type")!);
+  return { ...init, headers, body: await encoded.arrayBuffer() };
+}
+
+export const keepAliveFetch: typeof fetch = async (input, init) =>
+  undiciFetch(
+    input as never,
+    { ...(await encodeFormData(init ?? {})), dispatcher: agent } as never,
+  ) as unknown as Promise<Response>;
