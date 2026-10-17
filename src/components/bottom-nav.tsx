@@ -65,6 +65,12 @@ export function BottomNav({
   const pathname = usePathname();
   const items = isAdmin ? [...BASE_ITEMS, ADMIN_ITEM] : BASE_ITEMS;
 
+  // The book reader is full-screen with its own Back link; the nav would
+  // sit on top of its page controls.
+  if (/^\/evolve\/books\/[^/]+\/read/.test(pathname)) {
+    return null;
+  }
+
   return (
     <nav
       className={cn(

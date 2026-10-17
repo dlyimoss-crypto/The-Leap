@@ -15,6 +15,15 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString();
 
+// Safari's Lockdown Mode blocks the web fonts PDF.js loads for embedded
+// PDF fonts, so pages render as blank white sheets. Lockdown Mode also
+// removes WebAssembly, which makes it detectable — there, have PDF.js draw
+// glyphs as canvas paths instead of loading fonts. Kept at module scope so
+// <Document> sees a stable options object and doesn't reload the file.
+const DOCUMENT_OPTIONS = {
+  disableFontFace: typeof WebAssembly === "undefined",
+};
+
 const MAX_PAGE_WIDTH = 720;
 
 export function PdfViewer({ src, title }: { src: string; title: string }) {
@@ -61,6 +70,7 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
     >
       <Document
         file={src}
+        options={DOCUMENT_OPTIONS}
         onLoadSuccess={({ numPages }) => {
           setNumPages(numPages);
           setStatus("ready");
