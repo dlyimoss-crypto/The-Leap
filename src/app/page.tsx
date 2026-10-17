@@ -10,6 +10,7 @@ import {
   getActiveCommitment,
 } from "@/lib/supabase/commitments";
 import { getActivePrayerMovementCached } from "@/lib/supabase/prayer-movements";
+import { isTodaysDevotionUnread } from "@/lib/supabase/devotion-reads";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { WelcomeView } from "./welcome-view";
@@ -47,6 +48,7 @@ export default async function HomePage(props: PageProps<"/">) {
     commitment,
     prayerMovement,
     journey,
+    devotionUnread,
   ] = await Promise.all([
       journeyState,
       supabase
@@ -57,6 +59,7 @@ export default async function HomePage(props: PageProps<"/">) {
       getActiveCommitment(supabase, user.id),
       getActivePrayerMovementCached(),
       journeyMeta,
+      isTodaysDevotionUnread(supabase),
     ]);
 
   if (!journey) {
@@ -101,6 +104,7 @@ export default async function HomePage(props: PageProps<"/">) {
       }
       prayerMovement={prayerMovement}
       showGospelInvite={showGospelInvite}
+      devotionUnread={devotionUnread}
     />
   );
 }

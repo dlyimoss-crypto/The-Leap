@@ -3,6 +3,7 @@ import { Lock, Sparkles } from "lucide-react";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
+import { DevotionReminder } from "./devotion-reminder";
 
 type DevotionRow = {
   id: string;
@@ -68,6 +69,20 @@ export default async function DevotionPage(
 
   if (!isArchiveRequest) {
     featured = todaysRow ?? null;
+
+    // Clears the home screen's "new today" badge and tells the reminder
+    // job this reader doesn't need a nudge.
+    if (todaysRow) {
+      const { error: readError } = await supabase
+        .from("devotion_reads")
+        .upsert(
+          { user_id: user.id, devotion_id: todaysRow.id },
+          { onConflict: "user_id,devotion_id", ignoreDuplicates: true },
+        );
+      if (readError) {
+        console.error("Failed to record devotion read", readError);
+      }
+    }
   } else if (!existingChoice) {
     const { error: insertError } = await supabase
       .from("devotion_archive_reads")
@@ -124,6 +139,8 @@ export default async function DevotionPage(
           Pause, reflect and encounter God in today&apos;s thought.
         </p>
       </div>
+
+      <DevotionReminder />
 
       {lockedOutUntilTomorrow ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 py-12 text-center">

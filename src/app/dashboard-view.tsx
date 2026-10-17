@@ -99,6 +99,7 @@ export function DashboardView({
   commitmentProgress,
   prayerMovement,
   showGospelInvite,
+  devotionUnread,
 }: {
   journey: JourneyMeta;
   progress: JourneyProgress | null;
@@ -109,6 +110,7 @@ export function DashboardView({
   commitmentProgress?: { done: number; total: number } | null;
   prayerMovement?: PrayerMovement | null;
   showGospelInvite?: boolean;
+  devotionUnread?: boolean;
 }) {
   const firstName = displayName?.split(" ")[0];
 
@@ -342,8 +344,13 @@ export function DashboardView({
           </Link>
           <Link
             href="/evolve/devotion"
-            className="flex flex-col items-center gap-1.5 rounded-xl border bg-card p-4 text-center hover:bg-muted/50"
+            className="relative flex flex-col items-center gap-1.5 rounded-xl border bg-card p-4 text-center hover:bg-muted/50"
           >
+            {devotionUnread && (
+              <span className="absolute top-2 right-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                {dict.dashboard.devotionNew}
+              </span>
+            )}
             <Sparkles className="size-5 text-primary" />
             <p className="text-sm font-medium">{dict.dashboard.devotion}</p>
             <p className="text-xs text-muted-foreground">

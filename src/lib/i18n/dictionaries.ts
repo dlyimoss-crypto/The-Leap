@@ -79,6 +79,7 @@ export type Dictionary = {
     readGodsWord: string;
     devotion: string;
     growDaily: string;
+    devotionNew: string;
     thisWeeksCommitment: string;
     makeACommitment: string;
     keptThisWeek: (done: number, total: number) => string;
@@ -192,6 +193,7 @@ const en: Dictionary = {
     readGodsWord: "Read God's Word",
     devotion: "Devotion",
     growDaily: "Grow daily",
+    devotionNew: "New today",
     thisWeeksCommitment: "This week's commitment",
     makeACommitment: "Make a commitment",
     keptThisWeek: (done, total) => `${done} of ${total} kept this week`,
@@ -311,6 +313,7 @@ const sw: Dictionary = {
     readGodsWord: "Soma Neno la Mungu",
     devotion: "Ibada",
     growDaily: "Kua kila siku",
+    devotionNew: "Mpya leo",
     thisWeeksCommitment: "Ahadi ya wiki hii",
     makeACommitment: "Weka ahadi",
     keptThisWeek: (done, total) =>
