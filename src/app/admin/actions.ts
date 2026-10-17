@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
+import { parsePriceCents } from "@/lib/book-price";
 import { requireAdmin } from "@/lib/supabase/authorize";
 
 const RESTORED_STATUS_BY_TYPE: Record<string, string> = {
@@ -397,12 +398,7 @@ export async function unpublishBook(bookId: string) {
 export async function updateBookPrice(bookId: string, formData: FormData) {
   const { supabase } = await requireAdmin();
 
-  const raw = String(formData.get("price_usd") ?? "").trim();
-  const value = raw ? Number.parseFloat(raw) : null;
-  const priceCents =
-    value === null || Number.isNaN(value) || value < 0
-      ? null
-      : Math.round(value * 100);
+  const priceCents = parsePriceCents(String(formData.get("price_usd") ?? ""));
 
   const { error } = await supabase
     .from("books")

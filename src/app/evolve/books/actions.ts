@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { parsePriceCents } from "@/lib/book-price";
 import { requireActiveUser } from "@/lib/supabase/authorize";
 import { createClient } from "@/lib/supabase/server";
 
@@ -9,18 +10,6 @@ function parseCategories(raw: string): string[] {
     .split(",")
     .map((c) => c.trim())
     .filter(Boolean);
-}
-
-function parsePriceCents(raw: string): number | null {
-  const trimmed = raw.trim();
-  if (!trimmed) {
-    return null;
-  }
-  const value = Number.parseFloat(trimmed);
-  if (Number.isNaN(value) || value < 0) {
-    return null;
-  }
-  return Math.round(value * 100);
 }
 
 function storagePath(userId: string, file: File): string {
