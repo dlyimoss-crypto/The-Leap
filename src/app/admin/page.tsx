@@ -199,6 +199,17 @@ type EngagementReportRow = {
   gospel_prayers_count: number;
 };
 
+// When app_visits (0033_usage_report.sql) started recording daily opens.
+const USAGE_TRACKING_SINCE = "October 17, 2026";
+
+type UsageReportRow = {
+  total_users: number;
+  users_in_period: number;
+  regular_users: number;
+  devotion_readers: number;
+  reminder_subscribers: number;
+};
+
 type JourneyDayRow = {
   day_number: number;
   title: string;
@@ -2220,16 +2231,22 @@ async function ReportsAdmin({ period }: { period: ReportPeriod }) {
   const supabase = await createClient();
   const { start, end, label } = getReportRange(period);
 
-  const { data, error } = await supabase.rpc("admin_engagement_report", {
-    p_start: start.toISOString(),
-    p_end: end.toISOString(),
-  });
+  const range = { p_start: start.toISOString(), p_end: end.toISOString() };
+  const [{ data, error }, { data: usageData, error: usageError }] =
+    await Promise.all([
+      supabase.rpc("admin_engagement_report", range),
+      supabase.rpc("admin_usage_report", range),
+    ]);
 
   if (error) {
     console.error("Failed to load engagement report", error);
   }
+  if (usageError) {
+    console.error("Failed to load usage report", usageError);
+  }
 
   const report = (data as EngagementReportRow[] | null)?.[0] ?? null;
+  const usage = (usageData as UsageReportRow[] | null)?.[0] ?? null;
 
   const periods: { value: ReportPeriod; label: string }[] = [
     { value: "month", label: "Monthly" },
@@ -2277,6 +2294,39 @@ async function ReportsAdmin({ period }: { period: ReportPeriod }) {
               Decisions for Christ
             </p>
           </div>
+
+          {usage && (
+            <div className="space-y-2">
+              <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                Users
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                <ReportStat value={usage.total_users} label="Total users" />
+                <ReportStat
+                  value={usage.users_in_period}
+                  label="Used the app"
+                />
+                <ReportStat
+                  value={usage.regular_users}
+                  label="Regular users"
+                />
+                <ReportStat
+                  value={usage.devotion_readers}
+                  label="Read a devotion"
+                />
+                <ReportStat
+                  value={usage.reminder_subscribers}
+                  label="Daily reminders on"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Regular users opened the app on 8+ different days in the 30
+                days up to the end of this period. Daily visits are counted
+                from {USAGE_TRACKING_SINCE}; earlier periods only count days
+                people posted, prayed, chatted or completed something.
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">

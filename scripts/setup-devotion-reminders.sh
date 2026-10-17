@@ -274,9 +274,9 @@ to_clipboard ""
 confirm "All 5 saved in Vercel?" || SKIPPED+=("Add the missing Vercel environment variables, then redeploy")
 
 # ── Stage 4: run migration 0032 ────────────────────────────────────────────
-stage "Supabase: create the reminder tables"
-to_clipboard "$(cat supabase/migrations/0032_devotion_reminders.sql)"
-say "Migration 0032 is on your clipboard."
+stage "Supabase: create the reminder and usage tables"
+to_clipboard "$(cat supabase/migrations/0032_devotion_reminders.sql supabase/migrations/0033_usage_report.sql)"
+say "Migrations 0032 (reminders) and 0033 (admin usage report) are on your clipboard."
 open_url "$SQL_EDITOR"
 step "Click into the empty query box, press ⌘V, then click Run."
 step "Expect: 'Success. No rows returned'."

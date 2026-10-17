@@ -44,11 +44,56 @@ export async function updateSession(request: NextRequest) {
   // Swallow errors here: a transient network blip or refresh-token race
   // shouldn't drop the existing cookie. Worst case this request sees a
   // stale session and the next proxy pass refreshes it.
+  let userId: string | undefined;
   try {
-    await supabase.auth.getClaims();
+    const { data } = await supabase.auth.getClaims();
+    userId = data?.claims?.sub;
   } catch {
     // Leave supabaseResponse (and the untouched request cookies) as-is.
   }
 
+  if (userId) {
+    await recordDailyVisit(supabase, request, supabaseResponse, userId);
+  }
+
   return supabaseResponse;
+}
+
+const VISIT_COOKIE = "leap_visit";
+
+// Records one app_visits row per user per day for the admin usage report.
+// A cookie holding "<user id>:<date>" means today's visit is already in, so
+// only the first request of the day pays for the write — and a second
+// account signing in on the same browser still gets counted.
+async function recordDailyVisit(
+  supabase: ReturnType<typeof createServerClient>,
+  request: NextRequest,
+  response: NextResponse,
+  userId: string,
+) {
+  const today = new Date().toISOString().slice(0, 10);
+  const marker = `${userId}:${today}`;
+  if (request.cookies.get(VISIT_COOKIE)?.value === marker) {
+    return;
+  }
+
+  const { error } = await supabase
+    .from("app_visits")
+    .upsert(
+      { user_id: userId, visited_on: today },
+      { onConflict: "user_id,visited_on", ignoreDuplicates: true },
+    );
+
+  // Set the cookie even on failure: retrying on every request would put a
+  // failing write in front of each navigation. Missing a day's count is the
+  // cheaper outcome.
+  if (error) {
+    console.error("Failed to record app visit", error);
+  }
+  response.cookies.set(VISIT_COOKIE, marker, {
+    path: "/",
+    httpOnly: true,
+    sameSite: "lax",
+    maxAge: 60 * 60 * 48,
+  });
 }
