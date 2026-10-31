@@ -18,7 +18,7 @@ Apply the schema in [supabase/migrations/0001_init.sql](supabase/migrations/0001
 
 ## Ops
 
-Anthropic API keys expire periodically. When one's about to, run [scripts/rotate-anthropic-key.sh](scripts/rotate-anthropic-key.sh) — it walks you through creating the replacement, updating `.env.local` and Vercel, redeploying, and retiring the old key.
+The production Anthropic API key has no expiry (created 2026-10-31). If it ever needs replacing (or the Leap Companion starts replying "trouble responding" and Vercel's logs show `invalid x-api-key`), run [scripts/rotate-anthropic-key.sh](scripts/rotate-anthropic-key.sh) — it walks you through creating the replacement, updating `.env.local` and Vercel, redeploying, and retiring the old key.
 
 ## Testing
 

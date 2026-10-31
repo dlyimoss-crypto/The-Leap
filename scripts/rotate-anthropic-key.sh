@@ -188,14 +188,23 @@ ENV_FILE=".env.local"
 
 banner "Rotate Anthropic API key (The Leap)"
 
+# The current key: "The Leap", sk-ant-usr-…rQAA, created 2026-10-31 with NO
+# expiry. Run this wizard when you need to replace it (suspected leak, a team
+# change, or moving to a service-account key), not on a schedule.
+#
+# Lesson from 2026-10-31: the previous key expired on 2026-10-03 and the Leap
+# Companion silently fell back to "Sorry, I'm having trouble responding right
+# now" for weeks. A 401 "invalid x-api-key" in Vercel's runtime logs means
+# this wizard is what's needed.
+
 # ── Stage 1: create the new key ────────────────────────────────────────────
-stage "Anthropic Console: create the replacement key"
-say "The current key (\"The Leap\", apikey_01KAvT15FcNNAt7CLAxZoyoJ) expires 2026-10-03."
-say "We'll create its replacement first, so nothing goes down before the swap."
-open_url "https://console.anthropic.com/settings/keys"
-step "In org \"Deniss Lyimo's Individual Org\", click 'Create Key'."
-step "Name it something you'll recognize later, e.g. 'The Leap (2026-09)'."
-step "Copy the secret value shown — it's only shown once."
+stage "Claude Console: create the replacement key"
+say "We'll create the replacement first, so the Companion never goes down during the swap."
+open_url "https://platform.claude.com/settings/keys"
+step "In \"Deniss Lyimo's Individual Org\", click 'Create key'."
+step "Name it 'The Leap' and pick the Default workspace."
+step "Set Expiration to 'Never'. A dated key will break the Companion when it lapses."
+step "Copy the secret value shown. It's only shown once."
 ask_secret ANTHROPIC_API_KEY "Paste the new secret key (sk-ant-...):"
 
 # ── Stage 2: local env ──────────────────────────────────────────────────────
@@ -206,36 +215,40 @@ say "Local dev (companion actions in src/app/companion/actions.ts) now uses the 
 # ── Stage 3: Vercel env var ─────────────────────────────────────────────────
 stage "Vercel: update the deployed env var"
 say "No Vercel CLI is installed here, so this one's by hand in the dashboard."
-open_url "https://vercel.com/dashboard"
-step "Open the 'the-leap' project → Settings → Environment Variables."
-step "Find ANTHROPIC_API_KEY, edit it, and paste the same new key you just saved locally."
-step "Apply it to every environment it's currently set for (Production / Preview / Development)."
-confirm "Saved the new value in Vercel for all its environments?" || warn "remember to finish this before deploying"
+open_url "https://vercel.com/pastor-deniss/the-leap/settings/environment-variables"
+step "Find ANTHROPIC_API_KEY → '...' → Edit."
+step "Clear the Value box (Cmd+A, Delete), paste the new key, and click Save."
+step "Leave Type as Secret and Environments as Production."
+confirm "Saved the new value in Vercel?" || warn "remember to finish this before redeploying"
 
 # ── Stage 4: redeploy ────────────────────────────────────────────────────────
 stage "Vercel: redeploy so the new key takes effect"
-say "Env var edits don't apply to already-running deployments."
-step "In the project's Deployments tab, open the latest Production deployment."
-step "Use the '...' menu → Redeploy (no need to change any code)."
-pause "Redeployed and it finished successfully?"
+say "Env var edits don't apply to already-running deployments. Skipping this step"
+say "is the easiest mistake to make: the old key keeps being used."
+step "Click 'Redeploy' in the blue 'Updated Environment Variable' toast, or:"
+step "Deployments → newest Production row → '...' → Redeploy → Redeploy."
+step "Wait for a NEW row at the top to show 'Ready' (about 1 minute)."
+pause "Is the new deployment showing Ready?"
 
 # ── Stage 5: verify ──────────────────────────────────────────────────────────
 stage "Verify the new key actually works"
-say "Exercise whatever hits src/app/companion/actions.ts in production (or run the app"
-say "locally with the updated .env.local and try the companion feature)."
-confirm "Confirmed a live request succeeds with the new key?" || warn "hold off on deleting the old key until you've confirmed this"
+say "Refresh the Leap Companion on leapgrow.app and ask it a question."
+say "If it still says 'trouble responding', open Vercel → Logs, search 'Companion',"
+say "and check the failing request's Deployment ID: if it's the OLD deployment,"
+say "you tested too early. Refresh and try again."
+confirm "Did the Companion reply normally?" || warn "hold off on deleting the old key until this works"
 
 # ── Stage 6: retire the old key ──────────────────────────────────────────────
-stage "Anthropic Console: delete the old key"
-warn "This is irreversible — only do it once the new key is verified working everywhere."
-open_url "https://console.anthropic.com/settings/keys"
-step "Find 'The Leap' (apikey_01KAvT15FcNNAt7CLAxZoyoJ)."
+stage "Claude Console: delete the old key"
+warn "This is irreversible. Only do it once the new key is verified working."
+open_url "https://platform.claude.com/settings/keys"
+step "Find the OLD key: same name, but the older Created date and a different ending."
 if confirm "Delete the old key now?"; then
-  step "Click its menu → Delete, and confirm."
+  step "Click its '...' menu → Delete, and confirm."
   note "Old key retired."
 else
-  SKIPPED+=("Delete old key apikey_01KAvT15FcNNAt7CLAxZoyoJ in Anthropic Console once you're confident")
-  note "Left it in place — it'll simply expire on 2026-10-03 if you don't come back to delete it sooner."
+  SKIPPED+=("Delete the old Anthropic API key in the Claude Console once you're confident")
+  note "Left it in place. Come back and delete it so only one live key exists."
 fi
 
 finish
