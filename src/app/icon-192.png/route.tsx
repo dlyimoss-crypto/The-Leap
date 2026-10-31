@@ -5,7 +5,7 @@ import { IconMark } from "../_icon-mark";
 // numbered icon/apple-icon file conventions produce hashed URLs Next
 // injects into <head> itself, not something safe to hardcode elsewhere.
 export async function GET() {
-  return new ImageResponse(<IconMark mark={120} />, {
+  return new ImageResponse(<IconMark mark={158} />, {
     width: 192,
     height: 192,
   });

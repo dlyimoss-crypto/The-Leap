@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 import { BrandMark } from "./brand-mark";
 
 /**
- * Mark + "THE LEAP" wordmark, for prominent placements (splash/welcome
+ * Mark + "the leap" wordmark, for prominent placements (splash/welcome
  * screen, marketing surfaces). For small in-app spots, use BrandMark
  * alone instead.
  */
@@ -28,11 +28,11 @@ export function Logo({
       />
       <span
         className={cn(
-          "font-heading font-bold tracking-[0.15em] text-foreground",
+          "font-heading font-bold tracking-wide text-foreground",
           isLarge ? "text-3xl" : "text-2xl",
         )}
       >
-        THE LEAP
+        the leap
       </span>
     </div>
   );
