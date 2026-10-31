@@ -1,5 +1,6 @@
-import path from "node:path";
-import { safeReadJson } from "./safe-read-json";
+// Every Formation Journey — including "Faith in Christ", which used to ship as
+// content-as-code — lives in the `journeys`/`journey_days` tables and is
+// authored in admin. See journeys-repo.ts for loading.
 
 export type JourneyMeta = {
   slug: string;
@@ -12,15 +13,6 @@ export type JourneyMeta = {
   teaser?: string | null;
 };
 
-const CONTENT_ROOT = path.join(process.cwd(), "content", "en");
-const VALID_SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/;
-
-export function getJourneyMeta(slug: string): JourneyMeta | null {
-  return safeReadJson<JourneyMeta>(CONTENT_ROOT, VALID_SLUG, slug, (s) =>
-    path.join(s, "meta.json"),
-  );
-}
-
 export type JourneySession = {
   day: number;
   title: string;
@@ -31,12 +23,3 @@ export type JourneySession = {
   pray: string | null;
   nextTopic: string | null;
 };
-
-export function getJourneySession(
-  slug: string,
-  day: number,
-): JourneySession | null {
-  return safeReadJson<JourneySession>(CONTENT_ROOT, VALID_SLUG, slug, (s) =>
-    path.join(s, `day-${day}.json`),
-  );
-}

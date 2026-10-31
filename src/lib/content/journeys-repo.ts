@@ -1,17 +1,7 @@
 import { createClient as createSupabaseJsClient } from "@supabase/supabase-js";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { unstable_cache } from "next/cache";
-import {
-  getJourneyMeta,
-  getJourneySession,
-  type JourneyMeta,
-  type JourneySession,
-} from "./journeys";
-
-// The one journey shipped as content-as-code (ticket 02). Everything else an
-// admin authors lives in the `journeys`/`journey_days` tables instead, since
-// Vercel's runtime filesystem is read-only and can't accept new content files.
-const FILE_JOURNEY_SLUG = "faith-in-christ";
+import type { JourneyMeta, JourneySession } from "./journeys";
 
 type JourneyRow = {
   slug: string;
@@ -62,11 +52,6 @@ export async function findJourneyMeta(
   supabase: SupabaseClient,
   slug: string,
 ): Promise<JourneyMeta | null> {
-  const fileMeta = getJourneyMeta(slug);
-  if (fileMeta) {
-    return fileMeta;
-  }
-
   const { data } = await supabase
     .from("journeys")
     .select("slug, title, purpose, duration_days, completion_title, teaser")
@@ -81,11 +66,6 @@ export async function findJourneySession(
   slug: string,
   day: number,
 ): Promise<JourneySession | null> {
-  const fileSession = getJourneySession(slug, day);
-  if (fileSession) {
-    return fileSession;
-  }
-
   const { data: journey } = await supabase
     .from("journeys")
     .select("id")
@@ -108,27 +88,23 @@ export async function findJourneySession(
   return dayRow ? mapDbDay(dayRow) : null;
 }
 
-// Every journey a user can start or continue right now: the one file-based
-// journey (always available) plus every published, admin-authored journey.
+// Every journey a user can start or continue right now: every published
+// journey, oldest first (so "Faith in Christ", the onboarding journey, leads).
 export async function findAvailableJourneys(
   supabase: SupabaseClient,
 ): Promise<JourneyMeta[]> {
-  const fileJourney = getJourneyMeta(FILE_JOURNEY_SLUG);
-
   const { data, error } = await supabase
     .from("journeys")
     .select("slug, title, purpose, duration_days, completion_title, teaser")
     .eq("status", "published")
+    .order("created_at", { ascending: true })
     .returns<JourneyRow[]>();
 
   if (error) {
     console.error("Failed to load published journeys", error);
   }
 
-  return [
-    ...(fileJourney ? [fileJourney] : []),
-    ...(data ?? []).map(mapDbJourney),
-  ];
+  return (data ?? []).map(mapDbJourney);
 }
 
 // "published journeys are publicly readable" (migration 0018) — same result
