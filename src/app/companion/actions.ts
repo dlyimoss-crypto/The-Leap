@@ -129,3 +129,23 @@ export async function sendMessage(formData: FormData) {
 
   redirect("/companion");
 }
+
+// Wipes the signed-in user's own Companion conversation, so they can start
+// fresh. RLS ("owner writes own companion_messages") limits the delete to
+// their rows. Anything already shared through Ask PD is a separate copy and
+// stays with the PD team.
+export async function clearConversation() {
+  const { supabase, user } = await requireActiveUser("/companion");
+
+  const { error } = await supabase
+    .from("companion_messages")
+    .delete()
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("Failed to clear companion conversation", error);
+  }
+
+  revalidatePath("/companion");
+  redirect("/companion");
+}

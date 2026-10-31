@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { BookOpen, Compass, HeartHandshake, Send, Sparkles, UserRound } from "lucide-react";
+import { BookOpen, Compass, HeartHandshake, Send, Sparkles, Trash2, UserRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
 import { getCompanionIntent } from "@/lib/companion-intents";
-import { sendMessage } from "./actions";
+import { clearConversation, sendMessage } from "./actions";
 
 type MessageRow = {
   id: string;
@@ -63,6 +63,7 @@ export default async function CompanionPage(
 ) {
   const searchParams = await props.searchParams;
   const showCrisisBanner = searchParams.crisis === "1";
+  const confirmingClear = searchParams.clear === "confirm";
   const intentParam = Array.isArray(searchParams.intent)
     ? searchParams.intent[0]
     : searchParams.intent;
@@ -107,6 +108,41 @@ export default async function CompanionPage(
         </Link>{" "}
         to reach Pastor Deniss and the team.
       </p>
+
+      {(messages ?? []).length > 0 &&
+        (confirmingClear ? (
+          <div className="space-y-2 rounded-xl border border-destructive/40 bg-destructive/5 p-3 text-sm">
+            <p className="font-medium">Clear this whole conversation?</p>
+            <p className="text-xs text-muted-foreground">
+              This deletes all your Companion messages and can&apos;t be
+              undone. Anything you&apos;ve already shared through Ask PD stays
+              with the team.
+            </p>
+            <div className="flex justify-end gap-2">
+              <Button
+                render={<Link href="/companion" />}
+                nativeButton={false}
+                size="sm"
+                variant="ghost"
+              >
+                Cancel
+              </Button>
+              <form action={clearConversation}>
+                <Button type="submit" size="sm" variant="destructive">
+                  Yes, clear it
+                </Button>
+              </form>
+            </div>
+          </div>
+        ) : (
+          <Link
+            href="/companion?clear=confirm"
+            className="flex w-fit items-center gap-1 self-end text-xs text-muted-foreground hover:text-foreground"
+          >
+            <Trash2 className="size-3.5" />
+            Clear conversation
+          </Link>
+        ))}
 
       {showCrisisBanner && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-foreground">
