@@ -1,4 +1,4 @@
-import { HeartHandshake, Church, MessageCircle } from "lucide-react";
+import { HeartHandshake, Church, MessageCircle, UserRound } from "lucide-react";
 import { HubCard } from "@/components/hub-card";
 import { BackLink } from "@/components/back-link";
 import { PatternCorner } from "@/components/pattern-bg";
@@ -28,6 +28,12 @@ export default async function ConnectPage() {
           icon={Church}
           title="Churches"
           description="Find a local church and connect with its community."
+        />
+        <HubCard
+          href="/ask-pd"
+          icon={UserRound}
+          title="Ask PD"
+          description="Message Pastor Deniss and the team, or request a call."
         />
         <HubCard
           href="/companion"

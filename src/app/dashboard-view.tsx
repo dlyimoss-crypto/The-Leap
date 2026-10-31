@@ -11,6 +11,7 @@ import {
   CalendarDays,
   Megaphone,
   Bell,
+  UserRound,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -108,6 +109,7 @@ export function DashboardView({
   announcement,
   showGospelInvite,
   devotionUnread,
+  askPdUnread = 0,
 }: {
   journey: JourneyMeta;
   progress: JourneyProgress | null;
@@ -119,6 +121,7 @@ export function DashboardView({
   announcement?: Announcement | null;
   showGospelInvite?: boolean;
   devotionUnread?: boolean;
+  askPdUnread?: number;
 }) {
   const firstName = displayName?.split(" ")[0];
 
@@ -309,6 +312,21 @@ export function DashboardView({
             {dict.dashboard.browseOtherJourneys}
           </Link>
         </div>
+      )}
+
+      {askPdUnread > 0 && (
+        <Link
+          href="/ask-pd"
+          className="flex items-center gap-3 rounded-xl border-2 border-primary bg-primary/10 p-4 hover:bg-primary/15"
+        >
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <UserRound className="size-4" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold">{dict.dashboard.askPdReplied}</p>
+            <p className="text-xs text-muted-foreground">{dict.dashboard.tapToRead}</p>
+          </div>
+        </Link>
       )}
 
       {announcement && (

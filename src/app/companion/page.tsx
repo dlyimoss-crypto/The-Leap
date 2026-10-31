@@ -1,4 +1,5 @@
-import { BookOpen, Compass, HeartHandshake, Send, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { BookOpen, Compass, HeartHandshake, Send, Sparkles, UserRound } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,7 +20,21 @@ function renderMessageContent(content: string) {
     .split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g)
     .map((part, i) => {
       if (part.startsWith("**") && part.endsWith("**")) {
-        return <strong key={i}>{part.slice(2, -2)}</strong>;
+        const inner = part.slice(2, -2);
+        // The Companion writes **Ask PD** when it suggests reaching a real
+        // person; make that a tappable link rather than just bold text.
+        if (inner.trim().toLowerCase() === "ask pd") {
+          return (
+            <Link
+              key={i}
+              href="/ask-pd?from=companion"
+              className="font-semibold text-primary underline underline-offset-2"
+            >
+              Ask PD
+            </Link>
+          );
+        }
+        return <strong key={i}>{inner}</strong>;
       }
       if (part.startsWith("*") && part.endsWith("*")) {
         return <em key={i}>{part.slice(1, -1)}</em>;
@@ -72,11 +87,25 @@ export default async function CompanionPage(
       <div className="flex items-center gap-2">
         <h1 className="text-2xl font-heading font-semibold">Leap Companion</h1>
         <Badge variant="secondary">AI</Badge>
+        <Button
+          render={<Link href="/ask-pd?from=companion" />}
+          nativeButton={false}
+          size="sm"
+          variant="outline"
+          className="ml-auto rounded-full"
+        >
+          <UserRound className="size-4" />
+          Ask PD
+        </Button>
       </div>
       <p className="text-xs text-muted-foreground">
         I&apos;m an AI guide, not a pastor or mentor — here to help with
         Scripture questions, working through today&apos;s session, or when
-        you&apos;re feeling stuck.
+        you&apos;re feeling stuck. Want a real person? Tap{" "}
+        <Link href="/ask-pd?from=companion" className="font-medium text-primary underline">
+          Ask PD
+        </Link>{" "}
+        to reach Pastor Deniss and the team.
       </p>
 
       {showCrisisBanner && (

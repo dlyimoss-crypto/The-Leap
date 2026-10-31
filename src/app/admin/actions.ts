@@ -71,6 +71,23 @@ export async function banUser(userId: string) {
   revalidatePath("/admin");
 }
 
+// Adds or removes someone from the PD team (role 'pastor'), who can read
+// and answer Ask PD messages. Admins are always on the team.
+export async function setPdTeamMember(userId: string, isMember: boolean) {
+  const { supabase } = await requireAdmin();
+
+  const { error } = await supabase.rpc("set_pd_team_member", {
+    p_user_id: userId,
+    p_is_member: isMember,
+  });
+
+  if (error) {
+    console.error("Failed to update PD team membership", error);
+  }
+
+  revalidatePath("/admin");
+}
+
 export async function unbanUser(userId: string) {
   const { supabase } = await requireAdmin();
 

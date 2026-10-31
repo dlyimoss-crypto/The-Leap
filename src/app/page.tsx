@@ -10,6 +10,7 @@ import {
   getActiveCommitment,
 } from "@/lib/supabase/commitments";
 import { getActiveAnnouncementCached } from "@/lib/supabase/announcements";
+import { countUserUnreadAskPd } from "@/lib/supabase/ask-pd";
 import { isTodaysDevotionUnread } from "@/lib/supabase/devotion-reads";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -49,6 +50,7 @@ export default async function HomePage(props: PageProps<"/">) {
     announcement,
     journey,
     devotionUnread,
+    askPdUnread,
   ] = await Promise.all([
       journeyState,
       supabase
@@ -60,6 +62,7 @@ export default async function HomePage(props: PageProps<"/">) {
       getActiveAnnouncementCached(),
       journeyMeta,
       isTodaysDevotionUnread(supabase),
+      countUserUnreadAskPd(supabase, user.id),
     ]);
 
   if (!journey) {
@@ -105,6 +108,7 @@ export default async function HomePage(props: PageProps<"/">) {
       announcement={announcement}
       showGospelInvite={showGospelInvite}
       devotionUnread={devotionUnread}
+      askPdUnread={askPdUnread}
     />
   );
 }

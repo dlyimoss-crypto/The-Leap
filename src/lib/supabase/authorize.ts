@@ -85,3 +85,23 @@ export async function requireAdmin(redirectTo = "/") {
 
   return { supabase, user };
 }
+
+export function isPdTeamRole(role: string | null | undefined): boolean {
+  return role === "pastor" || role === "admin";
+}
+
+/**
+ * For the Ask PD inbox and its actions: Pastor Deniss and the PD team
+ * (role 'pastor' or 'admin') only.
+ */
+export async function requirePdTeam(redirectTo = "/") {
+  const { supabase, user } = await requireUser();
+
+  const profile = await getProfile(user.id);
+
+  if (!profile || profile.is_banned || !isPdTeamRole(profile.role)) {
+    redirect(redirectTo);
+  }
+
+  return { supabase, user };
+}

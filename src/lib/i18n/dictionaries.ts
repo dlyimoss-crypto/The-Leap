@@ -12,6 +12,7 @@ export type Dictionary = {
     evolve: string;
     engage: string;
     admin: string;
+    inbox: string;
   };
   companion: {
     menuHeading: string;
@@ -90,6 +91,7 @@ export type Dictionary = {
     prayerDaysLeft: (n: number) => string;
     tapToPray: string;
     tapToRead: string;
+    askPdReplied: string;
     daysLeftShort: (n: number) => string;
     announcementKinds: {
       prayer: string;
@@ -143,6 +145,7 @@ const en: Dictionary = {
     evolve: "Evolve",
     engage: "Engage",
     admin: "Admin",
+    inbox: "Inbox",
   },
   companion: {
     menuHeading: "What would you like to do?",
@@ -232,6 +235,7 @@ const en: Dictionary = {
     prayerDaysLeft: (n) => `${n} day${n === 1 ? "" : "s"} left — tap to pray`,
     tapToPray: "Tap to pray",
     tapToRead: "Tap to read more",
+    askPdReplied: "Pastor Deniss replied to you",
     daysLeftShort: (n) => `${n} day${n === 1 ? "" : "s"} left`,
     announcementKinds: {
       prayer: "Prayer",
@@ -288,6 +292,7 @@ const sw: Dictionary = {
     evolve: "Kua",
     engage: "Shiriki",
     admin: "Msimamizi",
+    inbox: "Kikasha",
   },
   companion: {
     menuHeading: "Ungependa kufanya nini?",
@@ -380,6 +385,7 @@ const sw: Dictionary = {
         : `Siku ${n} zimebaki — gusa kuomba`,
     tapToPray: "Gusa kuomba",
     tapToRead: "Gusa kusoma zaidi",
+    askPdReplied: "Mchungaji Deniss amekujibu",
     daysLeftShort: (n) =>
       n === 1 ? "Siku 1 imebaki" : `Siku ${n} zimebaki`,
     announcementKinds: {

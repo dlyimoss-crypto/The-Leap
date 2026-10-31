@@ -49,6 +49,7 @@ import {
   requestBookChanges,
   resolveReport,
   unbanUser,
+  setPdTeamMember,
   unpublishBook,
   updateBookPrice,
   updateChurch,
@@ -135,6 +136,7 @@ type ContentRow = {
 type ProfileRow = {
   id: string;
   display_name: string | null;
+  role: string;
   is_banned: boolean;
   gospel_invite_shown_at: string | null;
   gospel_prayer_at: string | null;
@@ -370,6 +372,12 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           Opportunities
         </Link>
         <Link
+          href="/ask-pd/inbox"
+          className="shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
+        >
+          Ask PD
+        </Link>
+        <Link
           href="/admin?tab=prayer"
           className={
             tab === "prayer"
@@ -573,7 +581,7 @@ async function UsersList() {
       supabase
         .from("profiles")
         .select(
-          "id, display_name, is_banned, gospel_invite_shown_at, gospel_prayer_at",
+          "id, display_name, role, is_banned, gospel_invite_shown_at, gospel_prayer_at",
         )
         .order("display_name", { ascending: true })
         .returns<ProfileRow[]>(),
@@ -663,11 +671,23 @@ async function UsersList() {
                   </div>
                 </td>
                 <td className="p-3">
-                  <Badge variant={p.is_banned ? "destructive" : "secondary"}>
-                    {p.is_banned ? "Banned" : "Active"}
-                  </Badge>
+                  <div className="flex flex-wrap gap-1">
+                    <Badge variant={p.is_banned ? "destructive" : "secondary"}>
+                      {p.is_banned ? "Banned" : "Active"}
+                    </Badge>
+                    {p.role === "admin" && <Badge>Admin</Badge>}
+                    {p.role === "pastor" && <Badge>PD team</Badge>}
+                  </div>
                 </td>
                 <td className="p-3 text-right">
+                  <div className="flex flex-col items-end gap-1.5">
+                  {p.role !== "admin" && !p.is_banned && (
+                    <form action={setPdTeamMember.bind(null, p.id, p.role !== "pastor")}>
+                      <Button type="submit" size="sm" variant="outline">
+                        {p.role === "pastor" ? "Remove from PD team" : "Add to PD team"}
+                      </Button>
+                    </form>
+                  )}
                   <form
                     action={(p.is_banned ? unbanUser : banUser).bind(
                       null,
@@ -682,6 +702,7 @@ async function UsersList() {
                       {p.is_banned ? "Unban" : "Ban"}
                     </Button>
                   </form>
+                  </div>
                 </td>
               </tr>
             ))}

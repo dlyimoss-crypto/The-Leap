@@ -64,6 +64,14 @@ _Avoid_: Prayer (ambiguous alone), request
 The single admin-curated window featured on Home, used to bring one thing into awareness at a time. It has a kind — Prayer, News, Event, Advert or General — and only one is live at once, for a set number of days. A Prayer announcement is what was formerly called a prayer movement: it also appears in the Prayer Room with its prayer points and "I have prayed" count. (Stored in the `prayer_movements` table for historical reasons.)
 _Avoid_: Banner, popup, notification (reserved for push/in-app notifications)
 
+**Ask PD**:
+The human channel to Pastor Deniss ("PD", The Leap's founder) and the PD team: a user sends a private message or requests a call (WhatsApp, phone or video, handled outside the app), and a real person replies in a private thread. The user may choose to attach their recent Leap Companion conversation. The Leap Companion suggests Ask PD when a real person would serve the user better, but it is never an emergency channel; crisis situations still point to immediate help first.
+_Avoid_: Support ticket, chat, contact form
+
+**PD team**:
+Pastor Deniss plus the pastors and coaches he approves (profile role `pastor`, or `admin`), who read and answer Ask PD requests from the shared inbox.
+_Avoid_: Moderators, staff, admins (an admin is on the team, but not every team member is an admin)
+
 **Post**:
 Community-space content, visible to all users. Always a distinct table/concept from a Reflection (private, never shared) and a Prayer Request (its own space, its own visibility rules).
 _Avoid_: Reflection, update, share

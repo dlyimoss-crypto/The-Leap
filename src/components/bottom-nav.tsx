@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Users, Flag, Sprout, Globe, ShieldCheck } from "lucide-react";
+import { Home, Users, Flag, Sprout, Globe, ShieldCheck, Inbox } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 
@@ -23,7 +23,8 @@ const BASE_ITEMS = [
     isActive: (pathname: string) =>
       pathname.startsWith("/connect") ||
       pathname.startsWith("/companion") ||
-      pathname.startsWith("/prayer-room"),
+      pathname.startsWith("/prayer-room") ||
+      (pathname.startsWith("/ask-pd") && !pathname.startsWith("/ask-pd/inbox")),
   },
   {
     href: "/commit",
@@ -53,17 +54,38 @@ const ADMIN_ITEM = {
   isActive: (pathname: string) => pathname.startsWith("/admin"),
 } as const;
 
+// PD team members who aren't admins (role 'pastor') get the Ask PD inbox
+// in the admin slot instead.
+const INBOX_ITEM = {
+  href: "/ask-pd/inbox",
+  labelKey: "inbox",
+  icon: Inbox,
+  isActive: (pathname: string) => pathname.startsWith("/ask-pd/inbox"),
+} as const;
+
 export function BottomNav({
-  isAdmin,
-  adminNotificationCount = 0,
+  teamRole,
+  teamNotificationCount = 0,
+  askPdUnreadCount = 0,
   dict,
 }: {
-  isAdmin: boolean;
-  adminNotificationCount?: number;
+  // "admin" → Admin tab; "pastor" → Ask PD inbox tab; null → neither.
+  teamRole: "admin" | "pastor" | null;
+  teamNotificationCount?: number;
+  // Ask PD replies the user hasn't read yet, badged on Connect.
+  askPdUnreadCount?: number;
   dict: Dictionary["nav"];
 }) {
   const pathname = usePathname();
-  const items = isAdmin ? [...BASE_ITEMS, ADMIN_ITEM] : BASE_ITEMS;
+  const teamItem =
+    teamRole === "admin" ? ADMIN_ITEM : teamRole === "pastor" ? INBOX_ITEM : null;
+  const items = teamItem ? [...BASE_ITEMS, teamItem] : BASE_ITEMS;
+  const badgeFor = (href: string) =>
+    href === teamItem?.href
+      ? teamNotificationCount
+      : href === "/connect"
+        ? askPdUnreadCount
+        : 0;
 
   // The book reader is full-screen with its own Back link; the nav would
   // sit on top of its page controls.
@@ -82,12 +104,12 @@ export function BottomNav({
       <div
         className={cn(
           "mx-auto grid w-full max-w-md",
-          isAdmin ? "grid-cols-6" : "grid-cols-5",
+          teamItem ? "grid-cols-6" : "grid-cols-5",
         )}
       >
         {items.map(({ href, labelKey, icon: Icon, isActive: matches }) => {
           const active = matches(pathname);
-          const showBadge = href === ADMIN_ITEM.href && adminNotificationCount > 0;
+          const badge = badgeFor(href);
           return (
             <Link
               key={href}
@@ -101,9 +123,9 @@ export function BottomNav({
             >
               <span className="relative inline-flex">
                 <Icon className="size-5" strokeWidth={active ? 2.5 : 2} />
-                {showBadge && (
+                {badge > 0 && (
                   <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-semibold leading-none text-white">
-                    {adminNotificationCount > 99 ? "99+" : adminNotificationCount}
+                    {badge > 99 ? "99+" : badge}
                   </span>
                 )}
               </span>

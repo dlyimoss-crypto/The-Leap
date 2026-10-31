@@ -9,6 +9,10 @@ import {
   getAdminNotificationCounts,
   totalAdminNotificationCount,
 } from "@/lib/supabase/admin-notifications";
+import {
+  countTeamUnreadAskPd,
+  countUserUnreadAskPd,
+} from "@/lib/supabase/ask-pd";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import "./globals.css";
@@ -66,16 +70,21 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const { supabase, user } = await getAuthedUser();
 
-  let isAdmin = false;
-  let adminNotificationCount = 0;
+  let teamRole: "admin" | "pastor" | null = null;
+  let teamNotificationCount = 0;
+  let askPdUnreadCount = 0;
   if (user) {
     const profile = await getProfile(user.id);
-    isAdmin = profile?.role === "admin";
-    if (isAdmin) {
-      adminNotificationCount = totalAdminNotificationCount(
-        await getAdminNotificationCounts(supabase),
-      );
-    }
+    teamRole =
+      profile?.role === "admin" ? "admin" : profile?.role === "pastor" ? "pastor" : null;
+    const [adminCounts, teamAskPd, userAskPd] = await Promise.all([
+      teamRole === "admin" ? getAdminNotificationCounts(supabase) : null,
+      teamRole ? countTeamUnreadAskPd(supabase) : 0,
+      countUserUnreadAskPd(supabase, user.id),
+    ]);
+    teamNotificationCount =
+      (adminCounts ? totalAdminNotificationCount(adminCounts) : 0) + teamAskPd;
+    askPdUnreadCount = userAskPd;
   }
 
   const locale = await getLocale();
@@ -98,8 +107,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           {user && <CompanionLauncher dict={dict.companion} />}
           {user && (
             <BottomNav
-              isAdmin={isAdmin}
-              adminNotificationCount={adminNotificationCount}
+              teamRole={teamRole}
+              teamNotificationCount={teamNotificationCount}
+              askPdUnreadCount={askPdUnreadCount}
               dict={dict.nav}
             />
           )}
