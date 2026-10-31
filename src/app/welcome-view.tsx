@@ -11,7 +11,7 @@ import { PatternCorner } from "@/components/pattern-bg";
 // system setting.
 export function WelcomeView() {
   return (
-    <main className="relative flex flex-1 flex-col items-center justify-center overflow-hidden bg-[#1c1a18] px-6 py-16 text-center">
+    <main className="relative flex flex-1 flex-col items-center justify-center overflow-hidden leap-backdrop-dark px-6 py-16 text-center">
       <PatternCorner corner="top-right" />
       <PatternCorner corner="bottom-left" />
 

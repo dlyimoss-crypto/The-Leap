@@ -98,7 +98,7 @@
 }
 
 .dark {
-  --background: #242424;
+  --background: #0E0D0C;
   --foreground: #FFFFFF;
   --card: #2E2E2E;
   --card-foreground: #FFFFFF;
@@ -142,6 +142,43 @@
   body {
     @apply bg-background text-foreground;
   }
+  /*
+    The Leap backdrop: a warm orange glow at the top (orange on the left,
+    deepening to red on the right) that fades away down the screen, into
+    near-black in dark mode and into cream in light mode. Painted on a
+    fixed layer rather than with background-attachment: fixed, which iOS
+    Safari ignores, so it stays put while the page scrolls.
+  */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--leap-backdrop);
+  }
+}
+
+:root {
+  --leap-backdrop:
+    radial-gradient(130% 45% at 10% -8%, rgba(255, 122, 0, 0.42) 0%, rgba(255, 122, 0, 0.16) 40%, transparent 72%),
+    radial-gradient(90% 38% at 100% -4%, rgba(226, 72, 26, 0.28) 0%, transparent 70%);
+}
+
+.dark,
+.leap-backdrop-dark {
+  --leap-backdrop:
+    radial-gradient(130% 48% at 8% -8%, rgba(255, 128, 10, 0.95) 0%, rgba(232, 92, 12, 0.6) 26%, rgba(120, 40, 8, 0.28) 52%, transparent 74%),
+    radial-gradient(95% 40% at 100% -4%, rgba(214, 48, 20, 0.85) 0%, rgba(150, 30, 12, 0.35) 40%, transparent 72%),
+    linear-gradient(180deg, #2B1408 0%, #140E0B 30%, #0E0D0C 48%, #0B0B0B 100%);
+}
+
+/* For screens that are always dark (welcome), independent of the theme. */
+.leap-backdrop-dark {
+  background: var(--leap-backdrop);
+}
+
+@layer base {
   html {
     @apply font-sans;
   }
