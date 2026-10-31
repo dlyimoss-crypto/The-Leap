@@ -4,9 +4,9 @@ import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
 import {
-  getActivePrayerMovementCached,
+  getActiveAnnouncementCached,
   getPrayerMovementParticipation,
-} from "@/lib/supabase/prayer-movements";
+} from "@/lib/supabase/announcements";
 import { PrayerComposer } from "./prayer-composer";
 import { PrayerMovementCard } from "./prayer-movement-card";
 import {
@@ -48,7 +48,11 @@ export default async function PrayerRoomPage(
 
   const { supabase, user } = await requireUser();
 
-  const activeMovement = await getActivePrayerMovementCached();
+  // Only a prayer announcement belongs in the Prayer Room — news, events
+  // and adverts show on Home alone.
+  const activeAnnouncement = await getActiveAnnouncementCached();
+  const activeMovement =
+    activeAnnouncement?.kind === "prayer" ? activeAnnouncement : null;
   const movementParticipation = activeMovement
     ? await getPrayerMovementParticipation(supabase, activeMovement.id, user.id)
     : null;

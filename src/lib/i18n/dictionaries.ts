@@ -89,6 +89,15 @@ export type Dictionary = {
     browseOtherJourneys: string;
     prayerDaysLeft: (n: number) => string;
     tapToPray: string;
+    tapToRead: string;
+    daysLeftShort: (n: number) => string;
+    announcementKinds: {
+      prayer: string;
+      news: string;
+      event: string;
+      advert: string;
+      general: string;
+    };
     today: string;
     scripture: string;
     readGodsWord: string;
@@ -222,6 +231,15 @@ const en: Dictionary = {
     browseOtherJourneys: "Browse other journeys",
     prayerDaysLeft: (n) => `${n} day${n === 1 ? "" : "s"} left — tap to pray`,
     tapToPray: "Tap to pray",
+    tapToRead: "Tap to read more",
+    daysLeftShort: (n) => `${n} day${n === 1 ? "" : "s"} left`,
+    announcementKinds: {
+      prayer: "Prayer",
+      news: "News",
+      event: "Event",
+      advert: "Featured",
+      general: "Announcement",
+    },
     today: "Today",
     scripture: "Scripture",
     readGodsWord: "Read God's Word",
@@ -361,6 +379,16 @@ const sw: Dictionary = {
         ? "Siku 1 imebaki — gusa kuomba"
         : `Siku ${n} zimebaki — gusa kuomba`,
     tapToPray: "Gusa kuomba",
+    tapToRead: "Gusa kusoma zaidi",
+    daysLeftShort: (n) =>
+      n === 1 ? "Siku 1 imebaki" : `Siku ${n} zimebaki`,
+    announcementKinds: {
+      prayer: "Maombi",
+      news: "Habari",
+      event: "Tukio",
+      advert: "Maalum",
+      general: "Tangazo",
+    },
     today: "Leo",
     scripture: "Maandiko",
     readGodsWord: "Soma Neno la Mungu",

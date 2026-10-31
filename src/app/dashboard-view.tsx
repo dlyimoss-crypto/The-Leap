@@ -7,6 +7,10 @@ import {
   ArrowRight,
   Flag,
   HeartHandshake,
+  Newspaper,
+  CalendarDays,
+  Megaphone,
+  Bell,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -16,9 +20,13 @@ import type { JourneyProgressRow } from "@/lib/supabase/journey-progress";
 import { journeyContinueHref } from "@/lib/journey-nav";
 import { getJourneyCompleteImage } from "@/lib/journey-complete-image";
 import {
-  getPrayerMovementDaysLeft,
-  type PrayerMovement,
-} from "@/lib/supabase/prayer-movements";
+  announcementHref,
+  formatEventDate,
+  getAnnouncementDaysLeft,
+  getAnnouncementImageUrl,
+  type Announcement,
+  type AnnouncementKind,
+} from "@/lib/supabase/announcements";
 import { GospelInviteCard } from "@/components/gospel-invite/gospel-invite-card";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import { signOut } from "./sign-in/actions";
@@ -97,7 +105,7 @@ export function DashboardView({
   avatarUrl,
   nextJourney,
   commitmentProgress,
-  prayerMovement,
+  announcement,
   showGospelInvite,
   devotionUnread,
 }: {
@@ -108,7 +116,7 @@ export function DashboardView({
   avatarUrl: string | null;
   nextJourney?: NextJourney | null;
   commitmentProgress?: { done: number; total: number } | null;
-  prayerMovement?: PrayerMovement | null;
+  announcement?: Announcement | null;
   showGospelInvite?: boolean;
   devotionUnread?: boolean;
 }) {
@@ -303,28 +311,8 @@ export function DashboardView({
         </div>
       )}
 
-      {prayerMovement && (
-        <Link
-          href="/prayer-room"
-          className="flex items-center gap-3 rounded-xl border-2 border-primary/30 bg-card p-4 hover:bg-muted/50"
-        >
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
-            <HeartHandshake className="size-4" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold">{prayerMovement.title}</p>
-            <p className="truncate text-xs text-muted-foreground">
-              {(() => {
-                const daysLeft = getPrayerMovementDaysLeft(
-                  prayerMovement.active_until,
-                );
-                return daysLeft !== null
-                  ? dict.dashboard.prayerDaysLeft(daysLeft)
-                  : dict.dashboard.tapToPray;
-              })()}
-            </p>
-          </div>
-        </Link>
+      {announcement && (
+        <AnnouncementBanner announcement={announcement} dict={dict} />
       )}
 
       <div className="space-y-3">
@@ -399,5 +387,66 @@ export function DashboardView({
         </div>
       </Link>
     </main>
+  );
+}
+
+const ANNOUNCEMENT_ICONS: Record<AnnouncementKind, typeof Bell> = {
+  prayer: HeartHandshake,
+  news: Newspaper,
+  event: CalendarDays,
+  advert: Megaphone,
+  general: Bell,
+};
+
+// The single featured announcement on Home — a prayer movement, news, an
+// event, an advert or a general message, all in the same window.
+function AnnouncementBanner({
+  announcement,
+  dict,
+}: {
+  announcement: Announcement;
+  dict: Dictionary;
+}) {
+  const Icon = ANNOUNCEMENT_ICONS[announcement.kind];
+  const imageUrl = getAnnouncementImageUrl(announcement.image_path);
+  const daysLeft = getAnnouncementDaysLeft(announcement.active_until);
+
+  let subtitle: string;
+  if (announcement.kind === "prayer") {
+    subtitle =
+      daysLeft !== null
+        ? dict.dashboard.prayerDaysLeft(daysLeft)
+        : dict.dashboard.tapToPray;
+  } else if (announcement.kind === "event" && announcement.event_date) {
+    subtitle = `${formatEventDate(announcement.event_date)} · ${dict.dashboard.tapToRead}`;
+  } else {
+    subtitle = dict.dashboard.tapToRead;
+  }
+
+  return (
+    <Link
+      href={announcementHref(announcement)}
+      className="flex items-center gap-3 rounded-xl border-2 border-primary/30 bg-card p-4 hover:bg-muted/50"
+    >
+      {imageUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={imageUrl}
+          alt=""
+          className="size-12 shrink-0 rounded-lg object-cover"
+        />
+      ) : (
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary">
+          <Icon className="size-4" />
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-primary">
+          {dict.dashboard.announcementKinds[announcement.kind]}
+        </p>
+        <p className="text-sm font-semibold">{announcement.title}</p>
+        <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
+      </div>
+    </Link>
   );
 }

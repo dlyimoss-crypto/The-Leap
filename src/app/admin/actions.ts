@@ -3,6 +3,11 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { parsePriceCents } from "@/lib/book-price";
 import { requireAdmin } from "@/lib/supabase/authorize";
+import {
+  ANNOUNCEMENT_IMAGE_BUCKET,
+  isAnnouncementKind,
+  sanitizeAnnouncementLink,
+} from "@/lib/supabase/announcements";
 
 const RESTORED_STATUS_BY_TYPE: Record<string, string> = {
   post: "visible",
@@ -135,54 +140,111 @@ export async function deleteDevotion(id: string) {
   revalidatePath("/admin");
 }
 
-function prayerMovementFields(formData: FormData) {
-  const prayer_points = String(formData.get("prayer_points") ?? "")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean);
+// Fields shared by every announcement kind, plus the kind-specific ones
+// (scripture/prayer points for Prayer, a date for Event). Fields that don't
+// belong to the chosen kind are cleared, so switching an announcement from
+// Prayer to News doesn't leave hidden prayer points behind.
+function announcementFields(formData: FormData) {
+  const kindRaw = formData.get("kind");
+  const kind = isAnnouncementKind(kindRaw) ? kindRaw : "prayer";
+
+  const prayer_points =
+    kind === "prayer"
+      ? String(formData.get("prayer_points") ?? "")
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean)
+      : [];
+
+  const eventDate = String(formData.get("event_date") ?? "").trim();
 
   return {
+    kind,
     title: String(formData.get("title") ?? "").trim(),
+    body: String(formData.get("body") ?? "").trim() || null,
+    link_url: sanitizeAnnouncementLink(String(formData.get("link_url") ?? "")),
+    link_label: String(formData.get("link_label") ?? "").trim() || null,
+    event_date:
+      kind === "event" && /^\d{4}-\d{2}-\d{2}$/.test(eventDate)
+        ? eventDate
+        : null,
     scripture_reference:
-      String(formData.get("scripture_reference") ?? "").trim() || null,
+      kind === "prayer"
+        ? String(formData.get("scripture_reference") ?? "").trim() || null
+        : null,
     prayer_points,
   };
 }
 
-export async function createPrayerMovement(formData: FormData) {
-  const { supabase } = await requireAdmin();
-
-  const { error } = await supabase
-    .from("prayer_movements")
-    .insert(prayerMovementFields(formData));
-
-  if (error) {
-    console.error("Failed to create prayer movement", error);
+// Uploads a newly chosen image (if any). Returns the new storage path, null
+// to clear the image ("remove image" ticked), or undefined to leave the
+// existing image as it is.
+async function announcementImageUpdate(
+  supabase: Awaited<ReturnType<typeof requireAdmin>>["supabase"],
+  formData: FormData,
+): Promise<string | null | undefined> {
+  const file = formData.get("image");
+  if (file instanceof File && file.size > 0) {
+    const safeName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+    const path = `${Date.now()}-${safeName}`;
+    const { error } = await supabase.storage
+      .from(ANNOUNCEMENT_IMAGE_BUCKET)
+      .upload(path, file, { contentType: file.type || undefined });
+    if (error) {
+      console.error("Failed to upload announcement image", error);
+      return undefined;
+    }
+    return path;
   }
-
-  revalidatePath("/admin");
-  revalidateTag("prayer-movement", { expire: 0 });
+  return formData.get("remove_image") === "on" ? null : undefined;
 }
 
-export async function updatePrayerMovement(id: string, formData: FormData) {
+function revalidateAnnouncement() {
+  revalidatePath("/admin");
+  revalidatePath("/prayer-room");
+  revalidatePath("/");
+  revalidateTag("announcement", { expire: 0 });
+}
+
+export async function createAnnouncement(formData: FormData) {
   const { supabase } = await requireAdmin();
+
+  const image_path = await announcementImageUpdate(supabase, formData);
 
   const { error } = await supabase
     .from("prayer_movements")
-    .update(prayerMovementFields(formData))
+    .insert({ ...announcementFields(formData), image_path: image_path ?? null });
+
+  if (error) {
+    console.error("Failed to create announcement", error);
+  }
+
+  revalidateAnnouncement();
+}
+
+export async function updateAnnouncement(id: string, formData: FormData) {
+  const { supabase } = await requireAdmin();
+
+  const image_path = await announcementImageUpdate(supabase, formData);
+
+  const { error } = await supabase
+    .from("prayer_movements")
+    .update({
+      ...announcementFields(formData),
+      ...(image_path !== undefined ? { image_path } : {}),
+    })
     .eq("id", id);
 
   if (error) {
-    console.error("Failed to update prayer movement", error);
+    console.error("Failed to update announcement", error);
   }
 
-  revalidatePath("/admin");
-  revalidateTag("prayer-movement", { expire: 0 });
+  revalidateAnnouncement();
 }
 
-// Only one movement is featured at a time, so activating one archives
+// Only one announcement is featured at a time, so activating one archives
 // whichever was previously active first.
-export async function activatePrayerMovement(id: string, formData: FormData) {
+export async function activateAnnouncement(id: string, formData: FormData) {
   const { supabase } = await requireAdmin();
 
   const daysRaw = Number.parseInt(String(formData.get("days") ?? ""), 10);
@@ -197,7 +259,7 @@ export async function activatePrayerMovement(id: string, formData: FormData) {
     .eq("status", "active");
 
   if (archiveError) {
-    console.error("Failed to archive previous prayer movement", archiveError);
+    console.error("Failed to archive previous announcement", archiveError);
   }
 
   const { error } = await supabase
@@ -206,16 +268,13 @@ export async function activatePrayerMovement(id: string, formData: FormData) {
     .eq("id", id);
 
   if (error) {
-    console.error("Failed to activate prayer movement", error);
+    console.error("Failed to activate announcement", error);
   }
 
-  revalidatePath("/admin");
-  revalidatePath("/prayer-room");
-  revalidatePath("/");
-  revalidateTag("prayer-movement", { expire: 0 });
+  revalidateAnnouncement();
 }
 
-export async function archivePrayerMovement(id: string) {
+export async function archiveAnnouncement(id: string) {
   const { supabase } = await requireAdmin();
 
   const { error } = await supabase
@@ -224,16 +283,13 @@ export async function archivePrayerMovement(id: string) {
     .eq("id", id);
 
   if (error) {
-    console.error("Failed to archive prayer movement", error);
+    console.error("Failed to archive announcement", error);
   }
 
-  revalidatePath("/admin");
-  revalidatePath("/prayer-room");
-  revalidatePath("/");
-  revalidateTag("prayer-movement", { expire: 0 });
+  revalidateAnnouncement();
 }
 
-export async function deletePrayerMovement(id: string) {
+export async function deleteAnnouncement(id: string) {
   const { supabase } = await requireAdmin();
 
   const { error } = await supabase
@@ -242,11 +298,10 @@ export async function deletePrayerMovement(id: string) {
     .eq("id", id);
 
   if (error) {
-    console.error("Failed to delete prayer movement", error);
+    console.error("Failed to delete announcement", error);
   }
 
-  revalidatePath("/admin");
-  revalidateTag("prayer-movement", { expire: 0 });
+  revalidateAnnouncement();
 }
 
 export async function approveAuthorApplication(

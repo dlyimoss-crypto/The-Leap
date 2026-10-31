@@ -1,9 +1,10 @@
 import { CheckCircle2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
-  getPrayerMovementDaysLeft,
-  type PrayerMovement,
-} from "@/lib/supabase/prayer-movements";
+  getAnnouncementDaysLeft,
+  getAnnouncementImageUrl,
+  type Announcement,
+} from "@/lib/supabase/announcements";
 import { joinPrayerMovement } from "./actions";
 
 export function PrayerMovementCard({
@@ -11,14 +12,23 @@ export function PrayerMovementCard({
   participantCount,
   hasPrayed,
 }: {
-  movement: PrayerMovement;
+  movement: Announcement;
   participantCount: number;
   hasPrayed: boolean;
 }) {
-  const daysLeft = getPrayerMovementDaysLeft(movement.active_until);
+  const daysLeft = getAnnouncementDaysLeft(movement.active_until);
+  const imageUrl = getAnnouncementImageUrl(movement.image_path);
 
   return (
     <div className="space-y-3 rounded-2xl border-2 border-primary/30 bg-card p-4 shadow-sm">
+      {imageUrl && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={imageUrl}
+          alt=""
+          className="aspect-video w-full rounded-xl object-cover"
+        />
+      )}
       <div className="space-y-1">
         <div className="flex items-center justify-between gap-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-primary">
@@ -33,6 +43,9 @@ export function PrayerMovementCard({
         <h2 className="font-heading text-lg font-semibold text-balance">
           {movement.title}
         </h2>
+        {movement.body && (
+          <p className="whitespace-pre-line text-sm">{movement.body}</p>
+        )}
         {movement.scripture_reference && (
           <p className="text-sm text-muted-foreground">
             {movement.scripture_reference}
@@ -49,6 +62,18 @@ export function PrayerMovementCard({
             </li>
           ))}
         </ul>
+      )}
+
+      {movement.link_url && (
+        <a
+          href={movement.link_url}
+          {...(movement.link_url.startsWith("http")
+            ? { target: "_blank", rel: "noopener noreferrer" }
+            : {})}
+          className="block text-sm font-medium text-primary underline-offset-4 hover:underline"
+        >
+          {movement.link_label || "Learn more"}
+        </a>
       )}
 
       <div className="flex items-center gap-3 pt-1">

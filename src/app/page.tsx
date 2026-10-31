@@ -9,7 +9,7 @@ import {
   COMMITMENT_ITEMS,
   getActiveCommitment,
 } from "@/lib/supabase/commitments";
-import { getActivePrayerMovementCached } from "@/lib/supabase/prayer-movements";
+import { getActiveAnnouncementCached } from "@/lib/supabase/announcements";
 import { isTodaysDevotionUnread } from "@/lib/supabase/devotion-reads";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary } from "@/lib/i18n/dictionaries";
@@ -32,7 +32,7 @@ export default async function HomePage(props: PageProps<"/">) {
   const showGospelInvite = gospelInviteParam === "1";
 
   // findJourneyMeta only depends on journeySlug (from getCurrentJourneyState),
-  // not on the profile/commitment/prayerMovement queries below it — chaining
+  // not on the profile/commitment/announcement queries below it — chaining
   // it off that one promise, then awaiting everything together, lets it run
   // concurrently with those instead of waiting for all of them to finish
   // first. Every serial round trip here is a few hundred ms on top of the
@@ -46,7 +46,7 @@ export default async function HomePage(props: PageProps<"/">) {
     { progress, journeySlug },
     { data: profile },
     commitment,
-    prayerMovement,
+    announcement,
     journey,
     devotionUnread,
   ] = await Promise.all([
@@ -57,7 +57,7 @@ export default async function HomePage(props: PageProps<"/">) {
         .eq("id", user.id)
         .single(),
       getActiveCommitment(supabase, user.id),
-      getActivePrayerMovementCached(),
+      getActiveAnnouncementCached(),
       journeyMeta,
       isTodaysDevotionUnread(supabase),
     ]);
@@ -102,7 +102,7 @@ export default async function HomePage(props: PageProps<"/">) {
           ? { done: commitmentItemsDone(commitment), total: COMMITMENT_ITEMS.length }
           : null
       }
-      prayerMovement={prayerMovement}
+      announcement={announcement}
       showGospelInvite={showGospelInvite}
       devotionUnread={devotionUnread}
     />

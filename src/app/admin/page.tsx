@@ -19,14 +19,19 @@ import { PatternCorner } from "@/components/pattern-bg";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ChipListInput } from "@/components/admin/chip-list-input";
 import { SuggestibleTextarea } from "@/components/admin/suggestible-textarea";
 import { createClient } from "@/lib/supabase/server";
 import { requireAdmin } from "@/lib/supabase/authorize";
 import { getAdminNotificationCounts } from "@/lib/supabase/admin-notifications";
 import { COUNTRIES, countryFlag } from "@/lib/countries";
 import { getDevotionStatus } from "@/lib/devotion";
-import { getPrayerMovementDaysLeft } from "@/lib/supabase/prayer-movements";
+import {
+  ANNOUNCEMENT_KIND_LABELS,
+  getAnnouncementDaysLeft,
+  getAnnouncementImageUrl,
+  type AnnouncementKind,
+} from "@/lib/supabase/announcements";
+import { AnnouncementFields } from "@/components/admin/announcement-fields";
 import {
   approveAuthorApplication,
   approveBook,
@@ -49,11 +54,11 @@ import {
   updateChurch,
   updateDevotion,
   updateServiceOpportunity,
-  createPrayerMovement,
-  updatePrayerMovement,
-  activatePrayerMovement,
-  archivePrayerMovement,
-  deletePrayerMovement,
+  createAnnouncement,
+  updateAnnouncement,
+  activateAnnouncement,
+  archiveAnnouncement,
+  deleteAnnouncement,
 } from "./actions";
 import {
   createJourney,
@@ -175,9 +180,15 @@ type JourneyRow = {
   status: string;
 };
 
-type PrayerMovementRow = {
+type AnnouncementRow = {
   id: string;
+  kind: AnnouncementKind;
   title: string;
+  body: string | null;
+  image_path: string | null;
+  link_url: string | null;
+  link_label: string | null;
+  event_date: string | null;
   scripture_reference: string | null;
   prayer_points: string[];
   status: string;
@@ -366,7 +377,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
               : "shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
           }
         >
-          Prayer
+          Announcements
         </Link>
         <Link
           href="/admin?tab=reports"
@@ -393,7 +404,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
       ) : tab === "opportunities" ? (
         <OpportunitiesAdmin editId={editIdParam} />
       ) : tab === "prayer" ? (
-        <PrayerMovementsAdmin editId={editIdParam} />
+        <AnnouncementsAdmin editId={editIdParam} />
       ) : tab === "reports" ? (
         <ReportsAdmin period={period} />
       ) : (
@@ -1553,7 +1564,7 @@ const PRAYER_POINT_SUGGESTIONS = [
   "Pray for revival",
 ];
 
-async function PrayerMovementsAdmin({
+async function AnnouncementsAdmin({
   editId,
 }: {
   editId: string | undefined;
@@ -1562,12 +1573,14 @@ async function PrayerMovementsAdmin({
 
   const { data: movements, error } = await supabase
     .from("prayer_movements")
-    .select("id, title, scripture_reference, prayer_points, status, active_until")
+    .select(
+      "id, kind, title, body, image_path, link_url, link_label, event_date, scripture_reference, prayer_points, status, active_until",
+    )
     .order("created_at", { ascending: false })
-    .returns<PrayerMovementRow[]>();
+    .returns<AnnouncementRow[]>();
 
   if (error) {
-    console.error("Failed to load prayer movements", error);
+    console.error("Failed to load announcements", error);
   }
 
   const rows = movements ?? [];
@@ -1582,44 +1595,25 @@ async function PrayerMovementsAdmin({
       <form
         action={
           editing
-            ? updatePrayerMovement.bind(null, editing.id)
-            : createPrayerMovement
+            ? updateAnnouncement.bind(null, editing.id)
+            : createAnnouncement
         }
         className="space-y-3 rounded-xl border bg-card p-4"
       >
         <p className="text-sm font-semibold">
-          {editing ? "Edit prayer movement" : "New prayer movement"}
+          {editing ? "Edit announcement" : "New announcement"}
         </p>
-        <div className="space-y-1.5">
-          <Label htmlFor="title">Title</Label>
-          <Input
-            id="title"
-            name="title"
-            placeholder="e.g. Let's pray for Nepal"
-            defaultValue={editing?.title}
-            required
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="scripture_reference">
-            Scripture reference (optional)
-          </Label>
-          <Input
-            id="scripture_reference"
-            name="scripture_reference"
-            placeholder="e.g. Psalm 67:1-2"
-            defaultValue={editing?.scripture_reference ?? ""}
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label>Prayer points</Label>
-          <ChipListInput
-            name="prayer_points"
-            defaultValue={editing?.prayer_points ?? []}
-            suggestions={PRAYER_POINT_SUGGESTIONS}
-            placeholder="Type a prayer point, then press Enter"
-          />
-        </div>
+        <p className="text-xs text-muted-foreground">
+          One announcement shows on Home at a time — a prayer movement, news,
+          an event, an advert or a general message. Activating one replaces
+          whichever is live.
+        </p>
+        <AnnouncementFields
+          key={editing?.id ?? "new"}
+          defaults={editing}
+          prayerPointSuggestions={PRAYER_POINT_SUGGESTIONS}
+          currentImageUrl={getAnnouncementImageUrl(editing?.image_path ?? null)}
+        />
         <div className="flex justify-end gap-2">
           {editing && (
             <Button
@@ -1633,7 +1627,7 @@ async function PrayerMovementsAdmin({
             </Button>
           )}
           <Button type="submit" size="sm">
-            {editing ? "Save changes" : "Create movement"}
+            {editing ? "Save changes" : "Create announcement"}
           </Button>
         </div>
       </form>
@@ -1642,7 +1636,7 @@ async function PrayerMovementsAdmin({
         <div className="flex flex-col items-center gap-3 py-12 text-center">
           <Heart className="size-8 text-muted-foreground/50" />
           <p className="text-sm text-muted-foreground">
-            No prayer movements yet — create the first one above.
+            No announcements yet — create the first one above.
           </p>
         </div>
       )}
@@ -1669,11 +1663,15 @@ async function PrayerMovementsAdmin({
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">{m.title}</p>
                       <p className="text-xs text-muted-foreground">
-                        {m.prayer_points.length} prayer point
-                        {m.prayer_points.length === 1 ? "" : "s"}
+                        {ANNOUNCEMENT_KIND_LABELS[m.kind]}
+                        {m.kind === "prayer" &&
+                          ` · ${m.prayer_points.length} prayer point${m.prayer_points.length === 1 ? "" : "s"}`}
+                        {m.kind === "event" &&
+                          m.event_date &&
+                          ` · ${m.event_date}`}
                         {m.status === "active" &&
                           (() => {
-                            const daysLeft = getPrayerMovementDaysLeft(
+                            const daysLeft = getAnnouncementDaysLeft(
                               m.active_until,
                             );
                             return daysLeft === null
@@ -1692,14 +1690,14 @@ async function PrayerMovementsAdmin({
                         Edit
                       </Button>
                       {m.status === "active" ? (
-                        <form action={archivePrayerMovement.bind(null, m.id)}>
+                        <form action={archiveAnnouncement.bind(null, m.id)}>
                           <Button type="submit" size="xs" variant="ghost">
                             Archive
                           </Button>
                         </form>
                       ) : (
                         <form
-                          action={activatePrayerMovement.bind(null, m.id)}
+                          action={activateAnnouncement.bind(null, m.id)}
                           className="flex items-center gap-1"
                         >
                           <Input
@@ -1715,7 +1713,7 @@ async function PrayerMovementsAdmin({
                           </Button>
                         </form>
                       )}
-                      <form action={deletePrayerMovement.bind(null, m.id)}>
+                      <form action={deleteAnnouncement.bind(null, m.id)}>
                         <Button type="submit" size="xs" variant="ghost">
                           Delete
                         </Button>

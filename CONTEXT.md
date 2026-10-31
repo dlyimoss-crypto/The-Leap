@@ -60,6 +60,10 @@ _Avoid_: Commitment, exercise
 A post in the Prayer Room. Always owned by its author, but independently public/private (who can see it) and identified/anonymous (whether the author's name shows) — anonymity is a display choice, not literal system-level anonymity; ownership is always retained for moderation.
 _Avoid_: Prayer (ambiguous alone), request
 
+**Announcement**:
+The single admin-curated window featured on Home, used to bring one thing into awareness at a time. It has a kind — Prayer, News, Event, Advert or General — and only one is live at once, for a set number of days. A Prayer announcement is what was formerly called a prayer movement: it also appears in the Prayer Room with its prayer points and "I have prayed" count. (Stored in the `prayer_movements` table for historical reasons.)
+_Avoid_: Banner, popup, notification (reserved for push/in-app notifications)
+
 **Post**:
 Community-space content, visible to all users. Always a distinct table/concept from a Reflection (private, never shared) and a Prayer Request (its own space, its own visibility rules).
 _Avoid_: Reflection, update, share
