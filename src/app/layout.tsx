@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Metadata, Viewport } from "next";
 import { Sora, Karla, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -14,7 +16,7 @@ import {
   countUserUnreadAskPd,
 } from "@/lib/supabase/ask-pd";
 import { getLocale } from "@/lib/i18n/get-locale";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { getDictionary, type Dictionary } from "@/lib/i18n/dictionaries";
 import "./globals.css";
 
 const sora = Sora({
@@ -64,27 +66,17 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1c1a18",
+  themeColor: "#0E0D0C",
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const { supabase, user } = await getAuthedUser();
 
-  let teamRole: "admin" | "pastor" | null = null;
-  let teamNotificationCount = 0;
-  let askPdUnreadCount = 0;
+  let teamRole: TeamRole = null;
   if (user) {
     const profile = await getProfile(user.id);
     teamRole =
       profile?.role === "admin" ? "admin" : profile?.role === "pastor" ? "pastor" : null;
-    const [adminCounts, teamAskPd, userAskPd] = await Promise.all([
-      teamRole === "admin" ? getAdminNotificationCounts(supabase) : null,
-      teamRole ? countTeamUnreadAskPd(supabase) : 0,
-      countUserUnreadAskPd(supabase, user.id),
-    ]);
-    teamNotificationCount =
-      (adminCounts ? totalAdminNotificationCount(adminCounts) : 0) + teamAskPd;
-    askPdUnreadCount = userAskPd;
   }
 
   const locale = await getLocale();
@@ -106,15 +98,50 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           </div>
           {user && <CompanionLauncher dict={dict.companion} />}
           {user && (
-            <BottomNav
-              teamRole={teamRole}
-              teamNotificationCount={teamNotificationCount}
-              askPdUnreadCount={askPdUnreadCount}
-              dict={dict.nav}
-            />
+            // Badge counts stream in after the page paints, rather than
+            // holding up the first frame (see the Home skeleton).
+            <Suspense fallback={<BottomNav teamRole={teamRole} dict={dict.nav} />}>
+              <BottomNavWithBadges
+                supabase={supabase}
+                userId={user.id}
+                teamRole={teamRole}
+                dict={dict.nav}
+              />
+            </Suspense>
           )}
         </ThemeProvider>
       </body>
     </html>
+  );
+}
+
+type TeamRole = "admin" | "pastor" | null;
+
+async function BottomNavWithBadges({
+  supabase,
+  userId,
+  teamRole,
+  dict,
+}: {
+  supabase: SupabaseClient;
+  userId: string;
+  teamRole: TeamRole;
+  dict: Dictionary["nav"];
+}) {
+  const [adminCounts, teamAskPd, userAskPd] = await Promise.all([
+    teamRole === "admin" ? getAdminNotificationCounts(supabase) : null,
+    teamRole ? countTeamUnreadAskPd(supabase) : 0,
+    countUserUnreadAskPd(supabase, userId),
+  ]);
+
+  return (
+    <BottomNav
+      teamRole={teamRole}
+      teamNotificationCount={
+        (adminCounts ? totalAdminNotificationCount(adminCounts) : 0) + teamAskPd
+      }
+      askPdUnreadCount={userAskPd}
+      dict={dict}
+    />
   );
 }

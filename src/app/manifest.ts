@@ -7,8 +7,11 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Your Essential Companion in Christ",
     start_url: "/",
     display: "standalone",
-    background_color: "#1c1a18",
-    theme_color: "#1c1a18",
+    // Android paints its launch screen (the icon) on background_color: the
+    // same near-black the app's dark backdrop fades into, so the hand-off
+    // from launch screen to Home reads as one continuous screen.
+    background_color: "#0E0D0C",
+    theme_color: "#0E0D0C",
     icons: [
       {
         src: "/icon-192.png",

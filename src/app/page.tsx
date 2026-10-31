@@ -14,19 +14,42 @@ import { countUserUnreadAskPd } from "@/lib/supabase/ask-pd";
 import { isTodaysDevotionUnread } from "@/lib/supabase/devotion-reads";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { Suspense } from "react";
 import { WelcomeView } from "./welcome-view";
+import { HomeSkeleton } from "./home-skeleton";
 import { DashboardView } from "./dashboard-view";
 
 export default async function HomePage(props: PageProps<"/">) {
-  const { supabase, user } = await getAuthedUser();
+  const { user } = await getAuthedUser();
 
+  if (!user) {
+    return <WelcomeView />;
+  }
+
+  // Stream Home: send the card outline at once and fill it in when the
+  // data arrives. Opening the installed app, Android keeps its launch
+  // screen (the logo) up until the first paint, so the sooner something
+  // paints, the shorter that logo shows.
+  return (
+    <Suspense fallback={<HomeSkeleton />}>
+      <HomeContent searchParams={props.searchParams} />
+    </Suspense>
+  );
+}
+
+async function HomeContent({
+  searchParams: searchParamsPromise,
+}: {
+  searchParams: PageProps<"/">["searchParams"];
+}) {
+  const { supabase, user } = await getAuthedUser();
   if (!user) {
     return <WelcomeView />;
   }
 
   // Sign-in/sign-up redirect here with ?gospel_invite=1 so the card shows
   // once per sign-in event, not on every Home render — see sign-in/actions.ts.
-  const searchParams = await props.searchParams;
+  const searchParams = await searchParamsPromise;
   const gospelInviteParam = Array.isArray(searchParams.gospel_invite)
     ? searchParams.gospel_invite[0]
     : searchParams.gospel_invite;
