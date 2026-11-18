@@ -3,7 +3,7 @@
 // isEnabledLocale) — listing it here alone doesn't switch it on, so a
 // half-translated language never reaches the live app.
 
-export const LOCALES = ["en", "sw", "de", "fr", "es", "zh-CN", "zh-TW"] as const;
+export const LOCALES = ["en", "sw", "de", "fr", "es", "zh-CN"] as const;
 
 export type Locale = (typeof LOCALES)[number];
 
@@ -24,7 +24,6 @@ export const LOCALE_INFO: Record<Locale, LocaleInfo> = {
   fr: { nativeName: "Français", englishName: "French", dir: "ltr" },
   es: { nativeName: "Español", englishName: "Spanish", dir: "ltr" },
   "zh-CN": { nativeName: "简体中文", englishName: "Simplified Chinese", dir: "ltr" },
-  "zh-TW": { nativeName: "繁體中文", englishName: "Traditional Chinese", dir: "ltr" },
 };
 
 export function isLocale(value: unknown): value is Locale {

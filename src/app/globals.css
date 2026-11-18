@@ -178,19 +178,14 @@
   background: var(--leap-backdrop);
 }
 
-/* Chinese: Sora/Karla have no CJK glyphs, so name system fonts with the
-   right glyph forms for each script (no multi-MB web-font download), and
+/* Chinese: Sora/Karla have no CJK glyphs, so name system fonts with
+   Simplified Chinese glyph forms (no multi-MB web-font download), and
    drop the negative letter-spacing that crowds Chinese characters. */
 html:lang(zh-CN) {
   --font-cjk: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
     "Noto Sans CJK SC", "Noto Sans SC", sans-serif;
 }
-html:lang(zh-TW) {
-  --font-cjk: "PingFang TC", "Microsoft JhengHei", "Noto Sans CJK TC",
-    "Noto Sans TC", sans-serif;
-}
-html:lang(zh-CN) .tracking-tight,
-html:lang(zh-TW) .tracking-tight {
+html:lang(zh-CN) .tracking-tight {
   letter-spacing: 0;
 }
 

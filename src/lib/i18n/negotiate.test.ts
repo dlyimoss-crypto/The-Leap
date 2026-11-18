@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { localeFromAcceptLanguage } from "./negotiate";
 
-const ALL = ["en", "sw", "de", "fr", "es", "zh-CN", "zh-TW"] as const;
+const ALL = ["en", "sw", "de", "fr", "es", "zh-CN"] as const;
 
 describe("localeFromAcceptLanguage", () => {
   it("returns null for a missing or empty header", () => {
@@ -33,9 +33,9 @@ describe("localeFromAcceptLanguage", () => {
     expect(localeFromAcceptLanguage("*", ALL)).toBeNull();
   });
 
-  it("maps Traditional Chinese variants to zh-TW", () => {
+  it("offers Simplified Chinese to Traditional Chinese devices too", () => {
     for (const tag of ["zh-TW", "zh-HK", "zh-MO", "zh-Hant", "zh-Hant-HK"]) {
-      expect(localeFromAcceptLanguage(tag, ALL)).toBe("zh-TW");
+      expect(localeFromAcceptLanguage(tag, ALL)).toBe("zh-CN");
     }
   });
 

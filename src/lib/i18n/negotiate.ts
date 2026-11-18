@@ -1,14 +1,14 @@
 import type { Locale } from "./locales";
 
-const TRADITIONAL_CHINESE = /^zh-(hant|tw|hk|mo)(-|$)/;
-
 /** Maps one BCP 47 language tag onto our locale codes, or null. */
 function toLocale(tag: string): Locale | null {
   const lower = tag.toLowerCase();
   const primary = lower.split("-")[0];
 
+  // Only Simplified Chinese is offered; Traditional Chinese readers
+  // (zh-TW/HK/Hant) are offered it too — as a suggestion, never forced.
   if (primary === "zh") {
-    return TRADITIONAL_CHINESE.test(lower) ? "zh-TW" : "zh-CN";
+    return "zh-CN";
   }
   if (primary === "en" || primary === "sw" || primary === "de" || primary === "fr" || primary === "es") {
     return primary;

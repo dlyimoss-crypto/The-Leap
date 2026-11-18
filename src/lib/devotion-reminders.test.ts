@@ -65,6 +65,6 @@ describe("reminderTitle", () => {
 
   it("uses each enabled language", () => {
     expect(reminderTitle("de")).not.toBe("Today's devotion is ready");
-    expect(reminderTitle("zh-TW")).not.toBe(reminderTitle("zh-CN"));
+    expect(reminderTitle("zh-CN")).not.toBe(reminderTitle("en"));
   });
 });

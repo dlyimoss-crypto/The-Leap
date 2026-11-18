@@ -15,7 +15,6 @@ import { de } from "./messages/de";
 import { fr } from "./messages/fr";
 import { es } from "./messages/es";
 import { zhCN } from "./messages/zh-CN";
-import { zhTW } from "./messages/zh-TW";
 
 export type { Locale };
 
@@ -178,7 +177,6 @@ export const dictionaries: Partial<Record<Locale, Dictionary>> = {
   fr,
   es,
   "zh-CN": zhCN,
-  "zh-TW": zhTW,
 };
 
 /** Languages users can pick today, in registry order. */

@@ -182,3 +182,4 @@ Each phase ends typechecked, linted, tested, built and verified in the running a
 4. **Bible: unchanged.** No Bible translations, no Swahili Bible, no localized book names. Scripture stays the BSB (English) in every language. §C5 is out of scope; Phase 5 is dropped.
 5. **Offline reading: in scope now** (Phase 6 stays).
 6. **Books: unchanged.** No translation of book metadata or files.
+7. **Traditional Chinese dropped** (2026-11-18): only Simplified Chinese (`zh-CN`) is offered. Traditional-Chinese devices are offered Simplified Chinese as a suggestion. Re-adding it later = a `messages/zh-TW/` folder + registry entry + migration.
