@@ -4,6 +4,7 @@ import { useSyncExternalStore } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
 
 const emptySubscribe = () => () => {};
 
@@ -18,7 +19,11 @@ function useIsHydrated() {
   );
 }
 
-export function ThemeToggle() {
+export function ThemeToggle({
+  dict,
+}: {
+  dict: Dictionary["common"]["themeToggle"];
+}) {
   const isHydrated = useIsHydrated();
   const { resolvedTheme, setTheme } = useTheme();
 
@@ -33,7 +38,7 @@ export function ThemeToggle() {
       type="button"
       variant="ghost"
       size="icon"
-      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      aria-label={isDark ? dict.toLight : dict.toDark}
       onClick={() => setTheme(isDark ? "light" : "dark")}
     >
       {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}

@@ -9,6 +9,8 @@ import { requireUser } from "@/lib/supabase/authorize";
 import { isDayGatedUntilTomorrow } from "@/lib/supabase/journey-progress";
 import { getScripturePassages } from "@/lib/content/scripture";
 import { completeSession } from "./actions";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 
 export default async function JourneySessionPage(
   props: PageProps<"/journeys/[slug]/day/[day]">,
@@ -17,6 +19,9 @@ export default async function JourneySessionPage(
   const dayNumber = Number(day);
 
   const { supabase, user } = await requireUser();
+  const dict = getDictionary(await getLocale()).commit;
+  const t = dict.journeyDay;
+  const loop = dict.formationLoop;
 
   const [journey, session] = await Promise.all([
     findJourneyMeta(supabase, slug),
@@ -39,17 +44,14 @@ export default async function JourneySessionPage(
       <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-4 overflow-hidden px-6 py-16 text-center">
         <PatternBorder />
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-          Day {dayNumber} of {journey.durationDays} &middot; {journey.title}
+          {t.dayOf(dayNumber, journey.durationDays)} &middot; {journey.title}
         </p>
         <h1 className="text-2xl font-heading font-semibold text-balance">
-          Welcome back tomorrow
+          {t.gatedHeading}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Take today to pray and sit with what you&apos;ve just read — the
-          next step opens when you return tomorrow.
-        </p>
+        <p className="text-sm text-muted-foreground">{t.gatedBody}</p>
         <Button render={<Link href="/" />} nativeButton={false} size="lg">
-          Back to Home
+          {t.backToHome}
         </Button>
       </main>
     );
@@ -65,7 +67,8 @@ export default async function JourneySessionPage(
       <div className="space-y-3">
         <Progress value={(dayNumber / journey.durationDays) * 100} />
         <p className="text-sm text-muted-foreground">
-          Day {session.day} of {journey.durationDays} &middot; {journey.title}
+          {t.dayOf(session.day, journey.durationDays)} &middot;{" "}
+          {journey.title}
         </p>
         <h1 className="text-2xl font-heading font-semibold text-balance">
           {session.title}
@@ -75,7 +78,7 @@ export default async function JourneySessionPage(
       <div className="space-y-5 rounded-xl border bg-card p-5">
         <div className="space-y-3">
           <p className="text-xs font-medium uppercase tracking-wide text-primary">
-            Scripture
+            {loop.scripture}
           </p>
           {hasMatchedPassage ? (
             passages.map(({ reference, passage }) =>
@@ -109,10 +112,10 @@ export default async function JourneySessionPage(
             </div>
           )}
         </div>
-        <Step label="Message">{session.message}</Step>
-        <Step label="Explore">{session.explore}</Step>
-        <Step label="Reflect">{session.reflect}</Step>
-        {session.pray && <Step label="Pray">{session.pray}</Step>}
+        <Step label={loop.message}>{session.message}</Step>
+        <Step label={loop.explore}>{session.explore}</Step>
+        <Step label={loop.reflect}>{session.reflect}</Step>
+        {session.pray && <Step label={loop.pray}>{session.pray}</Step>}
       </div>
 
       {isLastDay && (
@@ -132,10 +135,10 @@ export default async function JourneySessionPage(
       >
         <Button type="submit" size="lg" className="w-full">
           {isLastDay
-            ? "Continue"
+            ? t.continue
             : session.nextTopic
-              ? `Continue: ${session.nextTopic}`
-              : "Continue"}
+              ? t.continueTo(session.nextTopic)
+              : t.continue}
         </Button>
       </form>
     </main>

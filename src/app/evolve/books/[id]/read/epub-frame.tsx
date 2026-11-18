@@ -4,8 +4,17 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Rendition } from "epubjs";
 import { Button } from "@/components/ui/button";
+import type { BooksMessages } from "@/lib/i18n/messages/en/books";
 
-export function EpubFrame({ src, title }: { src: string; title: string }) {
+export function EpubFrame({
+  src,
+  title,
+  dict,
+}: {
+  src: string;
+  title: string;
+  dict: BooksMessages["reader"];
+}) {
   const viewerRef = useRef<HTMLDivElement>(null);
   const renditionRef = useRef<Rendition | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">(
@@ -74,17 +83,17 @@ export function EpubFrame({ src, title }: { src: string; title: string }) {
 
       {status === "loading" && (
         <div className="absolute inset-0 flex items-center justify-center bg-background">
-          <p className="text-sm text-muted-foreground">Loading book…</p>
+          <p className="text-sm text-muted-foreground">{dict.loading}</p>
         </div>
       )}
 
       {status === "error" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background p-8 text-center">
           <p className="text-sm font-medium">
-            This EPUB couldn&apos;t be loaded.
+            {dict.epubError}
           </p>
           <p className="text-sm text-muted-foreground">
-            The file may be corrupted or in an unsupported format.
+            {dict.fileErrorHint}
           </p>
         </div>
       )}
@@ -94,7 +103,7 @@ export function EpubFrame({ src, title }: { src: string; title: string }) {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Previous page"
+            aria-label={dict.previousPage}
             className="absolute top-1/2 left-1 -translate-y-1/2"
             onClick={() => renditionRef.current?.prev()}
           >
@@ -103,7 +112,7 @@ export function EpubFrame({ src, title }: { src: string; title: string }) {
           <Button
             variant="ghost"
             size="icon"
-            aria-label="Next page"
+            aria-label={dict.nextPage}
             className="absolute top-1/2 right-1 -translate-y-1/2"
             onClick={() => renditionRef.current?.next()}
           >

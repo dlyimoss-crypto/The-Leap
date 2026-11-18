@@ -33,17 +33,19 @@ export default async function AnnouncementPage(
     redirect("/prayer-room");
   }
 
-  const dict = getDictionary(await getLocale());
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
+  const t = dict.community.announcement;
 
   if (!announcement) {
     return (
       <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-4 overflow-hidden px-6 py-10 text-center">
         <PatternBorder />
         <p className="text-muted-foreground">
-          This announcement is no longer running.
+          {t.noLongerRunning}
         </p>
         <Button render={<Link href="/" />} nativeButton={false} size="lg">
-          Back to Home
+          {t.backToHome}
         </Button>
       </main>
     );
@@ -55,7 +57,7 @@ export default async function AnnouncementPage(
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-5 overflow-hidden px-6 py-10">
       <PatternBorder />
-      <BackLink href="/" label="Home" />
+      <BackLink href="/" label={dict.nav.home} />
 
       <div className="space-y-4 rounded-2xl border-2 border-primary/30 bg-card p-5 shadow-sm">
         {imageUrl && (
@@ -79,7 +81,7 @@ export default async function AnnouncementPage(
         {announcement.kind === "event" && announcement.event_date && (
           <p className="flex items-center gap-2 text-sm font-medium">
             <CalendarDays className="size-4 text-primary" />
-            {formatEventDate(announcement.event_date)}
+            {formatEventDate(announcement.event_date, locale)}
           </p>
         )}
 
@@ -106,7 +108,7 @@ export default async function AnnouncementPage(
             size="lg"
             className="w-full"
           >
-            {announcement.link_label || "Learn more"}
+            {announcement.link_label || t.learnMore}
             {isExternal && <ExternalLink className="size-4" />}
           </Button>
         )}

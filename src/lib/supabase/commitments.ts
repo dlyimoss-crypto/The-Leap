@@ -14,30 +14,24 @@ export type Commitment = {
 
 // The fixed practices every weekly commitment is made of. "key" names the
 // boolean column each checkbox toggles; the sentence they spell out
-// together becomes the commitment's stored `body`.
+// together becomes the commitment's stored `body` (stored content, kept in
+// English). Each item's on-screen label/detail lives in the i18n dictionary
+// under commit.commitmentItems[key].
 export const COMMITMENT_ITEMS = [
   {
     key: "scripture_done",
-    label: "Study 5 paragraphs of the Bible",
-    detail: "Every day this week",
     sentence: "study 5 paragraphs of the Bible every day",
   },
   {
     key: "prayer_done",
-    label: "Pray for 5–15 minutes",
-    detail: "Every day this week",
     sentence: "pray for 5–15 minutes every day",
   },
   {
     key: "witness_done",
-    label: "Share the gospel",
-    detail: "At least once this week",
     sentence: "share the gospel at least once",
   },
 ] as const satisfies ReadonlyArray<{
   key: "scripture_done" | "prayer_done" | "witness_done";
-  label: string;
-  detail: string;
   sentence: string;
 }>;
 

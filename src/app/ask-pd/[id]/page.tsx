@@ -11,6 +11,8 @@ import {
 } from "@/components/ask-pd/thread";
 import { requireUser } from "@/lib/supabase/authorize";
 import { askPdStatusLabel, getAskPdThread } from "@/lib/supabase/ask-pd";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { replyAsUser } from "../actions";
 
 export default async function AskPdThreadPage(
@@ -35,17 +37,19 @@ export default async function AskPdThreadPage(
     await supabase.rpc("mark_ask_pd_read", { p_request_id: id });
   }
 
+  const t = getDictionary(await getLocale()).engage.askPd;
+
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
       <PatternBorder />
-      <BackLink href="/ask-pd" label="Ask PD" />
+      <BackLink href="/ask-pd" label={t.title} />
 
       <div className="space-y-1">
         <h1 className="text-2xl font-heading font-semibold">
-          {request.kind === "call" ? "Your call request" : "Your message"}
+          {request.kind === "call" ? t.thread.yourCallRequest : t.thread.yourMessage}
         </h1>
         <p className="text-sm text-muted-foreground">
-          {askPdStatusLabel(request.status, "user")}
+          {askPdStatusLabel(t, request.status, "user")}
         </p>
       </div>
 
@@ -53,9 +57,7 @@ export default async function AskPdThreadPage(
         <div className="flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm">
           <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" />
           <p>
-            Sent. Pastor Deniss or someone from the team will reply here
-            {request.kind === "call" ? " or reach out to you directly" : ""}.
-            You&apos;ll see a dot on Ask PD when there&apos;s a reply.
+            {request.kind === "call" ? t.thread.sentCall : t.thread.sentMessage}
           </p>
         </div>
       )}
@@ -68,16 +70,16 @@ export default async function AskPdThreadPage(
 
       {request.status === "closed" ? (
         <p className="rounded-lg bg-muted p-3 text-center text-sm text-muted-foreground">
-          This conversation is closed.{" "}
+          {t.thread.closed}{" "}
           <Link href="/ask-pd" className="font-medium text-primary underline">
-            Start a new one
+            {t.thread.startNewOne}
           </Link>{" "}
-          any time.
+          {t.thread.anyTime}
         </p>
       ) : (
         <ReplyForm
           action={replyAsUser.bind(null, id)}
-          placeholder="Add a follow-up…"
+          placeholder={t.thread.followUpPlaceholder}
         />
       )}
     </main>

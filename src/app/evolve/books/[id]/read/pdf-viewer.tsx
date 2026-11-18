@@ -6,6 +6,8 @@ import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import { Button } from "@/components/ui/button";
+import { interpolate } from "@/lib/i18n/format";
+import type { BooksMessages } from "@/lib/i18n/messages/en/books";
 
 // Must be set in this module (not a shared setup file) — react-pdf resolves
 // the worker at the point <Document> first renders, and a later import can
@@ -26,7 +28,15 @@ const DOCUMENT_OPTIONS = {
 
 const MAX_PAGE_WIDTH = 720;
 
-export function PdfViewer({ src, title }: { src: string; title: string }) {
+export function PdfViewer({
+  src,
+  title,
+  dict,
+}: {
+  src: string;
+  title: string;
+  dict: BooksMessages["reader"];
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [pageWidth, setPageWidth] = useState<number>();
   const [numPages, setNumPages] = useState<number>();
@@ -80,7 +90,7 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
           setStatus("error");
         }}
         loading={
-          <p className="text-sm text-muted-foreground">Loading book…</p>
+          <p className="text-sm text-muted-foreground">{dict.loading}</p>
         }
         error={null}
         className="flex flex-1 items-start justify-center"
@@ -97,10 +107,10 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
       {status === "error" && (
         <div className="flex flex-1 flex-col items-center justify-center gap-2 p-8 text-center">
           <p className="text-sm font-medium">
-            This PDF couldn&apos;t be loaded.
+            {dict.pdfError}
           </p>
           <p className="text-sm text-muted-foreground">
-            The file may be corrupted or in an unsupported format.
+            {dict.fileErrorHint}
           </p>
         </div>
       )}
@@ -110,19 +120,19 @@ export function PdfViewer({ src, title }: { src: string; title: string }) {
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label="Previous page"
+            aria-label={dict.previousPage}
             disabled={pageNumber <= 1}
             onClick={() => setPageNumber((p) => Math.max(1, p - 1))}
           >
             <ChevronLeft className="size-4" />
           </Button>
           <span className="text-xs tabular-nums text-muted-foreground">
-            {pageNumber} / {numPages}
+            {interpolate(dict.pageOf, { page: pageNumber, total: numPages })}
           </span>
           <Button
             variant="ghost"
             size="icon-sm"
-            aria-label="Next page"
+            aria-label={dict.nextPage}
             disabled={pageNumber >= numPages}
             onClick={() =>
               setPageNumber((p) => Math.min(numPages, p + 1))

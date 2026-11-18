@@ -10,7 +10,6 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import { COUNTRIES } from "@/lib/countries";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
 import {
   resendConfirmation,
@@ -25,12 +24,17 @@ const initialResendState: ResendState = {};
 
 type Mode = "sign-in" | "sign-up";
 
+type Country = { code: string; name: string };
+
 export function SignInForm({
   initialMode = "sign-in",
   dict,
+  countries,
 }: {
   initialMode?: Mode;
   dict: Dictionary["signIn"];
+  /** Nationality options, already localized and sorted (see localizedCountries). */
+  countries: Country[];
 }) {
   const [mode, setMode] = useState<Mode>(initialMode);
   const isSignIn = mode === "sign-in";
@@ -43,7 +47,7 @@ export function SignInForm({
 
       {/* Keyed by mode so useActionState resets — otherwise an error from
           the sign-in attempt would linger after switching to sign-up. */}
-      <AuthFields key={mode} mode={mode} dict={dict} />
+      <AuthFields key={mode} mode={mode} dict={dict} countries={countries} />
 
       <Button
         type="button"
@@ -60,9 +64,11 @@ export function SignInForm({
 function AuthFields({
   mode,
   dict,
+  countries,
 }: {
   mode: Mode;
   dict: Dictionary["signIn"];
+  countries: Country[];
 }) {
   const isSignIn = mode === "sign-in";
   const [state, formAction, pending] = useActionState(
@@ -97,7 +103,7 @@ function AuthFields({
               <option value="" disabled>
                 {dict.selectNationality}
               </option>
-              {COUNTRIES.map((country) => (
+              {countries.map((country) => (
                 <option key={country.code} value={country.code}>
                   {country.name}
                 </option>

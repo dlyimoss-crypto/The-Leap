@@ -8,6 +8,7 @@ import { unstable_cache } from "next/cache";
 // 0036), so a 'prayer' announcement is exactly what used to be called a
 // prayer movement.
 import type { AnnouncementKind } from "@/lib/announcement-kinds";
+import { formatDate } from "@/lib/i18n/format";
 
 export {
   ANNOUNCEMENT_KINDS,
@@ -142,8 +143,10 @@ export function getAnnouncementDaysLeft(
 }
 
 // "Saturday, 14 November" — for an event's date on the banner and page.
+// English keeps its day-before-month (en-GB) order; other languages format
+// in their own locale.
 export function formatEventDate(eventDate: string, locale = "en-GB"): string {
-  return new Date(`${eventDate}T00:00:00`).toLocaleDateString(locale, {
+  return formatDate(locale === "en" ? "en-GB" : locale, eventDate, {
     weekday: "long",
     day: "numeric",
     month: "long",

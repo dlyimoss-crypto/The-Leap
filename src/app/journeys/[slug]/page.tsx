@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
 import { findJourneyMeta } from "@/lib/content/journeys-repo";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 
 export default async function JourneyOverviewPage(
   props: PageProps<"/journeys/[slug]">,
@@ -11,6 +13,7 @@ export default async function JourneyOverviewPage(
   const { slug } = await props.params;
 
   const { supabase } = await requireUser();
+  const t = getDictionary(await getLocale()).commit.journeyOverview;
 
   const journey = await findJourneyMeta(supabase, slug);
 
@@ -23,7 +26,7 @@ export default async function JourneyOverviewPage(
       <PatternBorder />
       <div className="space-y-2">
         <p className="text-sm font-medium uppercase tracking-wide text-primary">
-          {journey.durationDays}-day formation journey
+          {t.durationLabel(journey.durationDays)}
         </p>
         <h1 className="text-3xl font-heading font-semibold text-balance">
           {journey.title}
@@ -36,7 +39,7 @@ export default async function JourneyOverviewPage(
         nativeButton={false}
         size="lg"
       >
-        Start journey
+        {t.startJourney}
       </Button>
     </main>
   );

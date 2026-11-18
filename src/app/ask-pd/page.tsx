@@ -13,6 +13,8 @@ import {
   type AskPdKind,
   type AskPdStatus,
 } from "@/lib/supabase/ask-pd";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { createAskPdRequest } from "./actions";
 
 type RequestListRow = {
@@ -22,12 +24,6 @@ type RequestListRow = {
   user_unread: boolean;
   updated_at: string;
   ask_pd_messages: { body: string; created_at: string }[];
-};
-
-const ERRORS: Record<string, string> = {
-  empty: "Please write your message before sending.",
-  contact: "Choose how we should reach you and add your number or username.",
-  failed: "Something went wrong sending that. Please try again.",
 };
 
 export default async function AskPdPage(props: PageProps<"/ask-pd">) {
@@ -55,6 +51,11 @@ export default async function AskPdPage(props: PageProps<"/ask-pd">) {
       .eq("user_id", user.id),
   ]);
 
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
+  const t = dict.engage.askPd;
+  const errors: Record<string, string> = t.errors;
+
   const hasCompanionHistory = (companionCount ?? 0) > 0;
   const tabHref = (t: "message" | "call") =>
     `/ask-pd?tab=${t}${fromCompanion ? "&from=companion" : ""}`;
@@ -64,35 +65,33 @@ export default async function AskPdPage(props: PageProps<"/ask-pd">) {
       <PatternBorder />
       <BackLink
         href={fromCompanion ? "/companion" : "/connect"}
-        label={fromCompanion ? "Leap Companion" : "Connect"}
+        label={fromCompanion ? dict.engage.companion.title : dict.nav.connect}
       />
 
       <div className="space-y-2">
-        <h1 className="text-2xl font-heading font-semibold">Ask PD</h1>
+        <h1 className="text-2xl font-heading font-semibold">{t.title}</h1>
         <p className="text-sm text-muted-foreground">
-          Reach Pastor Deniss and the Leap pastoral team directly. Real people,
-          not AI. Send a private message or ask for a call, and we&apos;ll get
-          back to you as soon as we can.
+          {t.intro}
         </p>
         <p className="text-xs text-muted-foreground">
-          Not for emergencies. If you&apos;re in danger, please{" "}
+          {t.emergencyBefore}{" "}
           <a
             href="https://findahelpline.com"
             target="_blank"
             rel="noreferrer"
             className="font-medium text-primary underline"
           >
-            find immediate help
+            {t.emergencyLink}
           </a>
-          .
+          {t.emergencyAfter}
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-2 rounded-xl bg-muted p-1">
         {(
           [
-            ["message", "Send a message", MessageSquareText],
-            ["call", "Request a call", PhoneCall],
+            ["message", t.tabs.message, MessageSquareText],
+            ["call", t.tabs.call, PhoneCall],
           ] as const
         ).map(([key, label, Icon]) => (
           <Link
@@ -110,9 +109,9 @@ export default async function AskPdPage(props: PageProps<"/ask-pd">) {
         ))}
       </div>
 
-      {errorKey && ERRORS[errorKey] && (
+      {errorKey && Object.hasOwn(errors, errorKey) && (
         <p className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
-          {ERRORS[errorKey]}
+          {errors[errorKey]}
         </p>
       )}
 
@@ -125,35 +124,35 @@ export default async function AskPdPage(props: PageProps<"/ask-pd">) {
         {tab === "call" && (
           <>
             <div className="space-y-1.5">
-              <Label htmlFor="contact_method">How should we reach you?</Label>
+              <Label htmlFor="contact_method">{t.contactMethodLabel}</Label>
               <select
                 id="contact_method"
                 name="contact_method"
                 defaultValue="whatsapp"
                 className="h-9 w-full rounded-lg border border-input bg-transparent px-2.5 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30"
               >
-                <option value="whatsapp">WhatsApp</option>
-                <option value="phone">Phone call</option>
-                <option value="video">Video call</option>
+                <option value="whatsapp">{t.contactMethods.whatsapp}</option>
+                <option value="phone">{t.contactMethods.phone}</option>
+                <option value="video">{t.contactMethods.video}</option>
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="contact_detail">Your number or username</Label>
+              <Label htmlFor="contact_detail">{t.contactDetailLabel}</Label>
               <Input
                 id="contact_detail"
                 name="contact_detail"
-                placeholder="e.g. +255 7XX XXX XXX"
+                placeholder={t.contactDetailPlaceholder}
                 maxLength={200}
                 required
                 autoComplete="tel"
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="preferred_time">Best time to call (optional)</Label>
+              <Label htmlFor="preferred_time">{t.preferredTimeLabel}</Label>
               <Input
                 id="preferred_time"
                 name="preferred_time"
-                placeholder="e.g. Weekday evenings after 6pm, EAT"
+                placeholder={t.preferredTimePlaceholder}
                 maxLength={200}
               />
             </div>
@@ -162,9 +161,7 @@ export default async function AskPdPage(props: PageProps<"/ask-pd">) {
 
         <div className="space-y-1.5">
           <Label htmlFor="body">
-            {tab === "call"
-              ? "What would you like to talk about? (optional)"
-              : "Your message"}
+            {tab === "call" ? t.bodyLabelCall : t.bodyLabelMessage}
           </Label>
           <Textarea
             id="body"
@@ -173,9 +170,7 @@ export default async function AskPdPage(props: PageProps<"/ask-pd">) {
             maxLength={5000}
             required={tab === "message"}
             placeholder={
-              tab === "call"
-                ? "A sentence or two helps us prepare."
-                : "Share what's on your heart: a question, a decision, something you'd like prayer or guidance for."
+              tab === "call" ? t.bodyPlaceholderCall : t.bodyPlaceholderMessage
             }
           />
         </div>
@@ -188,30 +183,26 @@ export default async function AskPdPage(props: PageProps<"/ask-pd">) {
               className="mt-0.5 size-4 accent-[var(--primary)]"
             />
             <span>
-              <span className="font-medium">
-                Share my Leap Companion conversation
-              </span>
+              <span className="font-medium">{t.shareCompanionLabel}</span>
               <span className="block text-xs text-muted-foreground">
-                So the team can see what you&apos;ve been talking about. Only
-                your most recent messages are shared, and only if you tick
-                this.
+                {t.shareCompanionHint}
               </span>
             </span>
           </label>
         )}
 
         <Button type="submit" className="w-full">
-          {tab === "call" ? "Request a call" : "Send to Pastor Deniss"}
+          {tab === "call" ? t.submitCall : t.submitMessage}
         </Button>
         <p className="text-center text-xs text-muted-foreground">
-          Private: only Pastor Deniss and the Leap pastoral team can read this.
+          {t.privacyNote}
         </p>
       </form>
 
       {(requests ?? []).length > 0 && (
         <div className="space-y-2">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Your conversations
+            {t.yourConversations}
           </p>
           <div className="divide-y rounded-xl border bg-card">
             {(requests ?? []).map((r) => (
@@ -221,19 +212,19 @@ export default async function AskPdPage(props: PageProps<"/ask-pd">) {
                 className="flex items-center gap-3 p-3 hover:bg-muted/50"
               >
                 {r.user_unread ? (
-                  <span className="size-2 shrink-0 rounded-full bg-primary" aria-label="New reply" />
+                  <span className="size-2 shrink-0 rounded-full bg-primary" aria-label={t.newReply} />
                 ) : (
                   <span className="size-2 shrink-0" />
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">
-                    {r.ask_pd_messages[0]?.body ?? "Conversation"}
+                    {r.ask_pd_messages[0]?.body ?? t.conversationFallback}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {r.kind === "call" ? "Call request · " : ""}
-                    {r.user_unread ? "New reply" : askPdStatusLabel(r.status, "user")}
+                    {r.kind === "call" ? t.callRequestPrefix : ""}
+                    {r.user_unread ? t.newReply : askPdStatusLabel(t, r.status, "user")}
                     {" · "}
-                    {formatAskPdTime(r.updated_at)}
+                    {formatAskPdTime(locale, r.updated_at)}
                   </p>
                 </div>
                 <ChevronRight className="size-4 text-muted-foreground" />

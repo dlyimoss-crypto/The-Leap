@@ -15,6 +15,8 @@ import {
   formatAskPdTime,
   getAskPdThread,
 } from "@/lib/supabase/ask-pd";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import {
   markAskPdSeenByTeam,
   replyAsTeam,
@@ -26,6 +28,8 @@ export default async function AskPdInboxThreadPage(
 ) {
   const { id } = await props.params;
   const { supabase } = await requirePdTeam();
+  const locale = await getLocale();
+  const t = getDictionary(locale).engage.askPd;
 
   const thread = await getAskPdThread(supabase, id);
   if (!thread) {
@@ -38,7 +42,7 @@ export default async function AskPdInboxThreadPage(
     .select("display_name")
     .eq("id", request.user_id)
     .maybeSingle<{ display_name: string | null }>();
-  const requesterName = requester?.display_name || "Unnamed user";
+  const requesterName = requester?.display_name || t.inbox.unnamedUser;
 
   const crisisFlagged = messages.some(
     (m) => !m.from_team && checkForCrisisLanguage(m.body).flagged,
@@ -47,35 +51,39 @@ export default async function AskPdInboxThreadPage(
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
       <PatternBorder />
-      <BackLink href="/ask-pd/inbox" label="Ask PD inbox" />
+      <BackLink href="/ask-pd/inbox" label={t.inbox.title} />
 
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
           <h1 className="text-2xl font-heading font-semibold">{requesterName}</h1>
           <p className="text-sm text-muted-foreground">
-            {request.kind === "call" ? "Call request" : "Message"} ·{" "}
-            {askPdStatusLabel(request.status, "team")} · started{" "}
-            {formatAskPdTime(request.created_at)}
+            {request.kind === "call"
+              ? t.inboxThread.callRequest
+              : t.inboxThread.message}{" "}
+            ·{" "}
+            {askPdStatusLabel(t, request.status, "team")} ·{" "}
+            {t.inboxThread.started}{" "}
+            {formatAskPdTime(locale, request.created_at)}
           </p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1.5">
           {request.status === "closed" ? (
             <form action={setAskPdStatus.bind(null, id, "open")}>
               <Button type="submit" size="xs" variant="outline">
-                Reopen
+                {t.inboxThread.reopen}
               </Button>
             </form>
           ) : (
             <form action={setAskPdStatus.bind(null, id, "closed")}>
               <Button type="submit" size="xs" variant="outline">
-                Mark handled
+                {t.inboxThread.markHandled}
               </Button>
             </form>
           )}
           {request.team_unread && request.status !== "closed" && (
             <form action={markAskPdSeenByTeam.bind(null, id)}>
               <Button type="submit" size="xs" variant="ghost">
-                Mark as seen
+                {t.inboxThread.markAsSeen}
               </Button>
             </form>
           )}
@@ -84,9 +92,7 @@ export default async function AskPdInboxThreadPage(
 
       {crisisFlagged && (
         <p className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
-          This conversation contains crisis language. Please respond
-          promptly, and point them to immediate local help if they may be in
-          danger.
+          {t.inboxThread.crisisWarning}
         </p>
       )}
 
@@ -96,15 +102,14 @@ export default async function AskPdInboxThreadPage(
         <details className="rounded-xl border bg-muted/40 p-3 text-sm">
           <summary className="flex cursor-pointer items-center gap-2 font-medium">
             <Sparkles className="size-4 text-primary" />
-            Shared Leap Companion conversation (
-            {request.companion_snapshot.length} messages)
+            {t.inboxThread.sharedCompanion(request.companion_snapshot.length)}
           </summary>
           <div className="mt-3 space-y-2">
             {request.companion_snapshot.map((m, i) => (
               <div key={i} className="space-y-0.5">
                 <p className="text-[11px] text-muted-foreground">
-                  {m.role === "user" ? requesterName : "Leap Companion (AI)"} ·{" "}
-                  {formatAskPdTime(m.created_at)}
+                  {m.role === "user" ? requesterName : t.inboxThread.companionAi} ·{" "}
+                  {formatAskPdTime(locale, m.created_at)}
                 </p>
                 <p className="whitespace-pre-wrap">{m.content}</p>
               </div>
@@ -121,10 +126,10 @@ export default async function AskPdInboxThreadPage(
 
       <ReplyForm
         action={replyAsTeam.bind(null, id)}
-        placeholder={`Reply to ${requesterName}…`}
+        placeholder={t.inboxThread.replyTo(requesterName)}
       />
       <p className="text-xs text-muted-foreground">
-        Replies show your name to the user and send them a notification.
+        {t.inboxThread.repliesNote}
       </p>
     </main>
   );

@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
+import { formatBookPrice } from "@/lib/book-price";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import { getLocale } from "@/lib/i18n/get-locale";
 import { CoverZoom } from "./cover-zoom";
 
 type BookDetailRow = {
@@ -25,6 +28,8 @@ export default async function BookDetailPage(
   const { id } = await props.params;
 
   const { supabase } = await requireUser();
+  const locale = await getLocale();
+  const t = getDictionary(locale).books;
 
   const { data: book } = await supabase
     .from("books")
@@ -48,19 +53,26 @@ export default async function BookDetailPage(
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-6 overflow-hidden px-6 py-10">
       <PatternBorder />
-      <BackLink href="/evolve/books" label="Library" />
+      <BackLink href="/evolve/books" label={t.library.heading} />
 
       <div className="flex gap-4">
-        <CoverZoom coverUrl={coverUrl} title={book.title} />
+        <CoverZoom
+          coverUrl={coverUrl}
+          title={book.title}
+          viewLargerCoverTemplate={t.detail.viewLargerCover}
+          coverAltTemplate={t.detail.coverAlt}
+        />
         <div className="min-w-0 space-y-1.5">
           <h1 className="font-heading text-xl font-bold text-balance">
             {book.title}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {book.profiles?.display_name ?? "The Leap"}
+            {book.profiles?.display_name ?? t.library.defaultAuthor}
           </p>
           <Badge variant={isFree ? "secondary" : "outline"}>
-            {isFree ? "Free" : `$${(book.price_cents! / 100).toFixed(2)}`}
+            {isFree
+              ? t.library.free
+              : formatBookPrice(locale, book.price_cents!)}
           </Badge>
           {book.categories.length > 0 && (
             <div className="flex flex-wrap gap-1 pt-1">
@@ -89,14 +101,13 @@ export default async function BookDetailPage(
           className="w-full rounded-full"
         >
           <BookOpen className="size-4" />
-          Read now
+          {t.detail.readNow}
         </Button>
       ) : (
         <div className="space-y-2 rounded-xl border bg-card p-4 text-center">
-          <p className="text-sm font-medium">Purchasing isn&apos;t live yet</p>
+          <p className="text-sm font-medium">{t.detail.purchasingNotLive}</p>
           <p className="text-xs text-muted-foreground">
-            We&apos;re still wiring up payments for paid titles — check back
-            soon to buy this one.
+            {t.detail.purchasingNotLiveBody}
           </p>
         </div>
       )}

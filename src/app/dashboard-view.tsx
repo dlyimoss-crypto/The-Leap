@@ -30,6 +30,7 @@ import {
 } from "@/lib/supabase/announcements";
 import { GospelInviteCard } from "@/components/gospel-invite/gospel-invite-card";
 import type { Dictionary } from "@/lib/i18n/dictionaries";
+import type { Locale } from "@/lib/i18n/locales";
 import { signOut } from "./sign-in/actions";
 
 type JourneyProgress = JourneyProgressRow;
@@ -102,6 +103,7 @@ export function DashboardView({
   journey,
   progress,
   dict,
+  locale = "en",
   displayName,
   avatarUrl,
   nextJourney,
@@ -114,6 +116,7 @@ export function DashboardView({
   journey: JourneyMeta;
   progress: JourneyProgress | null;
   dict: Dictionary;
+  locale?: Locale;
   displayName: string | null;
   avatarUrl: string | null;
   nextJourney?: NextJourney | null;
@@ -330,7 +333,11 @@ export function DashboardView({
       )}
 
       {announcement && (
-        <AnnouncementBanner announcement={announcement} dict={dict} />
+        <AnnouncementBanner
+          announcement={announcement}
+          dict={dict}
+          locale={locale}
+        />
       )}
 
       <div className="space-y-3">
@@ -421,9 +428,11 @@ const ANNOUNCEMENT_ICONS: Record<AnnouncementKind, typeof Bell> = {
 function AnnouncementBanner({
   announcement,
   dict,
+  locale,
 }: {
   announcement: Announcement;
   dict: Dictionary;
+  locale: Locale;
 }) {
   const Icon = ANNOUNCEMENT_ICONS[announcement.kind];
   const imageUrl = getAnnouncementImageUrl(announcement.image_path);
@@ -436,7 +445,7 @@ function AnnouncementBanner({
         ? dict.dashboard.prayerDaysLeft(daysLeft)
         : dict.dashboard.tapToPray;
   } else if (announcement.kind === "event" && announcement.event_date) {
-    subtitle = `${formatEventDate(announcement.event_date)} · ${dict.dashboard.tapToRead}`;
+    subtitle = `${formatEventDate(announcement.event_date, locale === "en" ? "en-GB" : locale)} · ${dict.dashboard.tapToRead}`;
   } else {
     subtitle = dict.dashboard.tapToRead;
   }

@@ -11,16 +11,14 @@ import {
   getScripture,
   parseReference,
 } from "@/lib/content/scripture";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { removeBookmark } from "./actions";
 import { BibleTab, bibleHref } from "./bible-tab";
 
 type Tab = "bible" | "plans" | "favorites";
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: "bible", label: "Bible" },
-  { key: "plans", label: "Plans" },
-  { key: "favorites", label: "Favorites" },
-];
+const TABS: Tab[] = ["bible", "plans", "favorites"];
 
 type BookmarkRow = {
   reference: string;
@@ -48,6 +46,9 @@ export default async function ScripturePage(
   }
 
   const { supabase, user } = await requireUser();
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
+  const t = dict.evolve.scripture;
 
   const { data: bookmarkRows, error } = await supabase
     .from("scripture_bookmarks")
@@ -69,16 +70,14 @@ export default async function ScripturePage(
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
       <PatternBorder />
-      <BackLink href="/evolve" label="Evolve" />
+      <BackLink href="/evolve" label={dict.nav.evolve} />
       <div>
-        <h1 className="text-2xl font-heading font-semibold">Scripture</h1>
-        <p className="text-sm text-muted-foreground">
-          Read, search, study and save God&apos;s Word.
-        </p>
+        <h1 className="text-2xl font-heading font-semibold">{t.heading}</h1>
+        <p className="text-sm text-muted-foreground">{t.subheading}</p>
       </div>
 
       <div className="flex gap-4 border-b">
-        {TABS.map(({ key, label }) => (
+        {TABS.map((key) => (
           <Link
             key={key}
             href={key === "bible" ? "/evolve/scripture" : `/evolve/scripture?tab=${key}`}
@@ -88,7 +87,7 @@ export default async function ScripturePage(
                 : "pb-2 text-sm font-medium text-muted-foreground"
             }
           >
-            {label}
+            {t.tabs[key]}
           </Link>
         ))}
       </div>
@@ -99,14 +98,16 @@ export default async function ScripturePage(
           refParam={ref}
           bookParam={book}
           bookmarkedKeys={bookmarkedKeys}
+          dict={dict.evolve.bible}
+          locale={locale}
         />
       )}
 
       {tab === "plans" && (
         <ComingSoon
           icon={ListChecks}
-          title="Reading Plans"
-          description="Guided reading plans are coming soon."
+          title={t.plansTitle}
+          description={t.plansDescription}
         />
       )}
 
@@ -116,7 +117,7 @@ export default async function ScripturePage(
             <div className="flex flex-col items-center gap-3 py-12 text-center">
               <Bookmark className="size-8 text-muted-foreground/50" />
               <p className="text-sm text-muted-foreground">
-                Save a passage from the Bible tab to see it here.
+                {t.favoritesEmpty}
               </p>
             </div>
           )}
@@ -151,7 +152,7 @@ export default async function ScripturePage(
                   )}
                 >
                   <Button type="submit" size="xs" variant="ghost">
-                    Remove
+                    {t.remove}
                   </Button>
                 </form>
               </div>

@@ -6,47 +6,47 @@ import {
   Flower2,
   type LucideIcon,
 } from "lucide-react";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
+
+export type CompanionIntentSlug =
+  keyof Dictionary["engage"]["companion"]["intentMessages"];
 
 export type CompanionIntent = {
-  slug: string;
+  slug: CompanionIntentSlug;
+  /** English fallback; the menu shows dict.companion.intents[slug]. */
   label: string;
   icon: LucideIcon;
-  message: string;
 };
 
-// Seed messages are phrased as the user's own request — Companion
-// facilitates, it never leads or claims spiritual authority (CONTEXT.md).
+// Each intent's seed message lives in the dictionary
+// (engage.companion.intentMessages), phrased as the user's own request —
+// Companion facilitates, it never leads or claims spiritual authority
+// (CONTEXT.md).
 export const COMPANION_INTENTS: CompanionIntent[] = [
   {
     slug: "new-believer",
     label: "I just prayed to receive Jesus",
     icon: Flower2,
-    message:
-      "I just prayed to receive Jesus. Where do I begin? I'm not sure yet whether I'm just beginning to follow Jesus, want to understand the Bible, want to learn how to pray, want to grow in my faith, or just have questions about Jesus — can you help me figure out where to start?",
   },
   {
     slug: "scripture",
     label: "Help me understand Scripture",
     icon: BookOpen,
-    message: "Can you help me understand today's Scripture?",
   },
   {
     slug: "devotion",
     label: "Reflect on today's devotion",
     icon: Sparkles,
-    message: "Can you help me reflect on today's devotion?",
   },
   {
     slug: "next-step",
     label: "Help me take my next step",
     icon: Compass,
-    message: "What's my next step?",
   },
   {
     slug: "materials",
     label: "Get Christian materials",
     icon: Library,
-    message: "Can you recommend some Christian books or materials for me?",
   },
 ];
 

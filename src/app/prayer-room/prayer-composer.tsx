@@ -5,6 +5,7 @@ import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import type { CommunityMessages } from "@/lib/i18n/messages/en/community";
 import { postPrayerRequest } from "./actions";
 
 function TogglePill({
@@ -32,7 +33,11 @@ function TogglePill({
   );
 }
 
-export function PrayerComposer() {
+export function PrayerComposer({
+  dict,
+}: {
+  dict: CommunityMessages["prayerComposer"];
+}) {
   const [visibility, setVisibility] = useState<"public" | "private">(
     "public",
   );
@@ -45,7 +50,7 @@ export function PrayerComposer() {
     >
       <Textarea
         name="body"
-        placeholder="Share a prayer request…"
+        placeholder={dict.placeholder}
         required
         rows={2}
       />
@@ -56,25 +61,25 @@ export function PrayerComposer() {
           active={visibility === "public"}
           onClick={() => setVisibility("public")}
         >
-          Public
+          {dict.public}
         </TogglePill>
         <TogglePill
           active={visibility === "private"}
           onClick={() => setVisibility("private")}
         >
-          Private
+          {dict.private}
         </TogglePill>
         <TogglePill active={!isAnonymous} onClick={() => setIsAnonymous(false)}>
-          Identified
+          {dict.identified}
         </TogglePill>
         <TogglePill active={isAnonymous} onClick={() => setIsAnonymous(true)}>
-          Anonymous
+          {dict.anonymous}
         </TogglePill>
         <Button
           type="submit"
           size="icon"
           className="ml-auto rounded-full"
-          aria-label="Post prayer request"
+          aria-label={dict.submitAriaLabel}
         >
           <Send className="size-4" />
         </Button>

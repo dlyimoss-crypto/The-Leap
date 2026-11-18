@@ -15,9 +15,13 @@ import {
   completeCommitment,
   toggleCommitmentItem,
 } from "./actions";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import { formatDate } from "@/lib/i18n/format";
+import type { Locale } from "@/lib/i18n/locales";
 
-function formatWeekOf(weekOf: string) {
-  return new Date(`${weekOf}T00:00:00`).toLocaleDateString("en-US", {
+function formatWeekOf(locale: Locale, weekOf: string) {
+  return formatDate(locale, weekOf, {
     month: "short",
     day: "numeric",
   });
@@ -25,6 +29,9 @@ function formatWeekOf(weekOf: string) {
 
 export default async function CommitPage() {
   const { supabase, user } = await requireUser();
+  const locale = await getLocale();
+  const dict = getDictionary(locale).commit;
+  const t = dict.commitPage;
 
   const [active, history] = await Promise.all([
     getActiveCommitment(supabase, user.id),
@@ -37,20 +44,18 @@ export default async function CommitPage() {
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-6 overflow-hidden px-6 py-10">
       <PatternCorner corner="top-right" />
-      <BackLink href="/" label="Home" />
+      <BackLink href="/" label={t.backToHome} />
 
       <div>
-        <h1 className="text-2xl font-heading font-semibold">Commit</h1>
-        <p className="text-sm text-muted-foreground">
-          I choose the way of Christ.
-        </p>
+        <h1 className="text-2xl font-heading font-semibold">{t.heading}</h1>
+        <p className="text-sm text-muted-foreground">{t.subheading}</p>
       </div>
 
       <HubCard
         href="/commit/journey"
         icon={Compass}
-        title="Journey"
-        description="Continue your journey or browse a new one."
+        title={t.journeyCardTitle}
+        description={t.journeyCardDescription}
       />
 
       {active ? (
@@ -61,11 +66,14 @@ export default async function CommitPage() {
             </div>
             <div className="min-w-0 space-y-1">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                This week&apos;s commitment
+                {t.thisWeeksCommitment}
               </p>
               <p className="text-xs text-muted-foreground">
-                Week of {formatWeekOf(active.week_of)} — {doneCount} of{" "}
-                {COMMITMENT_ITEMS.length} kept
+                {t.weekOfProgress(
+                  formatWeekOf(locale, active.week_of),
+                  doneCount,
+                  COMMITMENT_ITEMS.length,
+                )}
               </p>
             </div>
           </div>
@@ -93,9 +101,9 @@ export default async function CommitPage() {
                       <Circle className="size-5 shrink-0 text-muted-foreground" />
                     )}
                     <div className="min-w-0">
-                      <p className="text-sm font-medium">{item.label}</p>
+                      <p className="text-sm font-medium">{dict.commitmentItems[item.key].label}</p>
                       <p className="text-xs text-muted-foreground">
-                        {item.detail}
+                        {dict.commitmentItems[item.key].detail}
                       </p>
                     </div>
                   </button>
@@ -112,7 +120,9 @@ export default async function CommitPage() {
               disabled={!allDone}
             >
               <CheckCircle2 className="size-4" />
-              {allDone ? "Mark as kept" : `Check all ${COMMITMENT_ITEMS.length} to mark as kept`}
+              {allDone
+                ? t.markAsKept
+                : t.checkAllToMarkAsKept(COMMITMENT_ITEMS.length)}
             </Button>
           </form>
         </div>
@@ -120,11 +130,9 @@ export default async function CommitPage() {
         <div className="space-y-4 rounded-2xl bg-muted p-5">
           <div className="space-y-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              This week&apos;s commitment
+              {t.thisWeeksCommitment}
             </p>
-            <p className="text-sm text-muted-foreground">
-              Three practices, every week — small enough to actually keep.
-            </p>
+            <p className="text-sm text-muted-foreground">{t.intro}</p>
           </div>
 
           <div className="divide-y divide-border overflow-hidden rounded-xl border bg-card">
@@ -132,9 +140,9 @@ export default async function CommitPage() {
               <div key={item.key} className="flex items-center gap-3 p-3">
                 <Circle className="size-5 shrink-0 text-muted-foreground" />
                 <div className="min-w-0">
-                  <p className="text-sm font-medium">{item.label}</p>
+                  <p className="text-sm font-medium">{dict.commitmentItems[item.key].label}</p>
                   <p className="text-xs text-muted-foreground">
-                    {item.detail}
+                    {dict.commitmentItems[item.key].detail}
                   </p>
                 </div>
               </div>
@@ -143,7 +151,7 @@ export default async function CommitPage() {
 
           <form action={createCommitment}>
             <Button type="submit" size="lg" className="w-full rounded-full">
-              Commit to this week
+              {t.commitToThisWeek}
             </Button>
           </form>
         </div>
@@ -152,7 +160,7 @@ export default async function CommitPage() {
       {history.length > 0 && (
         <div className="space-y-3">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Kept commitments
+            {t.keptCommitments}
           </p>
           <div className="divide-y rounded-xl border bg-card">
             {history.map((commitment) => (
@@ -161,7 +169,7 @@ export default async function CommitPage() {
                 <div className="min-w-0">
                   <p className="text-sm">{commitment.body}</p>
                   <p className="text-xs text-muted-foreground">
-                    Week of {formatWeekOf(commitment.week_of)}
+                    {t.weekOf(formatWeekOf(locale, commitment.week_of))}
                   </p>
                 </div>
               </div>

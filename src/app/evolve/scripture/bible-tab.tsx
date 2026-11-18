@@ -19,7 +19,11 @@ import {
   type BookSummary,
 } from "@/lib/content/scripture";
 import { TRANSLATIONS } from "@/lib/content/translations";
+import type { Dictionary, Locale } from "@/lib/i18n/dictionaries";
+import { interpolate, plural } from "@/lib/i18n/format";
 import { saveBookmark, removeBookmark } from "./actions";
+
+type BibleMessages = Dictionary["evolve"]["bible"];
 
 export function bibleHref(params: { ref?: string; book?: string; q?: string }) {
   const search = new URLSearchParams();
@@ -37,11 +41,15 @@ export function BibleTab({
   refParam,
   bookParam,
   bookmarkedKeys,
+  dict,
+  locale,
 }: {
   q: string;
   refParam?: string;
   bookParam?: string;
   bookmarkedKeys: Set<string>;
+  dict: BibleMessages;
+  locale: Locale;
 }) {
   const parsedRef = refParam ? parseReference(refParam) : null;
   const book = bookParam
@@ -51,7 +59,7 @@ export function BibleTab({
   let body: React.ReactNode;
   if (refParam) {
     if (!parsedRef) {
-      body = <NotFound reference={refParam} />;
+      body = <NotFound reference={refParam} dict={dict} />;
     } else if (
       parsedRef.startVerse === null &&
       parsedRef.startChapter === parsedRef.endChapter
@@ -61,6 +69,7 @@ export function BibleTab({
           book={parsedRef.book}
           chapter={parsedRef.startChapter}
           bookmarkedKeys={bookmarkedKeys}
+          dict={dict}
         />
       );
     } else {
@@ -70,15 +79,16 @@ export function BibleTab({
           book={parsedRef.book}
           chapter={parsedRef.startChapter}
           bookmarkedKeys={bookmarkedKeys}
+          dict={dict}
         />
       );
     }
   } else if (q) {
-    body = <SearchResults q={q} />;
+    body = <SearchResults q={q} dict={dict} locale={locale} />;
   } else if (book) {
-    body = <ChapterGrid book={book} />;
+    body = <ChapterGrid book={book} dict={dict} />;
   } else {
-    body = <BookList />;
+    body = <BookList dict={dict} />;
   }
 
   return (
@@ -91,7 +101,7 @@ export function BibleTab({
             className={translation.available ? undefined : "text-muted-foreground"}
           >
             {translation.code}
-            {!translation.available && " · Coming soon"}
+            {!translation.available && dict.comingSoonSuffix}
           </Badge>
         ))}
       </div>
@@ -106,31 +116,31 @@ export function BibleTab({
           type="text"
           name="q"
           defaultValue={q}
-          placeholder="John 3:16, or words to find…"
+          placeholder={dict.searchPlaceholder}
           className="w-full bg-transparent text-sm outline-none"
         />
         <Button type="submit" size="xs" variant="secondary">
-          Search
+          {dict.search}
         </Button>
       </form>
 
       {body}
 
       <p className="pt-2 text-center text-xs text-muted-foreground">
-        Scripture from the Berean Standard Bible (BSB), public domain.
+        {dict.attribution}
       </p>
     </div>
   );
 }
 
-function BookList() {
+function BookList({ dict }: { dict: BibleMessages }) {
   const books = listBooks();
   return (
     <div className="space-y-5">
       {(["old", "new"] as const).map((testament) => (
         <section key={testament} className="space-y-2">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-primary">
-            {testament === "old" ? "Old Testament" : "New Testament"}
+            {testament === "old" ? dict.oldTestament : dict.newTestament}
           </h2>
           <div className="grid grid-cols-2 gap-1.5">
             {books
@@ -151,14 +161,20 @@ function BookList() {
   );
 }
 
-function ChapterGrid({ book }: { book: BookSummary }) {
+function ChapterGrid({
+  book,
+  dict,
+}: {
+  book: BookSummary;
+  dict: BibleMessages;
+}) {
   return (
     <div className="space-y-3">
       <Link
         href={bibleHref({})}
         className="flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground"
       >
-        <ChevronLeft className="size-4" /> All books
+        <ChevronLeft className="size-4" /> {dict.allBooks}
       </Link>
       <h2 className="text-xl font-heading font-semibold">{book.name}</h2>
       <div className="grid grid-cols-6 gap-1.5">
@@ -180,10 +196,12 @@ function ChapterView({
   book,
   chapter,
   bookmarkedKeys,
+  dict,
 }: {
   book: string;
   chapter: number;
   bookmarkedKeys: Set<string>;
+  dict: BibleMessages;
 }) {
   const data = getChapter(book, chapter)!;
   const reference = `${book} ${chapter}`;
@@ -200,6 +218,7 @@ function ChapterView({
         <SaveButton
           reference={reference}
           saved={bookmarkedKeys.has(`${reference}::${TRANSLATION}`)}
+          dict={dict}
         />
       </div>
       <h2 className="text-xl font-heading font-semibold">{reference}</h2>
@@ -249,11 +268,13 @@ function PassageView({
   book,
   chapter,
   bookmarkedKeys,
+  dict,
 }: {
   reference: string;
   book: string;
   chapter: number;
   bookmarkedKeys: Set<string>;
+  dict: BibleMessages;
 }) {
   const passage = getScripture(reference)!;
 
@@ -261,7 +282,7 @@ function PassageView({
     <div className="space-y-3 rounded-xl border bg-card p-4">
       <blockquote className="space-y-1 border-l-2 border-primary/30 pl-3">
         <p className="text-foreground italic">
-          {passage.text || "This verse is not included in the BSB, which follows the oldest manuscripts."}
+          {passage.text || dict.verseNotInBsb}
         </p>
         <cite className="block text-sm text-muted-foreground not-italic">
           {passage.reference} ({passage.translation})
@@ -271,6 +292,7 @@ function PassageView({
         <SaveButton
           reference={reference}
           saved={bookmarkedKeys.has(`${reference}::${TRANSLATION}`)}
+          dict={dict}
         />
         <Button
           render={<Link href={bibleHref({ ref: `${book} ${chapter}` })} />}
@@ -278,20 +300,28 @@ function PassageView({
           variant="ghost"
           size="sm"
         >
-          Read {book} {chapter}
+          {interpolate(dict.readChapter, { reference: `${book} ${chapter}` })}
         </Button>
       </div>
     </div>
   );
 }
 
-function SearchResults({ q }: { q: string }) {
+function SearchResults({
+  q,
+  dict,
+  locale,
+}: {
+  q: string;
+  dict: BibleMessages;
+  locale: Locale;
+}) {
   const { results, total } = searchVerses(q);
 
   if (total === 0) {
     return (
       <p className="py-6 text-center text-sm text-muted-foreground">
-        No verses match &ldquo;{q}&rdquo;.
+        {interpolate(dict.noMatches, { q })}
       </p>
     );
   }
@@ -300,9 +330,13 @@ function SearchResults({ q }: { q: string }) {
     <div className="space-y-2">
       <p className="text-sm text-muted-foreground">
         {total > results.length
-          ? `Showing the first ${results.length} of ${total} verses`
-          : `${total} verse${total === 1 ? "" : "s"}`}{" "}
-        containing &ldquo;{q}&rdquo;
+          ? interpolate(dict.showingFirst, {
+              shown: results.length,
+              total,
+              q,
+            })
+          : // count passed raw (not locale-formatted) to keep "1234" as is.
+            plural(locale, total, dict.versesContaining, { count: total, q })}
       </p>
       {results.map((result) => (
         <Link
@@ -318,15 +352,29 @@ function SearchResults({ q }: { q: string }) {
   );
 }
 
-function NotFound({ reference }: { reference: string }) {
+function NotFound({
+  reference,
+  dict,
+}: {
+  reference: string;
+  dict: BibleMessages;
+}) {
   return (
     <p className="py-6 text-center text-sm text-muted-foreground">
-      Couldn&apos;t find &ldquo;{reference}&rdquo; in the Bible.
+      {interpolate(dict.notFound, { reference })}
     </p>
   );
 }
 
-function SaveButton({ reference, saved }: { reference: string; saved: boolean }) {
+function SaveButton({
+  reference,
+  saved,
+  dict,
+}: {
+  reference: string;
+  saved: boolean;
+  dict: BibleMessages;
+}) {
   return (
     <form
       action={(saved ? removeBookmark : saveBookmark).bind(
@@ -338,11 +386,11 @@ function SaveButton({ reference, saved }: { reference: string; saved: boolean })
       <Button type="submit" size="sm" variant={saved ? "secondary" : "outline"}>
         {saved ? (
           <>
-            <BookmarkCheck className="size-3.5" /> Saved
+            <BookmarkCheck className="size-3.5" /> {dict.saved}
           </>
         ) : (
           <>
-            <Bookmark className="size-3.5" /> Save
+            <Bookmark className="size-3.5" /> {dict.save}
           </>
         )}
       </Button>

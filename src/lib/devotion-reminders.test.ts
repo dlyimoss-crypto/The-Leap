@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { reminderDueOn } from "./devotion-reminders";
+import { reminderDueOn, reminderTitle } from "./devotion-reminders";
 
 const at = (iso: string) => new Date(iso);
 
@@ -49,5 +49,17 @@ describe("reminderDueOn", () => {
   it("falls back to UTC for an unknown time zone", () => {
     const bad = { ...sub, time_zone: "Not/AZone" };
     expect(reminderDueOn(bad, at("2026-10-17T07:00:00Z"))).toBe("2026-10-17");
+  });
+});
+
+describe("reminderTitle", () => {
+  it("uses the recipient's language", () => {
+    expect(reminderTitle("sw")).toBe("Ibada ya leo iko tayari");
+  });
+
+  it("falls back to English for a missing or not-yet-enabled language", () => {
+    expect(reminderTitle(null)).toBe("Today's devotion is ready");
+    expect(reminderTitle("de")).toBe("Today's devotion is ready");
+    expect(reminderTitle("xx")).toBe("Today's devotion is ready");
   });
 });

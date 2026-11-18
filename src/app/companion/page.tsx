@@ -6,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
 import { getCompanionIntent } from "@/lib/companion-intents";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { clearConversation, sendMessage } from "./actions";
 
 type MessageRow = {
@@ -15,7 +17,7 @@ type MessageRow = {
   created_at: string;
 };
 
-function renderMessageContent(content: string) {
+function renderMessageContent(content: string, askPdLabel: string) {
   return content
     .split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g)
     .map((part, i) => {
@@ -30,7 +32,7 @@ function renderMessageContent(content: string) {
               href="/ask-pd?from=companion"
               className="font-semibold text-primary underline underline-offset-2"
             >
-              Ask PD
+              {askPdLabel}
             </Link>
           );
         }
@@ -44,18 +46,9 @@ function renderMessageContent(content: string) {
 }
 
 const QUICK_PROMPTS = [
-  {
-    icon: BookOpen,
-    label: "Help me understand today's Scripture",
-  },
-  {
-    icon: Compass,
-    label: "What's my next step?",
-  },
-  {
-    icon: HeartHandshake,
-    label: "I'm feeling stuck",
-  },
+  { icon: BookOpen, key: "scripture" },
+  { icon: Compass, key: "nextStep" },
+  { icon: HeartHandshake, key: "stuck" },
 ] as const;
 
 export default async function CompanionPage(
@@ -82,12 +75,15 @@ export default async function CompanionPage(
     console.error("Failed to load companion messages", error);
   }
 
+  const t = getDictionary(await getLocale()).engage.companion;
+  const intentMessage = intent ? t.intentMessages[intent.slug] : undefined;
+
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
       <PatternBorder />
       <div className="flex items-center gap-2">
-        <h1 className="text-2xl font-heading font-semibold">Leap Companion</h1>
-        <Badge variant="secondary">AI</Badge>
+        <h1 className="text-2xl font-heading font-semibold">{t.title}</h1>
+        <Badge variant="secondary">{t.aiBadge}</Badge>
         <Button
           render={<Link href="/ask-pd?from=companion" />}
           nativeButton={false}
@@ -96,27 +92,23 @@ export default async function CompanionPage(
           className="ml-auto rounded-full"
         >
           <UserRound className="size-4" />
-          Ask PD
+          {t.askPd}
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">
-        I&apos;m an AI guide, not a pastor or mentor — here to help with
-        Scripture questions, working through today&apos;s session, or when
-        you&apos;re feeling stuck. Want a real person? Tap{" "}
+        {t.introBefore}{" "}
         <Link href="/ask-pd?from=companion" className="font-medium text-primary underline">
-          Ask PD
+          {t.askPd}
         </Link>{" "}
-        to reach Pastor Deniss and the team.
+        {t.introAfter}
       </p>
 
       {(messages ?? []).length > 0 &&
         (confirmingClear ? (
           <div className="space-y-2 rounded-xl border border-destructive/40 bg-destructive/5 p-3 text-sm">
-            <p className="font-medium">Clear this whole conversation?</p>
+            <p className="font-medium">{t.clearConfirmTitle}</p>
             <p className="text-xs text-muted-foreground">
-              This deletes all your Companion messages and can&apos;t be
-              undone. Anything you&apos;ve already shared through Ask PD stays
-              with the team.
+              {t.clearConfirmBody}
             </p>
             <div className="flex justify-end gap-2">
               <Button
@@ -125,11 +117,11 @@ export default async function CompanionPage(
                 size="sm"
                 variant="ghost"
               >
-                Cancel
+                {t.cancel}
               </Button>
               <form action={clearConversation}>
                 <Button type="submit" size="sm" variant="destructive">
-                  Yes, clear it
+                  {t.yesClear}
                 </Button>
               </form>
             </div>
@@ -140,25 +132,22 @@ export default async function CompanionPage(
             className="flex w-fit items-center gap-1 self-end text-xs text-muted-foreground hover:text-foreground"
           >
             <Trash2 className="size-3.5" />
-            Clear conversation
+            {t.clearConversation}
           </Link>
         ))}
 
       {showCrisisBanner && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-foreground">
-          You don&apos;t have to go through this alone. If you&apos;re in
-          immediate danger or thinking about harming yourself, please seek
-          immediate help.{" "}
+          {t.crisisBefore}{" "}
           <a
             href="https://findahelpline.com"
             target="_blank"
             rel="noreferrer"
             className="font-semibold text-destructive underline"
           >
-            Find crisis support in your country →
+            {t.crisisLink}
           </a>{" "}
-          You can also contact a trusted person, local church, professional
-          counselor, or emergency service.
+          {t.crisisAfter}
         </div>
       )}
 
@@ -167,21 +156,24 @@ export default async function CompanionPage(
           <div className="flex flex-1 flex-col items-center justify-center gap-4 py-8 text-center">
             <Sparkles className="size-8 text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">
-              What would you like help with?
+              {t.emptyPrompt}
             </p>
             <div className="w-full space-y-2">
-              {QUICK_PROMPTS.map(({ icon: Icon, label }) => (
-                <form key={label} action={sendMessage}>
-                  <input type="hidden" name="message" value={label} />
-                  <button
-                    type="submit"
-                    className="flex w-full items-center gap-2 rounded-xl border bg-card px-3 py-2.5 text-left text-sm hover:bg-muted"
-                  >
-                    <Icon className="size-4 text-primary" />
-                    {label}
-                  </button>
-                </form>
-              ))}
+              {QUICK_PROMPTS.map(({ icon: Icon, key }) => {
+                const label = t.quickPrompts[key];
+                return (
+                  <form key={key} action={sendMessage}>
+                    <input type="hidden" name="message" value={label} />
+                    <button
+                      type="submit"
+                      className="flex w-full items-center gap-2 rounded-xl border bg-card px-3 py-2.5 text-left text-sm hover:bg-muted"
+                    >
+                      <Icon className="size-4 text-primary" />
+                      {label}
+                    </button>
+                  </form>
+                );
+              })}
             </div>
           </div>
         )}
@@ -194,7 +186,7 @@ export default async function CompanionPage(
                 : "mr-auto max-w-[85%] whitespace-pre-wrap rounded-xl border bg-card px-3 py-2 text-sm"
             }
           >
-            {renderMessageContent(message.content)}
+            {renderMessageContent(message.content, t.askPd)}
           </div>
         ))}
       </div>
@@ -202,8 +194,8 @@ export default async function CompanionPage(
       <form action={sendMessage} className="flex items-end gap-2">
         <Textarea
           name="message"
-          placeholder="Ask the Companion…"
-          defaultValue={intent?.message}
+          placeholder={t.inputPlaceholder}
+          defaultValue={intentMessage}
           required
           rows={1}
           className="flex-1 rounded-full"
@@ -212,7 +204,7 @@ export default async function CompanionPage(
           type="submit"
           size="icon"
           className="rounded-full"
-          aria-label="Send"
+          aria-label={t.send}
         >
           <Send className="size-4" />
         </Button>

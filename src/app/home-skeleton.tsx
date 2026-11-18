@@ -1,13 +1,18 @@
 import { PatternCorner } from "@/components/pattern-bg";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 
 // The shape of Home (greeting, journey card, today's tiles) shown while its
 // data loads, so the app paints immediately on open instead of waiting.
-export function HomeSkeleton() {
+// getLocale is request-cached (the root layout already resolved it), so
+// this doesn't hold up the skeleton.
+export async function HomeSkeleton() {
+  const dict = getDictionary(await getLocale());
   return (
     <main
       className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-8 overflow-hidden px-6 py-10"
       aria-busy="true"
-      aria-label="Loading"
+      aria-label={dict.common.loading}
     >
       <PatternCorner corner="top-right" />
       <div className="flex items-center gap-3">

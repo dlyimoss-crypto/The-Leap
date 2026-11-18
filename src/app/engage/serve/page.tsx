@@ -3,6 +3,8 @@ import { CopyButton } from "@/components/copy-button";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 
 type OpportunityRow = {
   id: string;
@@ -31,17 +33,17 @@ export default async function ServePage() {
   }
 
   const rows = opportunities ?? [];
+  const dict = getDictionary(await getLocale());
+  const t = dict.engage.serve;
 
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
       <PatternBorder />
-      <BackLink href="/engage" label="Engage" />
+      <BackLink href="/engage" label={dict.nav.engage} />
       <div>
-        <h1 className="text-2xl font-heading font-semibold">
-          Serve & Missions
-        </h1>
+        <h1 className="text-2xl font-heading font-semibold">{t.title}</h1>
         <p className="text-sm text-muted-foreground">
-          Find ways to serve and get involved.
+          {t.subtitle}
         </p>
       </div>
 
@@ -49,7 +51,7 @@ export default async function ServePage() {
         <div className="flex flex-col items-center gap-3 py-12 text-center">
           <HeartHandshake className="size-8 text-muted-foreground/50" />
           <p className="text-sm text-muted-foreground">
-            No opportunities listed yet — check back soon.
+            {t.empty}
           </p>
         </div>
       ) : (
@@ -114,7 +116,7 @@ export default async function ServePage() {
                     rel="noopener noreferrer"
                     className="block text-sm font-medium text-primary underline"
                   >
-                    Learn more
+                    {t.learnMore}
                   </a>
                 )}
               </div>

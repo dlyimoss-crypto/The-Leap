@@ -5,16 +5,23 @@ import {
   getAnnouncementImageUrl,
   type Announcement,
 } from "@/lib/supabase/announcements";
+import type { Locale } from "@/lib/i18n/locales";
+import type { CommunityMessages } from "@/lib/i18n/messages/en/community";
+import { interpolate, plural } from "@/lib/i18n/format";
 import { joinPrayerMovement } from "./actions";
 
 export function PrayerMovementCard({
   movement,
   participantCount,
   hasPrayed,
+  locale,
+  dict,
 }: {
   movement: Announcement;
   participantCount: number;
   hasPrayed: boolean;
+  locale: Locale;
+  dict: CommunityMessages["prayerMovement"];
 }) {
   const daysLeft = getAnnouncementDaysLeft(movement.active_until);
   const imageUrl = getAnnouncementImageUrl(movement.image_path);
@@ -32,11 +39,11 @@ export function PrayerMovementCard({
       <div className="space-y-1">
         <div className="flex items-center justify-between gap-2">
           <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-            Let&apos;s pray for 5 minutes
+            {dict.eyebrow}
           </p>
           {daysLeft !== null && (
             <p className="shrink-0 text-xs font-medium text-muted-foreground">
-              {daysLeft} day{daysLeft === 1 ? "" : "s"} left
+              {plural(locale, daysLeft, dict.daysLeft)}
             </p>
           )}
         </div>
@@ -72,14 +79,14 @@ export function PrayerMovementCard({
             : {})}
           className="block text-sm font-medium text-primary underline-offset-4 hover:underline"
         >
-          {movement.link_label || "Learn more"}
+          {movement.link_label || dict.learnMore}
         </a>
       )}
 
       <div className="flex items-center gap-3 pt-1">
         <span className="flex items-center gap-1 text-sm text-muted-foreground">
           <Users className="size-4" />
-          {participantCount} prayed
+          {interpolate(dict.prayedCount, { count: participantCount })}
         </span>
         <form
           action={joinPrayerMovement.bind(null, movement.id)}
@@ -93,7 +100,7 @@ export function PrayerMovementCard({
             className="rounded-full"
           >
             <CheckCircle2 className="size-4" />
-            {hasPrayed ? "Prayed" : "I have prayed"}
+            {hasPrayed ? dict.prayed : dict.iHavePrayed}
           </Button>
         </form>
       </div>

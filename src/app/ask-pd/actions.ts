@@ -3,8 +3,20 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { checkForCrisisLanguage } from "@/lib/crisis-detection";
-import { getPdTeamUserIds, sendPushToUsers } from "@/lib/push";
+import {
+  getPdTeamUserIds,
+  sendPushToUsers,
+  type PushMessage,
+} from "@/lib/push";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { requireActiveUser, requirePdTeam } from "@/lib/supabase/authorize";
+import { getLocale } from "@/lib/i18n/get-locale";
+import {
+  getDictionary,
+  isEnabledLocale,
+  type Dictionary,
+} from "@/lib/i18n/dictionaries";
+import { DEFAULT_LOCALE, isLocale, type Locale } from "@/lib/i18n/locales";
 import {
   COMPANION_SNAPSHOT_LIMIT,
   isContactMethod,
@@ -13,6 +25,49 @@ import {
 
 function text(formData: FormData, name: string, max: number): string {
   return String(formData.get(name) ?? "").trim().slice(0, max);
+}
+
+type PushMessages = Dictionary["engage"]["askPd"]["push"];
+
+// Push copy goes out in each recipient's own language (their profile's
+// preferred_language), not the sender's: users are grouped by language
+// and each group gets its own message.
+async function sendAskPdPush(
+  userIds: string[],
+  build: (messages: PushMessages) => Omit<PushMessage, "url">,
+  url: string,
+) {
+  if (userIds.length === 0) return;
+
+  // Best effort, like the push itself: a failed lookup falls back to English.
+  let stored = new Map<string, string | null>();
+  try {
+    const { data } = await createAdminClient()
+      .from("profiles")
+      .select("id, preferred_language")
+      .in("id", userIds)
+      .returns<{ id: string; preferred_language: string | null }[]>();
+    stored = new Map((data ?? []).map((p) => [p.id, p.preferred_language]));
+  } catch (err) {
+    console.error("Failed to load push recipients' languages", err);
+  }
+
+  const byLocale = new Map<Locale, string[]>();
+  for (const id of userIds) {
+    const value = stored.get(id);
+    const locale =
+      isLocale(value) && isEnabledLocale(value) ? value : DEFAULT_LOCALE;
+    byLocale.set(locale, [...(byLocale.get(locale) ?? []), id]);
+  }
+
+  await Promise.all(
+    [...byLocale].map(([locale, ids]) =>
+      sendPushToUsers(ids, {
+        ...build(getDictionary(locale).engage.askPd.push),
+        url,
+      }),
+    ),
+  );
 }
 
 // A new Ask PD request: a private message, or a call request whose note
@@ -63,8 +118,9 @@ export async function createAskPdRequest(formData: FormData) {
     redirect("/ask-pd?error=failed");
   }
 
+  // Written on the sender's behalf, so in the sender's language.
   const firstMessage =
-    body || "I'd like to talk with Pastor Deniss or the PD team.";
+    body || getDictionary(await getLocale()).engage.askPd.defaultCallMessage;
   const { error: messageError } = await supabase.from("ask_pd_messages").insert({
     request_id: request.id,
     author_id: user.id,
@@ -75,11 +131,14 @@ export async function createAskPdRequest(formData: FormData) {
     console.error("Failed to save Ask PD message", messageError);
   }
 
-  await sendPushToUsers(await getPdTeamUserIds(), {
-    title: kind === "call" ? "New call request" : "New Ask PD message",
-    body: "Someone has reached out through Ask PD.",
-    url: `/ask-pd/inbox/${request.id}`,
-  });
+  await sendAskPdPush(
+    await getPdTeamUserIds(),
+    (m) => ({
+      title: kind === "call" ? m.newCallRequestTitle : m.newMessageTitle,
+      body: m.newRequestBody,
+    }),
+    `/ask-pd/inbox/${request.id}`,
+  );
 
   revalidatePath("/ask-pd");
   revalidatePath("/", "layout");
@@ -104,11 +163,11 @@ export async function replyAsUser(requestId: string, formData: FormData) {
   if (error) {
     console.error("Failed to send Ask PD follow-up", error);
   } else {
-    await sendPushToUsers(await getPdTeamUserIds(), {
-      title: "New Ask PD follow-up",
-      body: "Someone replied in an Ask PD conversation.",
-      url: `/ask-pd/inbox/${requestId}`,
-    });
+    await sendAskPdPush(
+      await getPdTeamUserIds(),
+      (m) => ({ title: m.followUpTitle, body: m.followUpBody }),
+      `/ask-pd/inbox/${requestId}`,
+    );
   }
 
   revalidatePath(`/ask-pd/${requestId}`);
@@ -140,11 +199,11 @@ export async function replyAsTeam(requestId: string, formData: FormData) {
       .eq("id", requestId)
       .maybeSingle<{ user_id: string }>();
     if (request) {
-      await sendPushToUsers([request.user_id], {
-        title: "Pastor Deniss replied",
-        body: "You have a new reply in Ask PD.",
-        url: `/ask-pd/${requestId}`,
-      });
+      await sendAskPdPush(
+        [request.user_id],
+        (m) => ({ title: m.repliedTitle, body: m.repliedBody }),
+        `/ask-pd/${requestId}`,
+      );
     }
   }
 

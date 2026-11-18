@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { addComment } from "../actions";
 
 type PostWithAuthor = {
@@ -29,6 +31,7 @@ export default async function PostDetailPage(
   const showCrisisBanner = searchParams.crisis === "1";
 
   const { supabase, user } = await requireUser();
+  const t = getDictionary(await getLocale()).community;
 
   const [{ data: post }, { data: comments }, { data: blocks }] =
     await Promise.all([
@@ -61,31 +64,28 @@ export default async function PostDetailPage(
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
       <PatternBorder />
       <Link href="/community" className="text-sm text-muted-foreground">
-        &larr; Community
+        &larr; {t.postDetail.backToCommunity}
       </Link>
 
       <div className="space-y-2 rounded-xl border bg-card p-4">
         <p className="text-sm font-semibold">
-          {post.profiles?.display_name ?? "A member of the community"}
+          {post.profiles?.display_name ?? t.communityMember}
         </p>
         <p className="text-sm">{post.body}</p>
       </div>
 
       {showCrisisBanner && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-foreground">
-          You don&apos;t have to go through this alone. If you&apos;re in
-          immediate danger or thinking about harming yourself, please seek
-          immediate help.{" "}
+          {t.crisisBanner.intro}{" "}
           <a
             href="https://findahelpline.com"
             target="_blank"
             rel="noreferrer"
             className="font-semibold text-destructive underline"
           >
-            Find crisis support in your country →
+            {t.crisisBanner.findSupportLink}
           </a>{" "}
-          You can also contact a trusted person, local church, professional
-          counselor, or emergency service.
+          {t.crisisBanner.outro}
         </div>
       )}
 
@@ -93,14 +93,14 @@ export default async function PostDetailPage(
         {visibleComments.map((comment) => (
           <div key={comment.id} className="rounded-lg border bg-card p-3">
             <p className="text-xs font-semibold">
-              {comment.profiles?.display_name ?? "A member of the community"}
+              {comment.profiles?.display_name ?? t.communityMember}
             </p>
             <p className="text-sm">{comment.body}</p>
           </div>
         ))}
         {visibleComments.length === 0 && (
           <p className="py-4 text-center text-sm text-muted-foreground">
-            No comments yet.
+            {t.postDetail.noComments}
           </p>
         )}
       </div>
@@ -111,13 +111,13 @@ export default async function PostDetailPage(
       >
         <Textarea
           name="body"
-          placeholder="Add a comment…"
+          placeholder={t.postDetail.commentPlaceholder}
           required
           rows={1}
           className="flex-1"
         />
         <Button type="submit" size="sm">
-          Post
+          {t.postDetail.post}
         </Button>
       </form>
     </main>

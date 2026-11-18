@@ -26,12 +26,16 @@ import { getAdminNotificationCounts } from "@/lib/supabase/admin-notifications";
 import { COUNTRIES, countryFlag } from "@/lib/countries";
 import { getDevotionStatus } from "@/lib/devotion";
 import {
-  ANNOUNCEMENT_KIND_LABELS,
   getAnnouncementDaysLeft,
   getAnnouncementImageUrl,
   type AnnouncementKind,
 } from "@/lib/supabase/announcements";
 import { AnnouncementFields } from "@/components/admin/announcement-fields";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { formatDate, interpolate, plural } from "@/lib/i18n/format";
+import type { Locale } from "@/lib/i18n/locales";
+import type { AdminMessages } from "@/lib/i18n/messages/en/admin";
 import {
   approveAuthorApplication,
   approveBook,
@@ -213,7 +217,7 @@ type EngagementReportRow = {
 };
 
 // When app_visits (0033_usage_report.sql) started recording daily opens.
-const USAGE_TRACKING_SINCE = "October 17, 2026";
+const USAGE_TRACKING_SINCE = "2026-10-17";
 
 type UsageReportRow = {
   total_users: number;
@@ -284,6 +288,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
     periodParam === "quarter" ? "quarter" : periodParam === "year" ? "year" : "month";
 
   await requireAdmin();
+  const t = getDictionary(await getLocale()).admin;
 
   const supabase = await createClient();
   const { openReportsCount, pendingApplicationsCount, pendingBooksCount } =
@@ -295,8 +300,8 @@ export default async function AdminPage(props: PageProps<"/admin">) {
   return (
     <main className="relative mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
       <PatternCorner corner="top-right" />
-      <BackLink href="/" label="Home" />
-      <h1 className="text-2xl font-heading font-semibold">Admin</h1>
+      <BackLink href="/" label={t.page.home} />
+      <h1 className="text-2xl font-heading font-semibold">{t.page.heading}</h1>
 
       <div className="-mx-6 flex gap-4 overflow-x-auto border-b px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <Link
@@ -307,7 +312,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
               : "flex shrink-0 items-center gap-1.5 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
           }
         >
-          Moderation queue
+          {t.page.tabs.queue}
           {!!openReportsCount && <TabBadge count={openReportsCount} />}
         </Link>
         <Link
@@ -318,7 +323,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
               : "shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
           }
         >
-          Users
+          {t.page.tabs.users}
         </Link>
         <Link
           href="/admin?tab=devotions"
@@ -328,7 +333,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
               : "shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
           }
         >
-          Devotions
+          {t.page.tabs.devotions}
         </Link>
         <Link
           href="/admin?tab=books"
@@ -338,7 +343,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
               : "flex shrink-0 items-center gap-1.5 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
           }
         >
-          Books
+          {t.page.tabs.books}
           {!!booksNotificationCount && <TabBadge count={booksNotificationCount} />}
         </Link>
         <Link
@@ -349,7 +354,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
               : "shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
           }
         >
-          Churches
+          {t.page.tabs.churches}
         </Link>
         <Link
           href="/admin?tab=journeys"
@@ -359,7 +364,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
               : "shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
           }
         >
-          Journeys
+          {t.page.tabs.journeys}
         </Link>
         <Link
           href="/admin?tab=opportunities"
@@ -369,13 +374,13 @@ export default async function AdminPage(props: PageProps<"/admin">) {
               : "shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
           }
         >
-          Opportunities
+          {t.page.tabs.opportunities}
         </Link>
         <Link
           href="/ask-pd/inbox"
           className="shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
         >
-          Ask PD
+          {t.page.tabs.askPd}
         </Link>
         <Link
           href="/admin?tab=prayer"
@@ -385,7 +390,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
               : "shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
           }
         >
-          Announcements
+          {t.page.tabs.announcements}
         </Link>
         <Link
           href="/admin?tab=reports"
@@ -395,7 +400,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
               : "shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
           }
         >
-          Reports
+          {t.page.tabs.reports}
         </Link>
       </div>
 
@@ -429,6 +434,7 @@ export default async function AdminPage(props: PageProps<"/admin">) {
 
 async function ModerationQueue() {
   const supabase = await createClient();
+  const t = getDictionary(await getLocale()).admin;
 
   const { data: reports, error } = await supabase
     .from("reports")
@@ -487,7 +493,7 @@ async function ModerationQueue() {
     return (
       <div className="flex flex-col items-center gap-3 py-12 text-center">
         <Inbox className="size-8 text-muted-foreground/50" />
-        <p className="text-sm text-muted-foreground">Nothing in the queue.</p>
+        <p className="text-sm text-muted-foreground">{t.moderation.empty}</p>
       </div>
     );
   }
@@ -506,18 +512,22 @@ async function ModerationQueue() {
               <Avatar name={content?.profiles?.display_name ?? null} />
               <div className="min-w-0 space-y-1.5">
                 <p className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
-                  Reported {report.target_type.replace("_", " ")}
+                  {interpolate(t.moderation.reported, {
+                    type:
+                      t.moderation.targetTypes[report.target_type] ??
+                      report.target_type.replace("_", " "),
+                  })}
                   {content?.profiles?.display_name
                     ? ` · ${content.profiles.display_name}`
                     : ""}
                 </p>
                 <p className="text-sm">
-                  {content?.body ?? "(content no longer available)"}
+                  {content?.body ?? t.moderation.contentUnavailable}
                 </p>
                 <Badge variant={isCrisis ? "secondary" : "destructive"}>
                   {isCrisis
-                    ? "Auto-flagged: crisis keywords"
-                    : "Reported by user"}
+                    ? t.moderation.autoFlagged
+                    : t.moderation.reportedByUser}
                 </Badge>
               </div>
             </div>
@@ -532,7 +542,7 @@ async function ModerationQueue() {
                 )}
               >
                 <Button type="submit" size="sm" variant="outline" className="w-full">
-                  Restore
+                  {t.moderation.restore}
                 </Button>
               </form>
               <form
@@ -550,7 +560,7 @@ async function ModerationQueue() {
                   variant="destructive"
                   className="w-full"
                 >
-                  Remove
+                  {t.moderation.remove}
                 </Button>
               </form>
               {!isCrisis && content?.user_id && (
@@ -561,7 +571,7 @@ async function ModerationQueue() {
                     variant="destructive"
                     className="w-full"
                   >
-                    Ban user
+                    {t.moderation.banUser}
                   </Button>
                 </form>
               )}
@@ -575,6 +585,7 @@ async function ModerationQueue() {
 
 async function UsersList() {
   const supabase = await createClient();
+  const t = getDictionary(await getLocale()).admin;
 
   const [{ data: profiles, error }, { data: emails, error: emailsError }] =
     await Promise.all([
@@ -615,19 +626,19 @@ async function UsersList() {
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-xl border bg-card p-4 text-center">
           <p className="text-2xl font-bold text-foreground">{prayedCount}</p>
-          <p className="text-xs text-muted-foreground">Prayed</p>
+          <p className="text-xs text-muted-foreground">{t.users.prayed}</p>
         </div>
         <div className="rounded-xl border bg-card p-4 text-center">
           <p className="text-2xl font-bold text-foreground">
             {maybeLaterCount}
           </p>
-          <p className="text-xs text-muted-foreground">Maybe later</p>
+          <p className="text-xs text-muted-foreground">{t.users.maybeLater}</p>
         </div>
         <div className="rounded-xl border bg-card p-4 text-center">
           <p className="text-2xl font-bold text-foreground">
             {notYetShownCount}
           </p>
-          <p className="text-xs text-muted-foreground">Not yet asked</p>
+          <p className="text-xs text-muted-foreground">{t.users.notYetAsked}</p>
         </div>
       </div>
 
@@ -635,8 +646,8 @@ async function UsersList() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b text-left text-xs text-muted-foreground">
-              <th className="p-3 font-normal">Name</th>
-              <th className="p-3 font-normal">Status</th>
+              <th className="p-3 font-normal">{t.users.name}</th>
+              <th className="p-3 font-normal">{t.users.status}</th>
               <th className="p-3"></th>
             </tr>
           </thead>
@@ -650,7 +661,7 @@ async function UsersList() {
                       className="size-7 text-[10px]"
                     />
                     <div>
-                      <div>{p.display_name ?? "(no name)"}</div>
+                      <div>{p.display_name ?? t.shared.noName}</div>
                       {emailById.get(p.id) && (
                         <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                           <span>{emailById.get(p.id)}</span>
@@ -673,10 +684,10 @@ async function UsersList() {
                 <td className="p-3">
                   <div className="flex flex-wrap gap-1">
                     <Badge variant={p.is_banned ? "destructive" : "secondary"}>
-                      {p.is_banned ? "Banned" : "Active"}
+                      {p.is_banned ? t.users.banned : t.users.active}
                     </Badge>
-                    {p.role === "admin" && <Badge>Admin</Badge>}
-                    {p.role === "pastor" && <Badge>PD team</Badge>}
+                    {p.role === "admin" && <Badge>{t.users.admin}</Badge>}
+                    {p.role === "pastor" && <Badge>{t.users.pdTeam}</Badge>}
                   </div>
                 </td>
                 <td className="p-3 text-right">
@@ -684,7 +695,7 @@ async function UsersList() {
                   {p.role !== "admin" && !p.is_banned && (
                     <form action={setPdTeamMember.bind(null, p.id, p.role !== "pastor")}>
                       <Button type="submit" size="sm" variant="outline">
-                        {p.role === "pastor" ? "Remove from PD team" : "Add to PD team"}
+                        {p.role === "pastor" ? t.users.removeFromPdTeam : t.users.addToPdTeam}
                       </Button>
                     </form>
                   )}
@@ -699,7 +710,7 @@ async function UsersList() {
                       size="sm"
                       variant={p.is_banned ? "outline" : "destructive"}
                     >
-                      {p.is_banned ? "Unban" : "Ban"}
+                      {p.is_banned ? t.users.unban : t.users.ban}
                     </Button>
                   </form>
                   </div>
@@ -715,6 +726,7 @@ async function UsersList() {
 
 async function DevotionsAdmin({ editId }: { editId: string | undefined }) {
   const supabase = await createClient();
+  const t = getDictionary(await getLocale()).admin;
 
   const { data: devotions, error } = await supabase
     .from("devotions")
@@ -748,10 +760,10 @@ async function DevotionsAdmin({ editId }: { editId: string | undefined }) {
         className="space-y-3 rounded-xl border bg-card p-4"
       >
         <p className="text-sm font-semibold">
-          {editing ? "Edit devotion" : "New devotion"}
+          {editing ? t.devotions.editHeading : t.devotions.newHeading}
         </p>
         <div className="space-y-1.5">
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">{t.shared.title}</Label>
           <Input
             id="title"
             name="title"
@@ -761,17 +773,17 @@ async function DevotionsAdmin({ editId }: { editId: string | undefined }) {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="scripture_reference">
-            Scripture reference (optional)
+            {t.shared.scriptureReferenceOptional}
           </Label>
           <Input
             id="scripture_reference"
             name="scripture_reference"
-            placeholder="e.g. Proverbs 3:5-6"
+            placeholder={t.devotions.scripturePlaceholder}
             defaultValue={editing?.scripture_reference ?? ""}
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="body">Body</Label>
+          <Label htmlFor="body">{t.devotions.body}</Label>
           <Textarea
             id="body"
             name="body"
@@ -781,7 +793,7 @@ async function DevotionsAdmin({ editId }: { editId: string | undefined }) {
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="reflection">Reflection (optional)</Label>
+          <Label htmlFor="reflection">{t.devotions.reflectionOptional}</Label>
           <Textarea
             id="reflection"
             name="reflection"
@@ -790,7 +802,7 @@ async function DevotionsAdmin({ editId }: { editId: string | undefined }) {
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="prayer">Prayer (optional)</Label>
+          <Label htmlFor="prayer">{t.devotions.prayerOptional}</Label>
           <Textarea
             id="prayer"
             name="prayer"
@@ -799,7 +811,7 @@ async function DevotionsAdmin({ editId }: { editId: string | undefined }) {
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="practice">Practice (optional)</Label>
+          <Label htmlFor="practice">{t.devotions.practiceOptional}</Label>
           <Textarea
             id="practice"
             name="practice"
@@ -809,7 +821,7 @@ async function DevotionsAdmin({ editId }: { editId: string | undefined }) {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="publish_date">
-            Publish date (leave blank to save as a draft)
+            {t.devotions.publishDate}
           </Label>
           <Input
             id="publish_date"
@@ -827,11 +839,11 @@ async function DevotionsAdmin({ editId }: { editId: string | undefined }) {
               variant="ghost"
               size="sm"
             >
-              Cancel
+              {t.shared.cancel}
             </Button>
           )}
           <Button type="submit" size="sm">
-            {editing ? "Save changes" : "Create devotion"}
+            {editing ? t.shared.saveChanges : t.devotions.create}
           </Button>
         </div>
       </form>
@@ -840,23 +852,26 @@ async function DevotionsAdmin({ editId }: { editId: string | undefined }) {
         <div className="flex flex-col items-center gap-3 py-12 text-center">
           <Sparkles className="size-8 text-muted-foreground/50" />
           <p className="text-sm text-muted-foreground">
-            No devotions yet — write the first one above.
+            {t.devotions.empty}
           </p>
         </div>
       )}
 
       {(
         [
-          ["Drafts", drafts],
-          ["Scheduled", scheduled],
-          ["Published", published],
+          [t.devotions.drafts, drafts],
+          [t.devotions.scheduled, scheduled],
+          [t.devotions.published, published],
         ] as const
       ).map(
         ([label, group]) =>
           group.length > 0 && (
             <div key={label} className="space-y-2">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {label} — {group.length}
+                {interpolate(t.shared.groupHeading, {
+                  label,
+                  count: group.length,
+                })}
               </p>
               <div className="divide-y rounded-xl border bg-card">
                 {group.map((d) => (
@@ -867,7 +882,7 @@ async function DevotionsAdmin({ editId }: { editId: string | undefined }) {
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">{d.title}</p>
                       <p className="text-xs text-muted-foreground">
-                        {d.publish_date ?? "No date yet"}
+                        {d.publish_date ?? t.devotions.noDate}
                       </p>
                     </div>
                     <div className="flex shrink-0 gap-2">
@@ -879,11 +894,11 @@ async function DevotionsAdmin({ editId }: { editId: string | undefined }) {
                         size="xs"
                         variant="outline"
                       >
-                        Edit
+                        {t.shared.edit}
                       </Button>
                       <form action={deleteDevotion.bind(null, d.id)}>
                         <Button type="submit" size="xs" variant="ghost">
-                          Delete
+                          {t.shared.delete}
                         </Button>
                       </form>
                     </div>
@@ -897,17 +912,9 @@ async function DevotionsAdmin({ editId }: { editId: string | undefined }) {
   );
 }
 
-const BOOK_STATUS_LABEL: Record<string, string> = {
-  pending_review: "Pending Review",
-  changes_requested: "Changes Requested",
-  rejected: "Rejected",
-  approved: "Approved",
-  published: "Published",
-  unpublished: "Unpublished",
-};
-
 async function BooksAdmin() {
   const supabase = await createClient();
+  const t = getDictionary(await getLocale()).admin;
 
   const [{ data: applications }, { data: books }] = await Promise.all([
     supabase
@@ -960,7 +967,10 @@ async function BooksAdmin() {
       {(applications ?? []).length > 0 && (
         <div className="space-y-2">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Author applications — {(applications ?? []).length}
+            {interpolate(t.shared.groupHeading, {
+              label: t.books.authorApplications,
+              count: (applications ?? []).length,
+            })}
           </p>
           <div className="divide-y rounded-xl border bg-card">
             {(applications ?? []).map((app) => (
@@ -968,20 +978,20 @@ async function BooksAdmin() {
                 <div className="flex items-center gap-2">
                   <Users2 className="size-4 text-muted-foreground" />
                   <p className="text-sm font-semibold">
-                    {app.profiles?.display_name ?? "(no name)"}
+                    {app.profiles?.display_name ?? t.shared.noName}
                   </p>
                   <Badge variant="secondary">
                     {app.status === "more_info_requested"
-                      ? "More info requested"
-                      : "Pending"}
+                      ? t.books.moreInfoRequested
+                      : t.books.pending}
                   </Badge>
                 </div>
                 <p className="text-sm">
-                  <span className="text-muted-foreground">Bio: </span>
+                  <span className="text-muted-foreground">{t.books.bio}</span>
                   {app.bio}
                 </p>
                 <p className="text-sm">
-                  <span className="text-muted-foreground">Why: </span>
+                  <span className="text-muted-foreground">{t.books.why}</span>
                   {app.reason}
                 </p>
                 {app.website && (
@@ -998,7 +1008,7 @@ async function BooksAdmin() {
                     )}
                   >
                     <Button type="submit" size="sm">
-                      Approve
+                      {t.books.approve}
                     </Button>
                   </form>
                   <form
@@ -1007,11 +1017,11 @@ async function BooksAdmin() {
                   >
                     <Input
                       name="review_notes"
-                      placeholder="What's missing?"
+                      placeholder={t.books.whatsMissing}
                       className="h-8 w-40"
                     />
                     <Button type="submit" size="sm" variant="outline">
-                      Request info
+                      {t.books.requestInfo}
                     </Button>
                   </form>
                   <form
@@ -1020,11 +1030,11 @@ async function BooksAdmin() {
                   >
                     <Input
                       name="review_notes"
-                      placeholder="Reason (optional)"
+                      placeholder={t.books.reasonOptional}
                       className="h-8 w-40"
                     />
                     <Button type="submit" size="sm" variant="destructive">
-                      Reject
+                      {t.books.reject}
                     </Button>
                   </form>
                 </div>
@@ -1037,7 +1047,10 @@ async function BooksAdmin() {
       {pendingReview.length > 0 && (
         <div className="space-y-2">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Book submissions — {pendingReview.length}
+            {interpolate(t.shared.groupHeading, {
+              label: t.books.bookSubmissions,
+              count: pendingReview.length,
+            })}
           </p>
           <div className="divide-y rounded-xl border bg-card">
             {pendingReview.map((b) => (
@@ -1054,10 +1067,13 @@ async function BooksAdmin() {
                   <div className="min-w-0 space-y-1">
                     <p className="text-sm font-semibold">{b.title}</p>
                     <p className="text-xs text-muted-foreground">
-                      by {b.profiles?.display_name ?? "(no name)"} ·{" "}
+                      {interpolate(t.books.byAuthor, {
+                        name: b.profiles?.display_name ?? t.shared.noName,
+                      })}{" "}
+                      ·{" "}
                       {b.price_cents
                         ? `$${(b.price_cents / 100).toFixed(2)}`
-                        : "Free"}
+                        : t.books.free}
                     </p>
                     <p className="text-sm">{b.description}</p>
                     {b.categories.length > 0 && (
@@ -1076,7 +1092,7 @@ async function BooksAdmin() {
                         rel="noreferrer"
                         className="text-sm font-medium text-primary underline"
                       >
-                        Preview manuscript
+                        {t.books.previewManuscript}
                       </a>
                     )}
                   </div>
@@ -1084,7 +1100,7 @@ async function BooksAdmin() {
                 <div className="flex flex-wrap gap-2 pt-1">
                   <form action={approveBook.bind(null, b.id)}>
                     <Button type="submit" size="sm">
-                      Approve
+                      {t.books.approve}
                     </Button>
                   </form>
                   <form
@@ -1093,11 +1109,11 @@ async function BooksAdmin() {
                   >
                     <Input
                       name="review_notes"
-                      placeholder="What needs to change?"
+                      placeholder={t.books.whatNeedsToChange}
                       className="h-8 w-48"
                     />
                     <Button type="submit" size="sm" variant="outline">
-                      Request changes
+                      {t.books.requestChanges}
                     </Button>
                   </form>
                   <form
@@ -1106,11 +1122,11 @@ async function BooksAdmin() {
                   >
                     <Input
                       name="review_notes"
-                      placeholder="Reason (optional)"
+                      placeholder={t.books.reasonOptional}
                       className="h-8 w-40"
                     />
                     <Button type="submit" size="sm" variant="destructive">
-                      Reject
+                      {t.books.reject}
                     </Button>
                   </form>
                 </div>
@@ -1123,14 +1139,17 @@ async function BooksAdmin() {
       {approved.length > 0 && (
         <div className="space-y-2">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Approved — {approved.length}
+            {interpolate(t.shared.groupHeading, {
+              label: t.books.approved,
+              count: approved.length,
+            })}
           </p>
           <div className="divide-y rounded-xl border bg-card">
             {approved.map((b) => (
-              <BookAdminRow key={b.id} book={b}>
+              <BookAdminRow key={b.id} book={b} t={t}>
                 <form action={publishBook.bind(null, b.id)}>
                   <Button type="submit" size="xs">
-                    Publish
+                    {t.shared.publish}
                   </Button>
                 </form>
               </BookAdminRow>
@@ -1142,14 +1161,17 @@ async function BooksAdmin() {
       {published.length > 0 && (
         <div className="space-y-2">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Published — {published.length}
+            {interpolate(t.shared.groupHeading, {
+              label: t.books.published,
+              count: published.length,
+            })}
           </p>
           <div className="divide-y rounded-xl border bg-card">
             {published.map((b) => (
-              <BookAdminRow key={b.id} book={b}>
+              <BookAdminRow key={b.id} book={b} t={t}>
                 <form action={unpublishBook.bind(null, b.id)}>
                   <Button type="submit" size="xs" variant="ghost">
-                    Unpublish
+                    {t.shared.unpublish}
                   </Button>
                 </form>
               </BookAdminRow>
@@ -1161,14 +1183,17 @@ async function BooksAdmin() {
       {unpublished.length > 0 && (
         <div className="space-y-2">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Unpublished — {unpublished.length}
+            {interpolate(t.shared.groupHeading, {
+              label: t.books.unpublished,
+              count: unpublished.length,
+            })}
           </p>
           <div className="divide-y rounded-xl border bg-card">
             {unpublished.map((b) => (
-              <BookAdminRow key={b.id} book={b}>
+              <BookAdminRow key={b.id} book={b} t={t}>
                 <form action={publishBook.bind(null, b.id)}>
                   <Button type="submit" size="xs">
-                    Publish
+                    {t.shared.publish}
                   </Button>
                 </form>
               </BookAdminRow>
@@ -1180,13 +1205,13 @@ async function BooksAdmin() {
       {other.length > 0 && (
         <div className="space-y-2">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Other
+            {t.books.other}
           </p>
           <div className="divide-y rounded-xl border bg-card">
             {other.map((b) => (
               <div key={b.id} className="flex items-center justify-between gap-3 p-3">
                 <p className="truncate text-sm font-medium">{b.title}</p>
-                <Badge variant="secondary">{BOOK_STATUS_LABEL[b.status]}</Badge>
+                <Badge variant="secondary">{t.books.statusLabels[b.status]}</Badge>
               </div>
             ))}
           </div>
@@ -1197,7 +1222,7 @@ async function BooksAdmin() {
         <div className="flex flex-col items-center gap-3 py-12 text-center">
           <BookOpen className="size-8 text-muted-foreground/50" />
           <p className="text-sm text-muted-foreground">
-            No author applications or book submissions yet.
+            {t.books.empty}
           </p>
         </div>
       )}
@@ -1212,9 +1237,11 @@ async function BooksAdmin() {
  */
 function BookAdminRow({
   book,
+  t,
   children,
 }: {
   book: BookRow;
+  t: AdminMessages;
   children: ReactNode;
 }) {
   return (
@@ -1222,7 +1249,7 @@ function BookAdminRow({
       <div className="min-w-0">
         <p className="truncate text-sm font-medium">{book.title}</p>
         <p className="text-xs text-muted-foreground">
-          {book.price_cents ? `$${(book.price_cents / 100).toFixed(2)}` : "Free"}
+          {book.price_cents ? `$${(book.price_cents / 100).toFixed(2)}` : t.books.free}
         </p>
       </div>
       <div className="flex items-center gap-2">
@@ -1242,7 +1269,7 @@ function BookAdminRow({
             className="h-8 w-20"
           />
           <Button type="submit" size="xs" variant="outline">
-            Set price
+            {t.books.setPrice}
           </Button>
         </form>
         {children}
@@ -1253,6 +1280,7 @@ function BookAdminRow({
 
 async function ChurchesAdmin({ editId }: { editId: string | undefined }) {
   const supabase = await createClient();
+  const t = getDictionary(await getLocale()).admin;
 
   const { data: churches, error } = await supabase
     .from("churches")
@@ -1271,7 +1299,7 @@ async function ChurchesAdmin({ editId }: { editId: string | undefined }) {
 
   return (
     <div className="space-y-6">
-      <BackLink href="/admin" label="Admin" />
+      <BackLink href="/admin" label={t.shared.backToAdmin} />
       <form
         action={
           editing ? updateChurch.bind(null, editing.id) : createChurch
@@ -1279,14 +1307,14 @@ async function ChurchesAdmin({ editId }: { editId: string | undefined }) {
         className="space-y-3 rounded-xl border bg-card p-4"
       >
         <p className="text-sm font-semibold">
-          {editing ? "Edit church" : "New church"}
+          {editing ? t.churches.editHeading : t.churches.newHeading}
         </p>
         <div className="space-y-1.5">
-          <Label htmlFor="name">Church name</Label>
+          <Label htmlFor="name">{t.churches.name}</Label>
           <Input id="name" name="name" defaultValue={editing?.name} required />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="lead_pastor">Lead Pastor</Label>
+          <Label htmlFor="lead_pastor">{t.churches.leadPastor}</Label>
           <Input
             id="lead_pastor"
             name="lead_pastor"
@@ -1294,7 +1322,7 @@ async function ChurchesAdmin({ editId }: { editId: string | undefined }) {
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="mission">Why do they exist?</Label>
+          <Label htmlFor="mission">{t.churches.mission}</Label>
           <Textarea
             id="mission"
             name="mission"
@@ -1303,7 +1331,7 @@ async function ChurchesAdmin({ editId }: { editId: string | undefined }) {
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="address">Address</Label>
+          <Label htmlFor="address">{t.churches.address}</Label>
           <Input
             id="address"
             name="address"
@@ -1311,20 +1339,20 @@ async function ChurchesAdmin({ editId }: { editId: string | undefined }) {
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="service_time">Service time</Label>
+          <Label htmlFor="service_time">{t.churches.serviceTime}</Label>
           <Input
             id="service_time"
             name="service_time"
-            placeholder="e.g. 0800-0930"
+            placeholder={t.churches.serviceTimePlaceholder}
             defaultValue={editing?.service_time ?? ""}
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="phone">Phone</Label>
+          <Label htmlFor="phone">{t.churches.phone}</Label>
           <Input id="phone" name="phone" defaultValue={editing?.phone ?? ""} />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">{t.churches.email}</Label>
           <Input
             id="email"
             name="email"
@@ -1334,7 +1362,7 @@ async function ChurchesAdmin({ editId }: { editId: string | undefined }) {
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="member_count_estimate">
-            Estimated number of members
+            {t.churches.memberCount}
           </Label>
           <Input
             id="member_count_estimate"
@@ -1353,11 +1381,11 @@ async function ChurchesAdmin({ editId }: { editId: string | undefined }) {
               variant="ghost"
               size="sm"
             >
-              Cancel
+              {t.shared.cancel}
             </Button>
           )}
           <Button type="submit" size="sm">
-            {editing ? "Save changes" : "Create church"}
+            {editing ? t.shared.saveChanges : t.churches.create}
           </Button>
         </div>
       </form>
@@ -1366,7 +1394,7 @@ async function ChurchesAdmin({ editId }: { editId: string | undefined }) {
         <div className="flex flex-col items-center gap-3 py-12 text-center">
           <Church className="size-8 text-muted-foreground/50" />
           <p className="text-sm text-muted-foreground">
-            No churches yet — add the first one above.
+            {t.churches.empty}
           </p>
         </div>
       ) : (
@@ -1376,7 +1404,7 @@ async function ChurchesAdmin({ editId }: { editId: string | undefined }) {
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{c.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {c.lead_pastor ?? "No pastor listed"}
+                  {c.lead_pastor ?? t.churches.noPastor}
                 </p>
               </div>
               <div className="flex shrink-0 gap-2">
@@ -1386,11 +1414,11 @@ async function ChurchesAdmin({ editId }: { editId: string | undefined }) {
                   size="xs"
                   variant="outline"
                 >
-                  Edit
+                  {t.shared.edit}
                 </Button>
                 <form action={deleteChurch.bind(null, c.id)}>
                   <Button type="submit" size="xs" variant="ghost">
-                    Delete
+                    {t.shared.delete}
                   </Button>
                 </form>
               </div>
@@ -1408,6 +1436,7 @@ async function OpportunitiesAdmin({
   editId: string | undefined;
 }) {
   const supabase = await createClient();
+  const t = getDictionary(await getLocale()).admin;
 
   const { data: opportunities, error } = await supabase
     .from("service_opportunities")
@@ -1426,7 +1455,7 @@ async function OpportunitiesAdmin({
 
   return (
     <div className="space-y-6">
-      <BackLink href="/admin" label="Admin" />
+      <BackLink href="/admin" label={t.shared.backToAdmin} />
       <form
         action={
           editing
@@ -1436,10 +1465,10 @@ async function OpportunitiesAdmin({
         className="space-y-3 rounded-xl border bg-card p-4"
       >
         <p className="text-sm font-semibold">
-          {editing ? "Edit opportunity" : "New opportunity"}
+          {editing ? t.opportunities.editHeading : t.opportunities.newHeading}
         </p>
         <div className="space-y-1.5">
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">{t.shared.title}</Label>
           <Input
             id="title"
             name="title"
@@ -1448,16 +1477,16 @@ async function OpportunitiesAdmin({
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="category">Category</Label>
+          <Label htmlFor="category">{t.opportunities.category}</Label>
           <Input
             id="category"
             name="category"
-            placeholder="e.g. Volunteering, Missions, Outreach"
+            placeholder={t.opportunities.categoryPlaceholder}
             defaultValue={editing?.category ?? ""}
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">{t.opportunities.description}</Label>
           <Textarea
             id="description"
             name="description"
@@ -1466,7 +1495,7 @@ async function OpportunitiesAdmin({
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="location">Location</Label>
+          <Label htmlFor="location">{t.opportunities.location}</Label>
           <Input
             id="location"
             name="location"
@@ -1474,7 +1503,7 @@ async function OpportunitiesAdmin({
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="contact_email">Contact email</Label>
+          <Label htmlFor="contact_email">{t.opportunities.contactEmail}</Label>
           <Input
             id="contact_email"
             name="contact_email"
@@ -1483,7 +1512,7 @@ async function OpportunitiesAdmin({
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="contact_phone">Contact phone</Label>
+          <Label htmlFor="contact_phone">{t.opportunities.contactPhone}</Label>
           <Input
             id="contact_phone"
             name="contact_phone"
@@ -1491,7 +1520,7 @@ async function OpportunitiesAdmin({
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="link">Link (optional)</Label>
+          <Label htmlFor="link">{t.shared.linkOptional}</Label>
           <Input
             id="link"
             name="link"
@@ -1500,15 +1529,17 @@ async function OpportunitiesAdmin({
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="status">Status</Label>
+          <Label htmlFor="status">{t.opportunities.status}</Label>
           <select
             id="status"
             name="status"
             defaultValue={editing?.status ?? "draft"}
             className="h-8 w-full min-w-0 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm dark:bg-input/30"
           >
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
+            <option value="draft">{t.opportunities.statusOptions.draft}</option>
+            <option value="published">
+              {t.opportunities.statusOptions.published}
+            </option>
           </select>
         </div>
         <div className="flex justify-end gap-2">
@@ -1520,11 +1551,11 @@ async function OpportunitiesAdmin({
               variant="ghost"
               size="sm"
             >
-              Cancel
+              {t.shared.cancel}
             </Button>
           )}
           <Button type="submit" size="sm">
-            {editing ? "Save changes" : "Create opportunity"}
+            {editing ? t.shared.saveChanges : t.opportunities.create}
           </Button>
         </div>
       </form>
@@ -1533,7 +1564,7 @@ async function OpportunitiesAdmin({
         <div className="flex flex-col items-center gap-3 py-12 text-center">
           <HeartHandshake className="size-8 text-muted-foreground/50" />
           <p className="text-sm text-muted-foreground">
-            No opportunities yet — add the first one above.
+            {t.opportunities.empty}
           </p>
         </div>
       ) : (
@@ -1544,11 +1575,11 @@ async function OpportunitiesAdmin({
                 <div className="flex items-center gap-1.5">
                   <p className="truncate text-sm font-medium">{o.title}</p>
                   <Badge variant={o.status === "published" ? "default" : "secondary"}>
-                    {o.status}
+                    {t.opportunities.statusBadges[o.status] ?? o.status}
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {o.category ?? "No category"}
+                  {o.category ?? t.opportunities.noCategory}
                 </p>
               </div>
               <div className="flex shrink-0 gap-2">
@@ -1558,11 +1589,11 @@ async function OpportunitiesAdmin({
                   size="xs"
                   variant="outline"
                 >
-                  Edit
+                  {t.shared.edit}
                 </Button>
                 <form action={deleteServiceOpportunity.bind(null, o.id)}>
                   <Button type="submit" size="xs" variant="ghost">
-                    Delete
+                    {t.shared.delete}
                   </Button>
                 </form>
               </div>
@@ -1574,23 +1605,14 @@ async function OpportunitiesAdmin({
   );
 }
 
-const PRAYER_POINT_SUGGESTIONS = [
-  "Pray for open doors for the gospel",
-  "Pray for peace and safety",
-  "Pray for the local church there",
-  "Pray for provision",
-  "Pray for boldness to share Christ",
-  "Pray for unity among believers",
-  "Pray for protection over families",
-  "Pray for revival",
-];
-
 async function AnnouncementsAdmin({
   editId,
 }: {
   editId: string | undefined;
 }) {
   const supabase = await createClient();
+  const locale = await getLocale();
+  const t = getDictionary(locale).admin;
 
   const { data: movements, error } = await supabase
     .from("prayer_movements")
@@ -1622,18 +1644,17 @@ async function AnnouncementsAdmin({
         className="space-y-3 rounded-xl border bg-card p-4"
       >
         <p className="text-sm font-semibold">
-          {editing ? "Edit announcement" : "New announcement"}
+          {editing ? t.announcements.editHeading : t.announcements.newHeading}
         </p>
         <p className="text-xs text-muted-foreground">
-          One announcement shows on Home at a time — a prayer movement, news,
-          an event, an advert or a general message. Activating one replaces
-          whichever is live.
+          {t.announcements.intro}
         </p>
         <AnnouncementFields
           key={editing?.id ?? "new"}
           defaults={editing}
-          prayerPointSuggestions={PRAYER_POINT_SUGGESTIONS}
+          prayerPointSuggestions={t.announcements.prayerPointSuggestions}
           currentImageUrl={getAnnouncementImageUrl(editing?.image_path ?? null)}
+          dict={t.announcementFields}
         />
         <div className="flex justify-end gap-2">
           {editing && (
@@ -1644,11 +1665,11 @@ async function AnnouncementsAdmin({
               variant="ghost"
               size="sm"
             >
-              Cancel
+              {t.shared.cancel}
             </Button>
           )}
           <Button type="submit" size="sm">
-            {editing ? "Save changes" : "Create announcement"}
+            {editing ? t.shared.saveChanges : t.announcements.create}
           </Button>
         </div>
       </form>
@@ -1657,23 +1678,26 @@ async function AnnouncementsAdmin({
         <div className="flex flex-col items-center gap-3 py-12 text-center">
           <Heart className="size-8 text-muted-foreground/50" />
           <p className="text-sm text-muted-foreground">
-            No announcements yet — create the first one above.
+            {t.announcements.empty}
           </p>
         </div>
       )}
 
       {(
         [
-          ["Active", active],
-          ["Drafts", drafts],
-          ["Archived", archived],
+          [t.announcements.active, active],
+          [t.announcements.drafts, drafts],
+          [t.announcements.archived, archived],
         ] as const
       ).map(
         ([label, group]) =>
           group.length > 0 && (
             <div key={label} className="space-y-2">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                {label} — {group.length}
+                {interpolate(t.shared.groupHeading, {
+                  label,
+                  count: group.length,
+                })}
               </p>
               <div className="divide-y rounded-xl border bg-card">
                 {group.map((m) => (
@@ -1684,9 +1708,9 @@ async function AnnouncementsAdmin({
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium">{m.title}</p>
                       <p className="text-xs text-muted-foreground">
-                        {ANNOUNCEMENT_KIND_LABELS[m.kind]}
+                        {t.announcementFields.kinds[m.kind]}
                         {m.kind === "prayer" &&
-                          ` · ${m.prayer_points.length} prayer point${m.prayer_points.length === 1 ? "" : "s"}`}
+                          ` · ${plural(locale, m.prayer_points.length, t.announcements.prayerPoints)}`}
                         {m.kind === "event" &&
                           m.event_date &&
                           ` · ${m.event_date}`}
@@ -1696,8 +1720,8 @@ async function AnnouncementsAdmin({
                               m.active_until,
                             );
                             return daysLeft === null
-                              ? " · no expiry"
-                              : ` · ${daysLeft} day${daysLeft === 1 ? "" : "s"} left`;
+                              ? ` · ${t.announcements.noExpiry}`
+                              : ` · ${plural(locale, daysLeft, t.announcements.daysLeft)}`;
                           })()}
                       </p>
                     </div>
@@ -1708,12 +1732,12 @@ async function AnnouncementsAdmin({
                         size="xs"
                         variant="outline"
                       >
-                        Edit
+                        {t.shared.edit}
                       </Button>
                       {m.status === "active" ? (
                         <form action={archiveAnnouncement.bind(null, m.id)}>
                           <Button type="submit" size="xs" variant="ghost">
-                            Archive
+                            {t.announcements.archive}
                           </Button>
                         </form>
                       ) : (
@@ -1726,17 +1750,17 @@ async function AnnouncementsAdmin({
                             type="number"
                             min="1"
                             defaultValue={7}
-                            aria-label="Days to run"
+                            aria-label={t.announcements.daysToRun}
                             className="h-6 w-14 px-1.5 text-xs"
                           />
                           <Button type="submit" size="xs">
-                            Activate
+                            {t.announcements.activate}
                           </Button>
                         </form>
                       )}
                       <form action={deleteAnnouncement.bind(null, m.id)}>
                         <Button type="submit" size="xs" variant="ghost">
-                          Delete
+                          {t.shared.delete}
                         </Button>
                       </form>
                     </div>
@@ -1762,6 +1786,7 @@ async function JourneysAdmin({
   publishError: string | undefined;
 }) {
   const supabase = await createClient();
+  const t = getDictionary(await getLocale()).admin;
 
   const { data: journeys, error } = await supabase
     .from("journeys")
@@ -1806,22 +1831,22 @@ async function JourneysAdmin({
         className="space-y-3 rounded-xl border bg-card p-4"
       >
         <p className="text-sm font-semibold">
-          {editing ? "Edit journey" : "New journey"}
+          {editing ? t.journeys.editHeading : t.journeys.newHeading}
         </p>
         <div className="space-y-1.5">
           <Label htmlFor="slug">
-            Slug (lowercase, hyphenated — used in the URL)
+            {t.journeys.slug}
           </Label>
           <Input
             id="slug"
             name="slug"
-            placeholder="e.g. identity-in-christ"
+            placeholder={t.journeys.slugPlaceholder}
             defaultValue={editing?.slug}
             required
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">{t.shared.title}</Label>
           <Input
             id="title"
             name="title"
@@ -1830,7 +1855,7 @@ async function JourneysAdmin({
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="purpose">Purpose</Label>
+          <Label htmlFor="purpose">{t.journeys.purpose}</Label>
           <Textarea
             id="purpose"
             name="purpose"
@@ -1841,8 +1866,7 @@ async function JourneysAdmin({
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="teaser">
-            Card teaser (optional — short blurb shown on Home&apos;s
-            dashboard cards; falls back to Purpose, trimmed, if left blank)
+            {t.journeys.teaser}
           </Label>
           <Textarea
             id="teaser"
@@ -1852,7 +1876,7 @@ async function JourneysAdmin({
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="duration_days">Duration (days)</Label>
+          <Label htmlFor="duration_days">{t.journeys.duration}</Label>
           <Input
             id="duration_days"
             name="duration_days"
@@ -1863,11 +1887,11 @@ async function JourneysAdmin({
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="completion_title">Completion title</Label>
+          <Label htmlFor="completion_title">{t.journeys.completionTitle}</Label>
           <Input
             id="completion_title"
             name="completion_title"
-            placeholder="e.g. You've taken your first Leap."
+            placeholder={t.journeys.completionTitlePlaceholder}
             defaultValue={editing?.completion_title}
             required
           />
@@ -1881,11 +1905,11 @@ async function JourneysAdmin({
               variant="ghost"
               size="sm"
             >
-              Cancel
+              {t.shared.cancel}
             </Button>
           )}
           <Button type="submit" size="sm">
-            {editing ? "Save changes" : "Create journey"}
+            {editing ? t.shared.saveChanges : t.journeys.create}
           </Button>
         </div>
       </form>
@@ -1894,9 +1918,7 @@ async function JourneysAdmin({
         <div className="flex flex-col items-center gap-3 py-12 text-center">
           <Compass className="size-8 text-muted-foreground/50" />
           <p className="text-sm text-muted-foreground">
-            No admin-authored journeys yet — &ldquo;Faith in Christ&rdquo;
-            remains available to every user as the built-in onboarding
-            journey.
+            {t.journeys.empty}
           </p>
         </div>
       ) : (
@@ -1907,11 +1929,14 @@ async function JourneysAdmin({
                 <div className="flex items-center gap-1.5">
                   <p className="truncate text-sm font-medium">{j.title}</p>
                   <Badge variant={j.status === "published" ? "default" : "secondary"}>
-                    {j.status === "published" ? "Published" : "Draft"}
+                    {j.status === "published" ? t.journeys.published : t.journeys.draft}
                   </Badge>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {j.duration_days} days &middot; /{j.slug}
+                  {interpolate(t.journeys.meta, {
+                    count: j.duration_days,
+                    slug: j.slug,
+                  })}
                 </p>
               </div>
               <div className="flex shrink-0 flex-wrap justify-end gap-2">
@@ -1921,7 +1946,7 @@ async function JourneysAdmin({
                   size="xs"
                   variant="outline"
                 >
-                  Edit days
+                  {t.journeys.editDays}
                 </Button>
                 <Button
                   render={<Link href={`/admin?tab=journeys&edit=${j.id}`} />}
@@ -1929,24 +1954,24 @@ async function JourneysAdmin({
                   size="xs"
                   variant="outline"
                 >
-                  Edit
+                  {t.shared.edit}
                 </Button>
                 {j.status === "published" ? (
                   <form action={unpublishJourney.bind(null, j.id)}>
                     <Button type="submit" size="xs" variant="ghost">
-                      Unpublish
+                      {t.shared.unpublish}
                     </Button>
                   </form>
                 ) : (
                   <form action={publishJourney.bind(null, j.id)}>
                     <Button type="submit" size="xs">
-                      Publish
+                      {t.shared.publish}
                     </Button>
                   </form>
                 )}
                 <form action={deleteJourney.bind(null, j.id)}>
                   <Button type="submit" size="xs" variant="ghost">
-                    Delete
+                    {t.shared.delete}
                   </Button>
                 </form>
               </div>
@@ -1966,6 +1991,7 @@ async function JourneyDaysList({
   showPublishError: boolean;
 }) {
   const supabase = await createClient();
+  const t = getDictionary(await getLocale()).admin;
 
   const { data: days, error } = await supabase
     .from("journey_days")
@@ -1989,9 +2015,12 @@ async function JourneyDaysList({
     <div className="space-y-4">
       {showPublishError && (
         <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-          Can&apos;t publish yet — Day{missingDays.length > 1 ? "s" : ""}{" "}
-          {missingDays.join(", ")} {missingDays.length > 1 ? "are" : "is"}{" "}
-          still missing. Write every day, then publish.
+          {interpolate(
+            missingDays.length > 1
+              ? t.journeyDays.missingMany
+              : t.journeyDays.missingOne,
+            { days: missingDays.join(", ") },
+          )}
         </div>
       )}
 
@@ -1999,8 +2028,11 @@ async function JourneyDaysList({
         <div className="min-w-0">
           <p className="text-sm font-semibold">{journey.title}</p>
           <p className="text-xs text-muted-foreground">
-            {writtenDays.size} of {journey.duration_days} days written
-            {!allWritten ? " — finish every day before publishing" : ""}
+            {interpolate(t.journeyDays.progress, {
+              written: writtenDays.size,
+              total: journey.duration_days,
+            })}
+            {!allWritten ? t.journeyDays.finishEveryDay : ""}
           </p>
         </div>
         <Button
@@ -2009,7 +2041,7 @@ async function JourneyDaysList({
           size="sm"
           variant="ghost"
         >
-          Back to journeys
+          {t.journeyDays.backToJourneys}
         </Button>
       </div>
 
@@ -2017,9 +2049,11 @@ async function JourneyDaysList({
         {dayNumbers.map((n) => (
           <div key={n} className="flex items-center justify-between gap-3 p-3">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-medium">Day {n}</p>
+              <p className="text-sm font-medium">
+                {interpolate(t.journeyDays.day, { day: n })}
+              </p>
               <Badge variant={writtenDays.has(n) ? "default" : "secondary"}>
-                {writtenDays.has(n) ? "Written" : "Missing"}
+                {writtenDays.has(n) ? t.journeyDays.written : t.journeyDays.missing}
               </Badge>
             </div>
             <Button
@@ -2030,7 +2064,7 @@ async function JourneyDaysList({
               size="xs"
               variant="outline"
             >
-              {writtenDays.has(n) ? "Edit" : "Write"}
+              {writtenDays.has(n) ? t.shared.edit : t.journeyDays.write}
             </Button>
           </div>
         ))}
@@ -2038,30 +2072,6 @@ async function JourneyDaysList({
     </div>
   );
 }
-
-const JOURNEY_DAY_SUGGESTIONS = {
-  message: [
-    "Today we're looking at...",
-    "In this passage, we see...",
-    "This changes everything because...",
-  ],
-  explore: [
-    "Read the passage slowly, twice.",
-    "What stands out to you here?",
-    "Who is speaking, and who are they speaking to?",
-  ],
-  reflect: [
-    "How does this truth change the way you see...?",
-    "Where do you need to apply this today?",
-    "What is one step you can take because of this?",
-  ],
-  pray: [
-    "Thank You, Lord, for...",
-    "Help me to...",
-    "I confess that...",
-    "Give me courage to...",
-  ],
-} as const;
 
 async function JourneyDayEditor({
   journey,
@@ -2071,6 +2081,7 @@ async function JourneyDayEditor({
   dayNumber: number;
 }) {
   const supabase = await createClient();
+  const t = getDictionary(await getLocale()).admin;
 
   const { data: existing, error } = await supabase
     .from("journey_days")
@@ -2091,7 +2102,10 @@ async function JourneyDayEditor({
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-sm font-semibold">
-          {journey.title} &middot; Day {dayNumber}
+          {interpolate(t.journeyDayEditor.heading, {
+            title: journey.title,
+            day: dayNumber,
+          })}
         </p>
         <Button
           render={<Link href={backHref} />}
@@ -2099,7 +2113,7 @@ async function JourneyDayEditor({
           size="sm"
           variant="ghost"
         >
-          Back to days
+          {t.journeyDayEditor.backToDays}
         </Button>
       </div>
 
@@ -2108,7 +2122,7 @@ async function JourneyDayEditor({
         className="space-y-3 rounded-xl border bg-card p-4"
       >
         <div className="space-y-1.5">
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">{t.shared.title}</Label>
           <Input
             id="title"
             name="title"
@@ -2117,60 +2131,62 @@ async function JourneyDayEditor({
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="scripture_reference">Scripture reference</Label>
+          <Label htmlFor="scripture_reference">
+            {t.journeyDayEditor.scriptureReference}
+          </Label>
           <Input
             id="scripture_reference"
             name="scripture_reference"
-            placeholder="e.g. Romans 6:1-11"
+            placeholder={t.journeyDayEditor.scripturePlaceholder}
             defaultValue={existing?.scripture_reference}
             required
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="message">Message</Label>
+          <Label htmlFor="message">{t.journeyDayEditor.message}</Label>
           <SuggestibleTextarea
             id="message"
             name="message"
             rows={4}
             defaultValue={existing?.message}
             required
-            suggestions={JOURNEY_DAY_SUGGESTIONS.message}
+            suggestions={t.journeyDayEditor.suggestions.message}
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="explore">Explore</Label>
+          <Label htmlFor="explore">{t.journeyDayEditor.explore}</Label>
           <SuggestibleTextarea
             id="explore"
             name="explore"
             rows={3}
             defaultValue={existing?.explore}
             required
-            suggestions={JOURNEY_DAY_SUGGESTIONS.explore}
+            suggestions={t.journeyDayEditor.suggestions.explore}
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="reflect">Reflect</Label>
+          <Label htmlFor="reflect">{t.journeyDayEditor.reflect}</Label>
           <SuggestibleTextarea
             id="reflect"
             name="reflect"
             rows={3}
             defaultValue={existing?.reflect}
             required
-            suggestions={JOURNEY_DAY_SUGGESTIONS.reflect}
+            suggestions={t.journeyDayEditor.suggestions.reflect}
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="pray">Pray (optional)</Label>
+          <Label htmlFor="pray">{t.journeyDayEditor.prayOptional}</Label>
           <SuggestibleTextarea
             id="pray"
             name="pray"
             rows={2}
             defaultValue={existing?.pray ?? ""}
-            suggestions={JOURNEY_DAY_SUGGESTIONS.pray}
+            suggestions={t.journeyDayEditor.suggestions.pray}
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="next_topic">Next topic teaser (optional)</Label>
+          <Label htmlFor="next_topic">{t.journeyDayEditor.nextTopic}</Label>
           <Input
             id="next_topic"
             name="next_topic"
@@ -2185,10 +2201,10 @@ async function JourneyDayEditor({
             variant="ghost"
             size="sm"
           >
-            Cancel
+            {t.shared.cancel}
           </Button>
           <Button type="submit" size="sm">
-            Save day
+            {t.journeyDayEditor.saveDay}
           </Button>
         </div>
       </form>
@@ -2199,7 +2215,11 @@ async function JourneyDayEditor({
 // Boundaries computed in UTC — a summary report, not a timezone-precise
 // ledger, so calendar-month/quarter/year in UTC is close enough and keeps
 // the boundary math simple.
-function getReportRange(period: ReportPeriod): {
+function getReportRange(
+  period: ReportPeriod,
+  locale: Locale,
+  t: AdminMessages["reports"],
+): {
   start: Date;
   end: Date;
   label: string;
@@ -2222,14 +2242,14 @@ function getReportRange(period: ReportPeriod): {
     return {
       start: new Date(Date.UTC(year, quarterStartMonth, 1)),
       end,
-      label: `Q${quarterNumber} ${year}`,
+      label: interpolate(t.quarterLabel, { quarter: quarterNumber, year }),
     };
   }
 
   return {
     start: new Date(Date.UTC(year, now.getUTCMonth(), 1)),
     end,
-    label: now.toLocaleString("en-US", {
+    label: formatDate(locale, now, {
       month: "long",
       year: "numeric",
       timeZone: "UTC",
@@ -2248,7 +2268,9 @@ function ReportStat({ value, label }: { value: number; label: string }) {
 
 async function ReportsAdmin({ period }: { period: ReportPeriod }) {
   const supabase = await createClient();
-  const { start, end, label } = getReportRange(period);
+  const locale = await getLocale();
+  const t = getDictionary(locale).admin.reports;
+  const { start, end, label } = getReportRange(period, locale, t);
 
   const range = { p_start: start.toISOString(), p_end: end.toISOString() };
   const [{ data, error }, { data: usageData, error: usageError }] =
@@ -2268,9 +2290,9 @@ async function ReportsAdmin({ period }: { period: ReportPeriod }) {
   const usage = (usageData as UsageReportRow[] | null)?.[0] ?? null;
 
   const periods: { value: ReportPeriod; label: string }[] = [
-    { value: "month", label: "Monthly" },
-    { value: "quarter", label: "Quarterly" },
-    { value: "year", label: "Annual" },
+    { value: "month", label: t.periods.month },
+    { value: "quarter", label: t.periods.quarter },
+    { value: "year", label: t.periods.year },
   ];
 
   return (
@@ -2295,14 +2317,14 @@ async function ReportsAdmin({ period }: { period: ReportPeriod }) {
         <div className="flex flex-col items-center gap-3 py-16 text-center">
           <TrendingUp className="size-8 text-muted-foreground/50" />
           <p className="text-sm text-muted-foreground">
-            Couldn&apos;t load the report — check server logs.
+            {t.loadFailed}
           </p>
         </div>
       ) : (
         <>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <TrendingUp className="size-4" />
-            <span>Summary for {label}</span>
+            <span>{interpolate(t.summaryFor, { label })}</span>
           </div>
 
           <div className="rounded-xl border bg-primary/10 p-4 text-center">
@@ -2310,104 +2332,107 @@ async function ReportsAdmin({ period }: { period: ReportPeriod }) {
               {report.gospel_prayers_count}
             </p>
             <p className="text-xs font-medium text-muted-foreground">
-              Decisions for Christ
+              {t.decisionsForChrist}
             </p>
           </div>
 
           {usage && (
             <div className="space-y-2">
               <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                Users
+                {t.users}
               </h3>
               <div className="grid grid-cols-2 gap-3">
-                <ReportStat value={usage.total_users} label="Total users" />
+                <ReportStat value={usage.total_users} label={t.totalUsers} />
                 <ReportStat
                   value={usage.users_in_period}
-                  label="Used the app"
+                  label={t.usedTheApp}
                 />
                 <ReportStat
                   value={usage.regular_users}
-                  label="Regular users"
+                  label={t.regularUsers}
                 />
                 <ReportStat
                   value={usage.devotion_readers}
-                  label="Read a devotion"
+                  label={t.readADevotion}
                 />
                 <ReportStat
                   value={usage.reminder_subscribers}
-                  label="Daily reminders on"
+                  label={t.dailyRemindersOn}
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Regular users opened the app on 8+ different days in the 30
-                days up to the end of this period. Daily visits are counted
-                from {USAGE_TRACKING_SINCE}; earlier periods only count days
-                people posted, prayed, chatted or completed something.
+                {interpolate(t.usageNote, {
+                  date: formatDate(locale, USAGE_TRACKING_SINCE, {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  }),
+                })}
               </p>
             </div>
           )}
 
           <div className="space-y-2">
             <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-              Connect
+              {t.connect}
             </h3>
             <div className="grid grid-cols-2 gap-3">
-              <ReportStat value={report.new_signups} label="New sign-ups" />
-              <ReportStat value={report.active_users} label="Active users" />
+              <ReportStat value={report.new_signups} label={t.newSignups} />
+              <ReportStat value={report.active_users} label={t.activeUsers} />
             </div>
           </div>
 
           <div className="space-y-2">
             <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-              Commit
+              {t.commit}
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <ReportStat
                 value={report.commitments_created}
-                label="Commitments made"
+                label={t.commitmentsMade}
               />
               <ReportStat
                 value={report.commitments_completed}
-                label="Commitments kept"
+                label={t.commitmentsKept}
               />
             </div>
           </div>
 
           <div className="space-y-2">
             <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-              Evolve
+              {t.evolve}
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <ReportStat
                 value={report.sessions_completed}
-                label="Sessions completed"
+                label={t.sessionsCompleted}
               />
               <ReportStat
                 value={report.journeys_started}
-                label="Journeys started"
+                label={t.journeysStarted}
               />
               <ReportStat
                 value={report.journeys_completed}
-                label="Journeys completed"
+                label={t.journeysCompleted}
               />
               <ReportStat
                 value={report.companion_messages_count}
-                label="Companion messages"
+                label={t.companionMessages}
               />
             </div>
           </div>
 
           <div className="space-y-2">
             <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-              Engage
+              {t.engage}
             </h3>
             <div className="grid grid-cols-2 gap-3">
               <ReportStat
                 value={report.prayer_requests_count}
-                label="Prayer requests"
+                label={t.prayerRequests}
               />
-              <ReportStat value={report.posts_count} label="Community posts" />
-              <ReportStat value={report.comments_count} label="Comments" />
+              <ReportStat value={report.posts_count} label={t.communityPosts} />
+              <ReportStat value={report.comments_count} label={t.comments} />
             </div>
           </div>
         </>

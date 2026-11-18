@@ -1,3 +1,6 @@
+import { getDictionary, isEnabledLocale } from "@/lib/i18n/dictionaries";
+import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n/locales";
+
 /**
  * How many hours after the chosen hour a reminder may still go out. The
  * sender runs hourly; this absorbs a missed or late run without sending a
@@ -46,4 +49,17 @@ export function reminderDueOn(
     hour < subscription.remind_hour + CATCH_UP_HOURS;
 
   return inWindow && subscription.last_sent_on !== date ? date : null;
+}
+
+/**
+ * The reminder notification's title in the recipient's own language
+ * (profiles.preferred_language), falling back to English for a missing or
+ * not-yet-enabled language.
+ */
+export function reminderTitle(preferredLanguage: string | null | undefined): string {
+  const locale =
+    isLocale(preferredLanguage) && isEnabledLocale(preferredLanguage)
+      ? preferredLanguage
+      : DEFAULT_LOCALE;
+  return getDictionary(locale).evolve.reminderPush.title;
 }

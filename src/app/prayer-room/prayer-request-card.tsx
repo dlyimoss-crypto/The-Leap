@@ -3,6 +3,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import type { CommunityMessages } from "@/lib/i18n/messages/en/community";
 import { markAnswered, prayForRequest, reportPrayerRequest } from "./actions";
 
 export type PrayerRequestRow = {
@@ -19,33 +20,36 @@ export type PrayerRequestRow = {
   hasPrayed: boolean;
 };
 
-function timeAgo(iso: string) {
+function timeAgo(iso: string, t: CommunityMessages["timeAgo"]) {
   const seconds = Math.max(
     0,
     Math.floor((Date.now() - new Date(iso).getTime()) / 1000),
   );
-  if (seconds < 60) return "just now";
+  if (seconds < 60) return t.justNow;
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return t.minutes(minutes);
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t.hours(hours);
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return t.days(days);
 }
 
 export function PrayerRequestCard({
   request,
   currentUserId,
   showManageActions,
+  dict,
 }: {
   request: PrayerRequestRow;
   currentUserId: string;
   showManageActions: boolean;
+  dict: CommunityMessages;
 }) {
+  const t = dict.prayerRequest;
   const isOwn = request.user_id === currentUserId;
   const authorLabel = request.is_anonymous
-    ? "Anonymous"
-    : (request.displayName ?? "A member of the community");
+    ? t.anonymous
+    : (request.displayName ?? dict.communityMember);
 
   return (
     <div className="space-y-3 rounded-2xl border bg-card p-4 shadow-sm">
@@ -57,18 +61,18 @@ export function PrayerRequestCard({
               {authorLabel}
             </span>
             <span className="shrink-0 font-mono text-[10.5px] text-muted-foreground">
-              {timeAgo(request.created_at)}
+              {timeAgo(request.created_at, dict.timeAgo)}
             </span>
           </div>
           <div className="flex flex-wrap gap-1">
             {request.is_anonymous && (
               <Badge variant="outline" className="text-[9px]">
-                hidden name
+                {t.hiddenName}
               </Badge>
             )}
             {showManageActions && request.status !== "open" && (
               <Badge variant="secondary" className="text-[9px]">
-                {request.status}
+                {t.status[request.status]}
               </Badge>
             )}
           </div>
@@ -79,7 +83,7 @@ export function PrayerRequestCard({
       {request.testimony && (
         <div className="space-y-1 border-t border-dashed pt-2">
           <p className="font-mono text-[10px] font-medium uppercase tracking-wide text-primary">
-            Testimony
+            {t.testimony}
           </p>
           <p className="text-sm text-muted-foreground">{request.testimony}</p>
         </div>
@@ -98,13 +102,13 @@ export function PrayerRequestCard({
             disabled={request.hasPrayed}
             className="rounded-full"
           >
-            {request.hasPrayed ? "Prayed" : "Pray"}
+            {request.hasPrayed ? t.prayed : t.pray}
           </Button>
         </form>
         {!isOwn && (
           <form action={reportPrayerRequest.bind(null, request.id)}>
             <Button type="submit" size="sm" variant="ghost">
-              Report
+              {dict.report}
             </Button>
           </form>
         )}
@@ -117,12 +121,12 @@ export function PrayerRequestCard({
         >
           <Textarea
             name="testimony"
-            placeholder="How was this answered? (optional)"
+            placeholder={t.testimonyPlaceholder}
             rows={1}
             className="flex-1"
           />
           <Button type="submit" size="sm" variant="outline">
-            Mark answered
+            {t.markAnswered}
           </Button>
         </form>
       )}

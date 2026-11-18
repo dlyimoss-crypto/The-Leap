@@ -2,29 +2,31 @@ import { Phone, Video, MessageCircle, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  CONTACT_METHOD_LABELS,
   formatAskPdTime,
   type AskPdMessage,
   type AskPdRequest,
 } from "@/lib/supabase/ask-pd";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 
 const CONTACT_ICONS = { whatsapp: MessageCircle, phone: Phone, video: Video };
 
 // The details of a call request: how and when the person wants to be
 // reached. Shown to both sides of the conversation.
-export function CallRequestDetails({ request }: { request: AskPdRequest }) {
+export async function CallRequestDetails({ request }: { request: AskPdRequest }) {
   if (request.kind !== "call" || !request.contact_method) {
     return null;
   }
+  const t = getDictionary(await getLocale()).engage.askPd;
   const Icon = CONTACT_ICONS[request.contact_method];
   return (
     <div className="space-y-1.5 rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm">
       <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-        Call request
+        {t.thread.callRequest}
       </p>
       <p className="flex items-center gap-2">
         <Icon className="size-4 text-primary" />
-        {CONTACT_METHOD_LABELS[request.contact_method]}:{" "}
+        {t.contactMethods[request.contact_method]}:{" "}
         <span className="font-medium">{request.contact_detail}</span>
       </p>
       {request.preferred_time && (
@@ -39,7 +41,7 @@ export function CallRequestDetails({ request }: { request: AskPdRequest }) {
 
 // The message bubbles. `viewer` decides whose messages sit on the right:
 // the user's own on their side, the team's on the inbox side.
-export function AskPdMessages({
+export async function AskPdMessages({
   messages,
   viewer,
   requesterName,
@@ -48,15 +50,17 @@ export function AskPdMessages({
   viewer: "user" | "team";
   requesterName?: string;
 }) {
+  const locale = await getLocale();
+  const t = getDictionary(locale).engage.askPd.thread;
   return (
     <div className="flex flex-col gap-3">
       {messages.map((m) => {
         const mine = viewer === "team" ? m.from_team : !m.from_team;
         const name = m.from_team
-          ? m.author?.display_name || "Pastor Deniss"
+          ? m.author?.display_name || t.pastorDeniss
           : viewer === "user"
-            ? "You"
-            : requesterName || "User";
+            ? t.you
+            : requesterName || t.userFallback;
         return (
           <div
             key={m.id}
@@ -69,7 +73,7 @@ export function AskPdMessages({
                   : "text-[11px] text-muted-foreground"
               }
             >
-              {name} · {formatAskPdTime(m.created_at)}
+              {name} · {formatAskPdTime(locale, m.created_at)}
             </p>
             <div
               className={
@@ -87,13 +91,14 @@ export function AskPdMessages({
   );
 }
 
-export function ReplyForm({
+export async function ReplyForm({
   action,
   placeholder,
 }: {
   action: (formData: FormData) => Promise<void>;
   placeholder: string;
 }) {
+  const t = getDictionary(await getLocale()).engage.askPd.thread;
   return (
     <form action={action} className="space-y-2">
       <Textarea
@@ -105,29 +110,27 @@ export function ReplyForm({
       />
       <div className="flex justify-end">
         <Button type="submit" size="sm">
-          Send
+          {t.send}
         </Button>
       </div>
     </form>
   );
 }
 
-export function CrisisNotice() {
+export async function CrisisNotice() {
+  const t = getDictionary(await getLocale()).engage.askPd.thread;
   return (
     <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-foreground">
-      You don&apos;t have to go through this alone. A reply here can take
-      time, so if you&apos;re in immediate danger or thinking about harming
-      yourself, please get help now.{" "}
+      {t.crisisBefore}{" "}
       <a
         href="https://findahelpline.com"
         target="_blank"
         rel="noreferrer"
         className="font-semibold text-destructive underline"
       >
-        Find crisis support in your country →
+        {t.crisisLink}
       </a>{" "}
-      You can also contact a trusted person, a local church, a professional
-      counselor, or emergency services.
+      {t.crisisAfter}
     </div>
   );
 }

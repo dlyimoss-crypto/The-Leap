@@ -3,6 +3,8 @@ import Link from "next/link";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import {
   getActiveAnnouncementCached,
   getPrayerMovementParticipation,
@@ -16,11 +18,7 @@ import {
 
 type Tab = "requests" | "testimonies" | "mine";
 
-const TABS: { key: Tab; label: string }[] = [
-  { key: "requests", label: "Requests" },
-  { key: "testimonies", label: "Testimonies" },
-  { key: "mine", label: "Mine" },
-];
+const TABS: Tab[] = ["requests", "testimonies", "mine"];
 
 type RawRow = {
   id: string;
@@ -47,6 +45,9 @@ export default async function PrayerRoomPage(
   const showCrisisBanner = searchParams.crisis === "1";
 
   const { supabase, user } = await requireUser();
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
+  const t = dict.community;
 
   // Only a prayer announcement belongs in the Prayer Room — news, events
   // and adverts show on Home alone.
@@ -113,19 +114,23 @@ export default async function PrayerRoomPage(
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
       <PatternBorder />
-      <BackLink href="/connect" label="Connect" />
-      <h1 className="text-2xl font-heading font-semibold">Prayer Room</h1>
+      <BackLink href="/connect" label={dict.nav.connect} />
+      <h1 className="text-2xl font-heading font-semibold">
+        {t.prayerRoom.heading}
+      </h1>
 
       {activeMovement && movementParticipation && (
         <PrayerMovementCard
           movement={activeMovement}
           participantCount={movementParticipation.count}
           hasPrayed={movementParticipation.hasPrayed}
+          locale={locale}
+          dict={t.prayerMovement}
         />
       )}
 
       <div className="flex gap-4 border-b">
-        {TABS.map(({ key, label }) => (
+        {TABS.map((key) => (
           <Link
             key={key}
             href={key === "requests" ? "/prayer-room" : `/prayer-room?tab=${key}`}
@@ -135,28 +140,25 @@ export default async function PrayerRoomPage(
                 : "pb-2 text-sm font-medium text-muted-foreground"
             }
           >
-            {label}
+            {t.prayerRoom.tabs[key]}
           </Link>
         ))}
       </div>
 
-      {tab === "requests" && <PrayerComposer />}
+      {tab === "requests" && <PrayerComposer dict={t.prayerComposer} />}
 
       {showCrisisBanner && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-foreground">
-          You don&apos;t have to go through this alone. If you&apos;re in
-          immediate danger or thinking about harming yourself, please seek
-          immediate help.{" "}
+          {t.crisisBanner.intro}{" "}
           <a
             href="https://findahelpline.com"
             target="_blank"
             rel="noreferrer"
             className="font-semibold text-destructive underline"
           >
-            Find crisis support in your country →
+            {t.crisisBanner.findSupportLink}
           </a>{" "}
-          You can also contact a trusted person, local church, professional
-          counselor, or emergency service.
+          {t.crisisBanner.outro}
         </div>
       )}
 
@@ -165,9 +167,9 @@ export default async function PrayerRoomPage(
           <div className="flex flex-col items-center gap-3 py-12 text-center">
             <HeartHandshake className="size-8 text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">
-              {tab === "requests" && "No prayer requests yet — be the first."}
-              {tab === "testimonies" && "No testimonies yet."}
-              {tab === "mine" && "You haven't posted a prayer request yet."}
+              {tab === "requests" && t.prayerRoom.emptyRequests}
+              {tab === "testimonies" && t.prayerRoom.emptyTestimonies}
+              {tab === "mine" && t.prayerRoom.emptyMine}
             </p>
           </div>
         )}
@@ -177,6 +179,7 @@ export default async function PrayerRoomPage(
             request={request}
             currentUserId={user.id}
             showManageActions={tab === "mine"}
+            dict={t}
           />
         ))}
       </div>

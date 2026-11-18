@@ -3,6 +3,8 @@ import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
 import { getCommunityPrompt } from "@/lib/content/community-prompt";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import { Composer } from "./composer";
 import { PostCard, type PostRow } from "./post-card";
 
@@ -23,6 +25,8 @@ export default async function CommunityPage(
   const showCrisisBanner = searchParams.crisis === "1";
 
   const { supabase, user } = await requireUser();
+  const dict = getDictionary(await getLocale());
+  const t = dict.community;
 
   const today = new Date().toISOString().slice(0, 10);
   const prompt = getCommunityPrompt(today);
@@ -83,26 +87,25 @@ export default async function CommunityPage(
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
       <PatternBorder />
-      <BackLink href="/" label="Home" />
-      <h1 className="text-2xl font-heading font-semibold">Community</h1>
+      <BackLink href="/" label={dict.nav.home} />
+      <h1 className="text-2xl font-heading font-semibold">
+        {t.communityPage.heading}
+      </h1>
 
-      <Composer prompt={prompt} />
+      <Composer prompt={prompt} dict={t.composer} />
 
       {showCrisisBanner && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-foreground">
-          You don&apos;t have to go through this alone. If you&apos;re in
-          immediate danger or thinking about harming yourself, please seek
-          immediate help.{" "}
+          {t.crisisBanner.intro}{" "}
           <a
             href="https://findahelpline.com"
             target="_blank"
             rel="noreferrer"
             className="font-semibold text-destructive underline"
           >
-            Find crisis support in your country →
+            {t.crisisBanner.findSupportLink}
           </a>{" "}
-          You can also contact a trusted person, local church, professional
-          counselor, or emergency service.
+          {t.crisisBanner.outro}
         </div>
       )}
 
@@ -111,12 +114,17 @@ export default async function CommunityPage(
           <div className="flex flex-col items-center gap-3 py-12 text-center">
             <Users className="size-8 text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">
-              No posts yet — be the first to share.
+              {t.communityPage.empty}
             </p>
           </div>
         )}
         {posts.map((post) => (
-          <PostCard key={post.id} post={post} currentUserId={user.id} />
+          <PostCard
+            key={post.id}
+            post={post}
+            currentUserId={user.id}
+            dict={t}
+          />
         ))}
       </div>
     </main>

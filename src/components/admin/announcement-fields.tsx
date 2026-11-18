@@ -7,32 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   ANNOUNCEMENT_KINDS,
-  ANNOUNCEMENT_KIND_LABELS,
   type AnnouncementKind,
 } from "@/lib/announcement-kinds";
-
-const PLACEHOLDERS: Record<AnnouncementKind, { title: string; body: string }> = {
-  prayer: {
-    title: "e.g. Let's pray for Nepal",
-    body: "Why we're praying and what's at stake (optional)",
-  },
-  news: {
-    title: "e.g. The Leap is now available in Swahili",
-    body: "Share the update in a few short sentences",
-  },
-  event: {
-    title: "e.g. Night of Worship in Dar es Salaam",
-    body: "What, where and who it's for",
-  },
-  advert: {
-    title: "e.g. New book: Rooted in Grace",
-    body: "What you're promoting and why it matters",
-  },
-  general: {
-    title: "e.g. A word for this season",
-    body: "Your message",
-  },
-};
+import type { AdminMessages } from "@/lib/i18n/messages/en/admin";
 
 // The kind picker plus every field whose relevance depends on it — Prayer
 // gets scripture and prayer points, Event gets a date. Image, message and
@@ -41,6 +18,7 @@ export function AnnouncementFields({
   defaults,
   prayerPointSuggestions,
   currentImageUrl,
+  dict,
 }: {
   defaults?: {
     kind: AnnouncementKind;
@@ -54,16 +32,17 @@ export function AnnouncementFields({
   };
   prayerPointSuggestions: readonly string[];
   currentImageUrl: string | null;
+  dict: AdminMessages["announcementFields"];
 }) {
   const [kind, setKind] = useState<AnnouncementKind>(
     defaults?.kind ?? "prayer",
   );
-  const placeholder = PLACEHOLDERS[kind];
+  const placeholder = dict.placeholders[kind];
 
   return (
     <>
       <div className="space-y-1.5">
-        <Label htmlFor="kind">Type</Label>
+        <Label htmlFor="kind">{dict.type}</Label>
         <select
           id="kind"
           name="kind"
@@ -73,14 +52,14 @@ export function AnnouncementFields({
         >
           {ANNOUNCEMENT_KINDS.map((k) => (
             <option key={k} value={k}>
-              {ANNOUNCEMENT_KIND_LABELS[k]}
+              {dict.kinds[k]}
             </option>
           ))}
         </select>
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor="title">Title</Label>
+        <Label htmlFor="title">{dict.title}</Label>
         <Input
           id="title"
           name="title"
@@ -92,7 +71,8 @@ export function AnnouncementFields({
 
       <div className="space-y-1.5">
         <Label htmlFor="body">
-          Message{kind === "prayer" ? " (optional)" : ""}
+          {dict.message}
+          {kind === "prayer" ? dict.optionalSuffix : ""}
         </Label>
         <Textarea
           id="body"
@@ -105,7 +85,7 @@ export function AnnouncementFields({
 
       {kind === "event" && (
         <div className="space-y-1.5">
-          <Label htmlFor="event_date">Event date</Label>
+          <Label htmlFor="event_date">{dict.eventDate}</Label>
           <Input
             id="event_date"
             name="event_date"
@@ -119,29 +99,30 @@ export function AnnouncementFields({
         <>
           <div className="space-y-1.5">
             <Label htmlFor="scripture_reference">
-              Scripture reference (optional)
+              {dict.scriptureReferenceOptional}
             </Label>
             <Input
               id="scripture_reference"
               name="scripture_reference"
-              placeholder="e.g. Psalm 67:1-2"
+              placeholder={dict.scripturePlaceholder}
               defaultValue={defaults?.scripture_reference ?? ""}
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Prayer points</Label>
+            <Label>{dict.prayerPoints}</Label>
             <ChipListInput
               name="prayer_points"
               defaultValue={defaults?.prayer_points ?? []}
               suggestions={prayerPointSuggestions}
-              placeholder="Type a prayer point, then press Enter"
+              placeholder={dict.prayerPointPlaceholder}
+              labels={dict.chipList}
             />
           </div>
         </>
       )}
 
       <div className="space-y-1.5">
-        <Label htmlFor="image">Image (optional)</Label>
+        <Label htmlFor="image">{dict.imageOptional}</Label>
         {currentImageUrl && (
           <div className="flex items-center gap-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -152,7 +133,7 @@ export function AnnouncementFields({
             />
             <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <input type="checkbox" name="remove_image" />
-              Remove image
+              {dict.removeImage}
             </label>
           </div>
         )}
@@ -161,20 +142,20 @@ export function AnnouncementFields({
 
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5">
-          <Label htmlFor="link_url">Link (optional)</Label>
+          <Label htmlFor="link_url">{dict.linkOptional}</Label>
           <Input
             id="link_url"
             name="link_url"
-            placeholder="https://… or /evolve/books"
+            placeholder={dict.linkPlaceholder}
             defaultValue={defaults?.link_url ?? ""}
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="link_label">Button text</Label>
+          <Label htmlFor="link_label">{dict.buttonText}</Label>
           <Input
             id="link_label"
             name="link_label"
-            placeholder="e.g. Register"
+            placeholder={dict.buttonTextPlaceholder}
             defaultValue={defaults?.link_label ?? ""}
           />
         </div>

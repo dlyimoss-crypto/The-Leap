@@ -4,6 +4,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { interpolate } from "@/lib/i18n/format";
 
 // A "type one, press Enter" list builder that still submits as a plain
 // newline-joined string via a hidden input — so the server action reading
@@ -13,11 +14,14 @@ export function ChipListInput({
   defaultValue = [],
   suggestions = [],
   placeholder,
+  labels,
 }: {
   name: string;
   defaultValue?: string[];
   suggestions?: readonly string[];
   placeholder?: string;
+  /** Interface text from the dictionary; `remove` takes an {item} placeholder. */
+  labels: { add: string; remove: string; placeholder: string };
 }) {
   const [items, setItems] = useState<string[]>(defaultValue);
   const [draft, setDraft] = useState("");
@@ -54,7 +58,7 @@ export function ChipListInput({
               <button
                 type="button"
                 onClick={() => removeItem(i)}
-                aria-label={`Remove ${item}`}
+                aria-label={interpolate(labels.remove, { item })}
                 className="flex size-4 items-center justify-center rounded-full text-muted-foreground hover:bg-background hover:text-foreground"
               >
                 <X className="size-3" />
@@ -74,7 +78,7 @@ export function ChipListInput({
               handleAddDraft();
             }
           }}
-          placeholder={placeholder ?? "Type a point, then press Enter"}
+          placeholder={placeholder ?? labels.placeholder}
         />
         <Button
           type="button"
@@ -82,7 +86,7 @@ export function ChipListInput({
           variant="outline"
           onClick={handleAddDraft}
         >
-          Add
+          {labels.add}
         </Button>
       </div>
 

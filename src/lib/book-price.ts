@@ -15,3 +15,16 @@ export function parsePriceCents(raw: string): number | null {
   const cents = Math.round(value * 100);
   return cents > 0 ? cents : null;
 }
+
+/**
+ * Display price for a paid book (books.price_cents, always USD) in the
+ * reader's locale, e.g. "$12.50" in English. Grouping is off so English
+ * output matches the original `$${(cents / 100).toFixed(2)}`.
+ */
+export function formatBookPrice(locale: string, priceCents: number): string {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: "USD",
+    useGrouping: false,
+  }).format(priceCents / 100);
+}

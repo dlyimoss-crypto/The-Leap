@@ -4,18 +4,25 @@ import { useState } from "react";
 import { Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/copy-button";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { interpolate } from "@/lib/i18n/format";
 
 const INVITE_URL = "https://leapgrow.app";
-const INVITE_MESSAGE =
-  "I've been using The Leap to grow in my walk with Christ, one day at a time. Take your first Leap too:";
 
-export function InviteCard({ firstName }: { firstName?: string | null }) {
+export function InviteCard({
+  firstName,
+  dict,
+}: {
+  firstName?: string | null;
+  dict: Dictionary["engage"]["invite"]["card"];
+}) {
   const [shared, setShared] = useState(false);
+  const inviteMessage = dict.shareMessage;
 
   async function handleShare() {
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
-        await navigator.share({ text: INVITE_MESSAGE, url: INVITE_URL });
+        await navigator.share({ text: inviteMessage, url: INVITE_URL });
         setShared(true);
       } catch {
         // User cancelled the share sheet — nothing to do.
@@ -24,7 +31,7 @@ export function InviteCard({ firstName }: { firstName?: string | null }) {
     }
 
     try {
-      await navigator.clipboard.writeText(`${INVITE_MESSAGE} ${INVITE_URL}`);
+      await navigator.clipboard.writeText(`${inviteMessage} ${INVITE_URL}`);
       setShared(true);
       setTimeout(() => setShared(false), 2000);
     } catch (err) {
@@ -40,11 +47,12 @@ export function InviteCard({ firstName }: { firstName?: string | null }) {
         </div>
         <div className="min-w-0 space-y-1">
           <p className="font-heading text-lg font-semibold text-foreground">
-            Take someone with you
+            {dict.heading}
           </p>
           <p className="text-sm text-muted-foreground">
-            {firstName ? `${firstName}, help` : "Help"} a friend or family
-            member take their first Leap with Christ.
+            {firstName
+              ? interpolate(dict.helpWithName, { name: firstName })
+              : dict.help}
           </p>
         </div>
       </div>
@@ -55,7 +63,7 @@ export function InviteCard({ firstName }: { firstName?: string | null }) {
         className="w-full rounded-full"
         onClick={handleShare}
       >
-        {shared ? "Invite copied" : "Share The Leap"}
+        {shared ? dict.inviteCopied : dict.shareTheLeap}
       </Button>
 
       <div className="rounded-xl border bg-card p-3">

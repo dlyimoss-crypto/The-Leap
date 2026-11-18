@@ -9,6 +9,7 @@ import { findJourneyMeta } from "@/lib/content/journeys-repo";
 import { getCurrentJourneyState } from "@/lib/supabase/journey-progress";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { LOCALE_INFO } from "@/lib/i18n/locales";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 import {
   toAlternatingTurns,
   type ConversationMessage,
@@ -87,8 +88,7 @@ export async function sendMessage(formData: FormData) {
       ? ""
       : `\n\nRespond in ${LOCALE_INFO[locale].englishName}, unless the user writes in a different language.`;
 
-  let replyText =
-    "Sorry, I'm having trouble responding right now — please try again in a moment.";
+  let replyText = getDictionary(locale).engage.companion.errorReply;
 
   try {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });

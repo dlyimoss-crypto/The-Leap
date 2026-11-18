@@ -93,7 +93,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <div className="fixed top-3 right-3 z-50">
-            <ThemeToggle />
+            <ThemeToggle dict={dict.common.themeToggle} />
           </div>
           <div className={user ? "flex flex-1 flex-col pb-16" : "flex flex-1 flex-col"}>
             {children}

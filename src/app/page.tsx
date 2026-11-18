@@ -92,7 +92,8 @@ async function HomeContent({
     return <WelcomeView />;
   }
 
-  const dict = getDictionary(await getLocale());
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
 
   // Only needed to power the completed-state "recommended next journey" card
   // — skip the extra query on every other Home render.
@@ -120,6 +121,7 @@ async function HomeContent({
       journey={journey}
       progress={progress}
       dict={dict}
+      locale={locale}
       displayName={profile?.display_name ?? null}
       avatarUrl={profile?.avatar_url ?? null}
       nextJourney={nextJourney}

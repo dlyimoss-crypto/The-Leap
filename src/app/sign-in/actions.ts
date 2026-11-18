@@ -2,15 +2,49 @@
 
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import type { AuthError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { COUNTRIES } from "@/lib/countries";
 import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 
 const VALID_COUNTRY_CODES = new Set(COUNTRIES.map((c) => c.code));
 
 // awaitingConfirmation holds the email address a confirmation link was sent
 // to — set after sign-up, or when someone signs in before confirming.
 export type AuthState = { error?: string; awaitingConfirmation?: string };
+
+// Supabase's own error text is English-only (and sometimes technical), so
+// show a dictionary message instead: the common cases by error code, then a
+// generic fallback. The raw error is logged for debugging.
+async function authErrorMessage(error: AuthError): Promise<string> {
+  const t = getDictionary(await getLocale()).common.authErrors;
+  switch (error.code) {
+    case "invalid_credentials":
+      return t.invalidCredentials;
+    case "email_not_confirmed":
+      return t.emailNotConfirmed;
+    case "user_already_exists":
+    case "email_exists":
+      return t.userAlreadyRegistered;
+    case "weak_password":
+      return t.weakPassword;
+    case "same_password":
+      return t.samePassword;
+    case "email_address_invalid":
+    case "validation_failed":
+      return t.invalidEmail;
+    case "over_email_send_rate_limit":
+    case "over_request_rate_limit":
+    case "over_sms_send_rate_limit":
+      return t.rateLimit;
+  }
+  if (error.status === 429) {
+    return t.rateLimit;
+  }
+  console.error("Unmapped auth error", error.code, error.message);
+  return t.generic;
+}
 
 // Where an emailed confirmation link lands. /auth/confirm turns the link
 // into a session, then forwards on to the gospel invite like a sign-in does.
@@ -37,7 +71,7 @@ export async function signIn(
   }
 
   if (error) {
-    return { error: error.message };
+    return { error: await authErrorMessage(error) };
   }
 
   redirect("/?gospel_invite=1");
@@ -70,7 +104,7 @@ export async function signUp(
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: await authErrorMessage(error) };
   }
 
   // With "Confirm email" on, Supabase holds the session back until the
@@ -98,7 +132,7 @@ export async function resendConfirmation(
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: await authErrorMessage(error) };
   }
 
   return { sent: true };
@@ -122,7 +156,7 @@ export async function requestPasswordReset(
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: await authErrorMessage(error) };
   }
 
   // Same answer whether or not the email has an account, so this form
@@ -140,7 +174,7 @@ export async function updatePassword(
   const { error } = await supabase.auth.updateUser({ password });
 
   if (error) {
-    return { error: error.message };
+    return { error: await authErrorMessage(error) };
   }
 
   redirect("/");

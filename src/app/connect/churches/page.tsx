@@ -4,6 +4,8 @@ import { CopyButton } from "@/components/copy-button";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 
 type ChurchRow = {
   id: string;
@@ -26,6 +28,7 @@ export default async function ChurchesPage(
     : searchParams.id;
 
   const { supabase } = await requireUser();
+  const t = getDictionary(await getLocale()).commit.churches;
 
   const { data: churches } = await supabase
     .from("churches")
@@ -54,10 +57,10 @@ export default async function ChurchesPage(
             className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="size-4" />
-            Back to Churches
+            {t.backToChurches}
           </Link>
           <p className="text-sm text-muted-foreground">
-            This church listing couldn&apos;t be found.
+            {t.notFound}
           </p>
         </main>
       );
@@ -72,7 +75,7 @@ export default async function ChurchesPage(
             className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="size-4" />
-            Back to Churches
+            {t.backToChurches}
           </Link>
         )}
 
@@ -87,7 +90,7 @@ export default async function ChurchesPage(
               </h1>
               {church.lead_pastor && (
                 <p className="text-sm text-muted-foreground">
-                  Lead Pastor: {church.lead_pastor}
+                  {t.leadPastor(church.lead_pastor)}
                 </p>
               )}
             </div>
@@ -109,7 +112,7 @@ export default async function ChurchesPage(
                 <span className="w-4 shrink-0 text-center text-muted-foreground">
                   🕒
                 </span>
-                <span>Service: {church.service_time}</span>
+                <span>{t.service(church.service_time)}</span>
               </div>
             )}
             {church.phone && (
@@ -134,7 +137,7 @@ export default async function ChurchesPage(
             {church.member_count_estimate != null && (
               <div className="flex items-center gap-2">
                 <Users2 className="size-4 shrink-0 text-muted-foreground" />
-                <span>~{church.member_count_estimate} members</span>
+                <span>{t.members(church.member_count_estimate)}</span>
               </div>
             )}
           </div>
@@ -146,19 +149,17 @@ export default async function ChurchesPage(
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
       <PatternBorder />
-      <BackLink href="/connect" label="Connect" />
+      <BackLink href="/connect" label={t.backToConnect} />
       <div>
-        <h1 className="text-2xl font-heading font-semibold">Churches</h1>
-        <p className="text-sm text-muted-foreground">
-          Find a local church and connect with its community.
-        </p>
+        <h1 className="text-2xl font-heading font-semibold">{t.heading}</h1>
+        <p className="text-sm text-muted-foreground">{t.intro}</p>
       </div>
 
       {rows.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-12 text-center">
           <Church className="size-8 text-muted-foreground/50" />
           <p className="text-sm text-muted-foreground">
-            No churches listed yet — check back soon.
+            {t.empty}
           </p>
         </div>
       ) : (
@@ -176,7 +177,7 @@ export default async function ChurchesPage(
                 <p className="truncate text-sm font-medium">{church.name}</p>
                 <p className="truncate text-xs text-muted-foreground">
                   {church.lead_pastor ? `${church.lead_pastor} · ` : ""}
-                  {church.service_time ?? "Service time not listed"}
+                  {church.service_time ?? t.serviceTimeNotListed}
                 </p>
               </div>
             </Link>

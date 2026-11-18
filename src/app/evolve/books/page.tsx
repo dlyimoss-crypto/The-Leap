@@ -8,6 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
+import { formatBookPrice } from "@/lib/book-price";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import { interpolate, plural } from "@/lib/i18n/format";
+import { getLocale } from "@/lib/i18n/get-locale";
 import {
   applyToBeAuthor,
   createBookSubmission,
@@ -42,16 +46,6 @@ type PublishedBookRow = {
   profiles: { display_name: string | null } | null;
 };
 
-const STATUS_LABEL: Record<string, string> = {
-  draft: "Draft",
-  pending_review: "Pending Review",
-  changes_requested: "Changes Requested",
-  rejected: "Rejected",
-  approved: "Approved",
-  published: "Published",
-  unpublished: "Unpublished",
-};
-
 const STATUS_ORDER = [
   "draft",
   "pending_review",
@@ -60,7 +54,7 @@ const STATUS_ORDER = [
   "approved",
   "published",
   "unpublished",
-];
+] as const;
 
 export default async function BooksPage(props: PageProps<"/evolve/books">) {
   const searchParams = await props.searchParams;
@@ -73,6 +67,9 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
       : searchParams.apply) === "1";
 
   const { supabase, user } = await requireUser();
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
+  const t = dict.books;
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -93,11 +90,11 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
     <div className="space-y-3">
       <div className="flex items-baseline justify-between">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Library
+          {t.library.heading}
         </p>
         {library.length > 0 && (
           <span className="text-xs text-muted-foreground">
-            {library.length} {library.length === 1 ? "book" : "books"}
+            {plural(locale, library.length, t.library.bookCount)}
           </span>
         )}
       </div>
@@ -105,7 +102,7 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
         <div className="flex flex-col items-center gap-3 rounded-xl border bg-card py-12 text-center">
           <Library className="size-8 text-muted-foreground/50" />
           <p className="text-sm text-muted-foreground">
-            No books published yet — be the first to share one below.
+            {t.library.empty}
           </p>
         </div>
       ) : (
@@ -136,13 +133,13 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
                 <div>
                   <p className="truncate text-sm font-medium">{book.title}</p>
                   <p className="truncate text-xs text-muted-foreground">
-                    {book.profiles?.display_name ?? "The Leap"}
+                    {book.profiles?.display_name ?? t.library.defaultAuthor}
                   </p>
                 </div>
                 <Badge variant={book.price_cents ? "outline" : "secondary"}>
                   {book.price_cents
-                    ? `$${(book.price_cents / 100).toFixed(2)}`
-                    : "Free"}
+                    ? formatBookPrice(locale, book.price_cents)
+                    : t.library.free}
                 </Badge>
               </Link>
             );
@@ -165,13 +162,13 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
       return (
         <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-6 overflow-hidden px-6 py-10">
           <PatternBorder />
-          <BackLink href="/evolve" label="Evolve" />
+          <BackLink href="/evolve" label={dict.nav.evolve} />
           <div>
             <h1 className="text-2xl font-heading font-semibold">
-              Books & Literature
+              {t.catalogue.heading}
             </h1>
             <p className="text-sm text-muted-foreground">
-              Go deeper through books, teachings and curated resources.
+              {t.catalogue.readerSubheading}
             </p>
           </div>
 
@@ -183,22 +180,22 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
                 <div className="min-w-0 space-y-1">
                   <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                     {application?.status === "pending"
-                      ? "Author Application"
-                      : "Become an Author"}
+                      ? t.application.eyebrowPending
+                      : t.application.eyebrowDefault}
                   </p>
                   <h2 className="font-heading text-xl font-bold text-foreground text-balance">
                     {application?.status === "pending"
-                      ? "Your application is under review"
+                      ? t.application.headingPending
                       : application?.status === "more_info_requested"
-                        ? "We need a bit more from you"
-                        : "Publish your book with The Leap"}
+                        ? t.application.headingMoreInfo
+                        : t.application.headingDefault}
                   </h2>
                   <p className="text-sm text-muted-foreground">
                     {application?.status === "pending"
-                      ? "We'll let you know as soon as it's reviewed."
+                      ? t.application.bodyPending
                       : application?.status === "more_info_requested"
-                        ? "Pick up your application where you left off."
-                        : "Share your writing with our community — free or paid, your choice."}
+                        ? t.application.bodyMoreInfo
+                        : t.application.bodyDefault}
                   </p>
                 </div>
                 <div className="flex size-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5">
@@ -214,8 +211,8 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
                   className="w-full rounded-full"
                 >
                   {application?.status === "more_info_requested"
-                    ? "Continue application"
-                    : "Apply now"}
+                    ? t.application.continueApplication
+                    : t.application.applyNow}
                   <ArrowRight className="size-4" />
                 </Button>
               )}
@@ -225,7 +222,7 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
           {application?.status === "rejected" && (
             <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
               <p className="font-medium">
-                Your author application wasn&apos;t approved.
+                {t.application.rejected}
               </p>
               {application.review_notes && (
                 <p className="mt-1 text-muted-foreground">
@@ -246,14 +243,14 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
           className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
-          Back to Library
+          {t.application.backToLibrary}
         </Link>
 
         {application?.status === "pending" ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 py-12 text-center">
             <Sparkles className="size-8 text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">
-              Your author application is under review.
+              {t.application.underReview}
             </p>
           </div>
         ) : (
@@ -262,12 +259,12 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
             className="space-y-3 rounded-xl border bg-card p-4"
           >
             <p className="text-sm font-semibold">
-              Apply to become an author
+              {t.application.formHeading}
             </p>
             {application?.status === "more_info_requested" && (
               <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
                 <p className="font-medium text-primary">
-                  More information requested
+                  {t.application.moreInfoRequested}
                 </p>
                 {application.review_notes && (
                   <p className="mt-1">{application.review_notes}</p>
@@ -275,7 +272,7 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
               </div>
             )}
             <div className="space-y-1.5">
-              <Label htmlFor="bio">A little about you</Label>
+              <Label htmlFor="bio">{t.application.bioLabel}</Label>
               <Textarea
                 id="bio"
                 name="bio"
@@ -286,7 +283,7 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="reason">
-                Why do you want to publish with The Leap?
+                {t.application.reasonLabel}
               </Label>
               <Textarea
                 id="reason"
@@ -298,7 +295,7 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="website">
-                Website or profile link (optional)
+                {t.application.websiteLabel}
               </Label>
               <Input
                 id="website"
@@ -309,10 +306,10 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
             </div>
             <label className="flex items-start gap-2 text-sm">
               <input type="checkbox" name="agreement" required className="mt-0.5" />
-              I agree to The Leap&apos;s publishing requirements.
+              {t.application.agreement}
             </label>
             <Button type="submit" size="sm">
-              {application ? "Resubmit application" : "Submit application"}
+              {application ? t.application.resubmit : t.application.submit}
             </Button>
           </form>
         )}
@@ -335,13 +332,13 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-6 overflow-hidden px-6 py-10">
       <PatternBorder />
-      <BackLink href="/evolve" label="Evolve" />
+      <BackLink href="/evolve" label={dict.nav.evolve} />
       <div>
         <h1 className="text-2xl font-heading font-semibold">
-          Books & Literature
+          {t.catalogue.heading}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Submit a book for review — approved books join the Library.
+          {t.catalogue.authorSubheading}
         </p>
       </div>
 
@@ -357,20 +354,20 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
         className="space-y-3 rounded-xl border bg-card p-4"
       >
         <p className="text-sm font-semibold">
-          {editing ? "Edit book" : "New book"}
+          {editing ? t.submission.editBook : t.submission.newBook}
         </p>
         {editing?.review_notes && (
           <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-sm">
-            <p className="font-medium text-primary">Reviewer feedback</p>
+            <p className="font-medium text-primary">{t.submission.reviewerFeedback}</p>
             <p className="mt-1">{editing.review_notes}</p>
           </div>
         )}
         <div className="space-y-1.5">
-          <Label htmlFor="title">Title</Label>
+          <Label htmlFor="title">{t.submission.titleLabel}</Label>
           <Input id="title" name="title" defaultValue={editing?.title} required />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="description">Description</Label>
+          <Label htmlFor="description">{t.submission.descriptionLabel}</Label>
           <Textarea
             id="description"
             name="description"
@@ -380,30 +377,32 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="categories">Categories (comma-separated)</Label>
+          <Label htmlFor="categories">{t.submission.categoriesLabel}</Label>
           <Input
             id="categories"
             name="categories"
-            placeholder="Discipleship, Christian Living"
+            placeholder={t.submission.categoriesPlaceholder}
             defaultValue={editing?.categories.join(", ")}
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="manuscript">Manuscript (PDF or EPUB)</Label>
+          <Label htmlFor="manuscript">{t.submission.manuscriptLabel}</Label>
           <Input id="manuscript" name="manuscript" type="file" accept=".pdf,.epub" />
           {editing?.manuscript_filename && (
             <p className="text-xs text-muted-foreground">
-              Current file: {editing.manuscript_filename}
+              {interpolate(t.submission.currentFile, {
+                filename: editing.manuscript_filename,
+              })}
             </p>
           )}
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="cover">Cover image</Label>
+          <Label htmlFor="cover">{t.submission.coverLabel}</Label>
           <Input id="cover" name="cover" type="file" accept="image/*" />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="price_usd">
-            Price in USD (leave blank for free)
+            {t.submission.priceLabel}
           </Label>
           <Input
             id="price_usd"
@@ -420,15 +419,14 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
         </div>
         <label className="flex items-start gap-2 text-sm">
           <input type="checkbox" name="rights_attestation" className="mt-0.5" />
-          I confirm that I own the rights to this work, or have permission to
-          publish it.
+          {t.submission.rightsAttestation}
         </label>
         <div className="flex justify-end gap-2">
           <Button type="submit" name="intent" value="draft" size="sm" variant="outline">
-            Save draft
+            {t.submission.saveDraft}
           </Button>
           <Button type="submit" name="intent" value="submit" size="sm">
-            Submit for review
+            {t.submission.submitForReview}
           </Button>
         </div>
       </form>
@@ -441,7 +439,7 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
         return (
           <div key={status} className="space-y-2">
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {STATUS_LABEL[status]} — {group.length}
+              {t.submission.statusLabels[status]} — {group.length}
             </p>
             <div className="divide-y rounded-xl border bg-card">
               {group.map((b) => (
@@ -453,8 +451,8 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
                     <p className="truncate text-sm font-medium">{b.title}</p>
                     <p className="text-xs text-muted-foreground">
                       {b.price_cents
-                        ? `$${(b.price_cents / 100).toFixed(2)}`
-                        : "Free"}
+                        ? formatBookPrice(locale, b.price_cents)
+                        : t.library.free}
                     </p>
                   </div>
                   <Button
@@ -463,7 +461,7 @@ export default async function BooksPage(props: PageProps<"/evolve/books">) {
                     size="xs"
                     variant="outline"
                   >
-                    Edit
+                    {t.submission.edit}
                   </Button>
                 </div>
               ))}

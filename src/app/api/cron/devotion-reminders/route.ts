@@ -1,5 +1,5 @@
 import webpush from "web-push";
-import { reminderDueOn } from "@/lib/devotion-reminders";
+import { reminderDueOn, reminderTitle } from "@/lib/devotion-reminders";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 type SubscriptionRow = {
@@ -69,18 +69,32 @@ export async function POST(request: Request) {
     return Response.json({ sent: 0 });
   }
 
+  const dueUserIds = [...new Set(due.map(({ sub }) => sub.user_id))];
+
   const { data: reads } = await supabase
     .from("devotion_reads")
     .select("user_id")
     .eq("devotion_id", devotion.id)
-    .in("user_id", [...new Set(due.map(({ sub }) => sub.user_id))]);
+    .in("user_id", dueUserIds);
   const alreadyRead = new Set((reads ?? []).map((r) => r.user_id));
 
-  const payload = JSON.stringify({
-    title: "Today's devotion is ready",
-    body: devotion.title,
-    url: "/evolve/devotion",
-  });
+  // Each recipient gets the notification in their own language.
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, preferred_language")
+    .in("id", dueUserIds)
+    .returns<{ id: string; preferred_language: string | null }[]>();
+  const languageByUser = new Map(
+    (profiles ?? []).map((p) => [p.id, p.preferred_language]),
+  );
+
+  // The body is the devotion's own title (content), so it isn't translated.
+  const payloadFor = (userId: string) =>
+    JSON.stringify({
+      title: reminderTitle(languageByUser.get(userId)),
+      body: devotion.title,
+      url: "/evolve/devotion",
+    });
 
   let sent = 0;
   let skipped = 0;
@@ -94,7 +108,7 @@ export async function POST(request: Request) {
         try {
           await webpush.sendNotification(
             { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-            payload,
+            payloadFor(sub.user_id),
           );
           sent++;
         } catch (err) {

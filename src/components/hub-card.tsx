@@ -8,12 +8,15 @@ export function HubCard({
   title,
   description,
   comingSoon,
+  comingSoonLabel = "Coming soon",
 }: {
   href: string;
   icon: LucideIcon;
   title: string;
   description: string;
   comingSoon?: boolean;
+  /** Badge text when comingSoon; pass dict.commit.hubCard.comingSoon. */
+  comingSoonLabel?: string;
 }) {
   return (
     <Link
@@ -28,7 +31,7 @@ export function HubCard({
           <p className="font-semibold">{title}</p>
           {comingSoon && (
             <Badge variant="secondary" className="text-[9px]">
-              Coming soon
+              {comingSoonLabel}
             </Badge>
           )}
         </div>

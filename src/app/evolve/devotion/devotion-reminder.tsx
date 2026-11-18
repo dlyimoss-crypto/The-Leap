@@ -3,6 +3,8 @@
 import { Bell, BellOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import type { Dictionary, Locale } from "@/lib/i18n/dictionaries";
+import { formatTime } from "@/lib/i18n/format";
 import {
   getDevotionReminderHour,
   removeDevotionReminder,
@@ -11,6 +13,8 @@ import {
 } from "./actions";
 
 const DEFAULT_HOUR = 7;
+
+type ReminderMessages = Dictionary["evolve"]["reminder"];
 
 type State =
   | { kind: "checking" }
@@ -26,8 +30,8 @@ function urlBase64ToUint8Array(base64String: string) {
   return Uint8Array.from(raw, (c) => c.charCodeAt(0));
 }
 
-function formatHour(hour: number) {
-  return new Date(2000, 0, 1, hour).toLocaleTimeString([], {
+function formatHour(locale: Locale, hour: number) {
+  return formatTime(locale, new Date(2000, 0, 1, hour), {
     hour: "numeric",
     minute: "2-digit",
   });
@@ -45,14 +49,18 @@ function HourSelect({
   value,
   onChange,
   disabled,
+  label,
+  locale,
 }: {
+  label: string;
+  locale: Locale;
   value: number;
   onChange: (hour: number) => void;
   disabled?: boolean;
 }) {
   return (
     <select
-      aria-label="Reminder time"
+      aria-label={label}
       value={value}
       disabled={disabled}
       onChange={(e) => onChange(Number(e.target.value))}
@@ -60,14 +68,20 @@ function HourSelect({
     >
       {Array.from({ length: 24 }, (_, hour) => (
         <option key={hour} value={hour}>
-          {formatHour(hour)}
+          {formatHour(locale, hour)}
         </option>
       ))}
     </select>
   );
 }
 
-export function DevotionReminder() {
+export function DevotionReminder({
+  dict,
+  locale,
+}: {
+  dict: ReminderMessages;
+  locale: Locale;
+}) {
   const [state, setState] = useState<State>({ kind: "checking" });
   const [pendingHour, setPendingHour] = useState(DEFAULT_HOUR);
   const [busy, setBusy] = useState(false);
@@ -177,37 +191,27 @@ export function DevotionReminder() {
         ) : (
           <BellOff className="size-4 text-muted-foreground" />
         )}
-        <p className="text-sm font-semibold">Daily reminder</p>
+        <p className="text-sm font-semibold">{dict.heading}</p>
       </div>
 
       {state.kind === "unsupported" &&
         (state.needsInstall ? (
-          <p className="text-sm text-muted-foreground">
-            To get a daily reminder on iPhone, add The Leap to your Home
-            Screen first: tap the Share button, then &ldquo;Add to Home
-            Screen&rdquo;, and open The Leap from there.
-          </p>
+          <p className="text-sm text-muted-foreground">{dict.needsInstall}</p>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            This browser doesn&apos;t support notifications.
-          </p>
+          <p className="text-sm text-muted-foreground">{dict.unsupported}</p>
         ))}
 
       {state.kind === "denied" && (
-        <p className="text-sm text-muted-foreground">
-          Notifications are blocked for The Leap. Allow them in your
-          browser&apos;s site settings to get a daily reminder.
-        </p>
+        <p className="text-sm text-muted-foreground">{dict.denied}</p>
       )}
 
       {state.kind === "off" && (
         <>
-          <p className="text-sm text-muted-foreground">
-            Get a gentle nudge each day when you haven&apos;t read the
-            devotion yet.
-          </p>
+          <p className="text-sm text-muted-foreground">{dict.offIntro}</p>
           <div className="flex flex-wrap items-center gap-2">
             <HourSelect
+              label={dict.timeAriaLabel}
+              locale={locale}
               value={pendingHour}
               onChange={setPendingHour}
               disabled={busy}
@@ -218,7 +222,7 @@ export function DevotionReminder() {
               disabled={busy}
               onClick={turnOn}
             >
-              Remind me daily
+              {dict.turnOn}
             </Button>
           </div>
         </>
@@ -226,8 +230,10 @@ export function DevotionReminder() {
 
       {state.kind === "on" && (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm text-muted-foreground">Every day at</span>
+          <span className="text-sm text-muted-foreground">{dict.everyDayAt}</span>
           <HourSelect
+            label={dict.timeAriaLabel}
+            locale={locale}
             value={state.hour}
             onChange={(hour) => changeHour(state.subscription, hour)}
             disabled={busy}
@@ -239,14 +245,14 @@ export function DevotionReminder() {
             disabled={busy}
             onClick={() => turnOff(state.subscription)}
           >
-            Turn off
+            {dict.turnOff}
           </Button>
         </div>
       )}
 
       {failed && (
         <p className="text-sm text-destructive">
-          Something went wrong saving your reminder. Please try again.
+          {dict.failed}
         </p>
       )}
     </div>

@@ -258,3 +258,21 @@ export function countryFlag(code: string): string {
     .map((c) => String.fromCodePoint(127397 + c.charCodeAt(0)))
     .join("");
 }
+
+// The nationality list in the user's language, sorted by the localized name.
+// English keeps the names and order above exactly. Built on the server and
+// passed down, so the browser's own Intl data can't cause a hydration
+// mismatch.
+export function localizedCountries(
+  locale: string,
+): { code: string; name: string }[] {
+  if (locale === "en") {
+    return COUNTRIES;
+  }
+  const names = new Intl.DisplayNames(locale, { type: "region" });
+  const collator = new Intl.Collator(locale);
+  return COUNTRIES.map(({ code, name }) => ({
+    code,
+    name: names.of(code) ?? name,
+  })).sort((a, b) => collator.compare(a.name, b.name));
+}

@@ -1,4 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Dictionary } from "@/lib/i18n/dictionaries";
+import { formatDate } from "@/lib/i18n/format";
 
 // Ask PD: a user reaching Pastor Deniss (PD) and the PD team directly,
 // by private message or by requesting a call. See migration 0037.
@@ -6,12 +8,6 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 export type AskPdKind = "message" | "call";
 export type AskPdStatus = "open" | "answered" | "closed";
 export type ContactMethod = "whatsapp" | "phone" | "video";
-
-export const CONTACT_METHOD_LABELS: Record<ContactMethod, string> = {
-  whatsapp: "WhatsApp",
-  phone: "Phone call",
-  video: "Video call",
-};
 
 export function isContactMethod(value: unknown): value is ContactMethod {
   return value === "whatsapp" || value === "phone" || value === "video";
@@ -107,16 +103,16 @@ export async function getAskPdThread(
 }
 
 export function askPdStatusLabel(
+  dict: Dictionary["engage"]["askPd"],
   status: AskPdStatus,
   audience: "user" | "team",
 ): string {
-  if (status === "closed") return "Closed";
-  if (status === "answered") return audience === "user" ? "Replied" : "Answered";
-  return audience === "user" ? "Waiting for a reply" : "Needs a reply";
+  return dict.status[audience][status];
 }
 
-export function formatAskPdTime(iso: string): string {
-  return new Date(iso).toLocaleString("en-GB", {
+// English keeps its original British day-month order ("18 Nov, 14:05").
+export function formatAskPdTime(locale: string, iso: string): string {
+  return formatDate(locale === "en" ? "en-GB" : locale, iso, {
     day: "numeric",
     month: "short",
     hour: "2-digit",

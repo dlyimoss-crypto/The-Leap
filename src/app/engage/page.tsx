@@ -3,18 +3,22 @@ import { HubCard } from "@/components/hub-card";
 import { BackLink } from "@/components/back-link";
 import { PatternCorner } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
 
 export default async function EngagePage() {
   await requireUser();
+  const dict = getDictionary(await getLocale());
+  const t = dict.engage.hub;
 
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
       <PatternCorner corner="top-right" />
-      <BackLink href="/" label="Home" />
+      <BackLink href="/" label={dict.nav.home} />
       <div>
-        <h1 className="text-2xl font-heading font-semibold">Engage</h1>
+        <h1 className="text-2xl font-heading font-semibold">{dict.nav.engage}</h1>
         <p className="text-sm text-muted-foreground">
-          My life has a purpose beyond myself.
+          {t.subtitle}
         </p>
       </div>
 
@@ -22,21 +26,22 @@ export default async function EngagePage() {
         <HubCard
           href="/engage/invite"
           icon={Share2}
-          title="Invite a Friend"
-          description="Help someone else take their first Leap."
+          title={t.inviteTitle}
+          description={t.inviteDescription}
         />
         <HubCard
           href="/engage/serve"
           icon={HeartHandshake}
-          title="Serve & Missions"
-          description="Find ways to serve and get involved."
+          title={t.serveTitle}
+          description={t.serveDescription}
         />
         <HubCard
           href="/engage/give"
           icon={Gift}
-          title="Giving"
-          description="Support The Leap and the ministries it partners with."
+          title={t.giveTitle}
+          description={t.giveDescription}
           comingSoon
+          comingSoonLabel={dict.commit.hubCard.comingSoon}
         />
       </div>
     </main>

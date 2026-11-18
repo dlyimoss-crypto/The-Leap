@@ -3,6 +3,9 @@ import { Lock, Sparkles } from "lucide-react";
 import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
+import { getLocale } from "@/lib/i18n/get-locale";
+import { getDictionary, type Locale } from "@/lib/i18n/dictionaries";
+import { formatDate } from "@/lib/i18n/format";
 import { DevotionReminder } from "./devotion-reminder";
 
 type DevotionRow = {
@@ -16,8 +19,8 @@ type DevotionRow = {
   publish_date: string;
 };
 
-function formatDevotionDate(publishDate: string) {
-  return new Date(`${publishDate}T00:00:00`).toLocaleDateString("en-US", {
+function formatDevotionDate(locale: Locale, publishDate: string) {
+  return formatDate(locale, publishDate, {
     weekday: "long",
     year: "numeric",
     month: "long",
@@ -34,6 +37,9 @@ export default async function DevotionPage(
     : searchParams.id;
 
   const { supabase, user } = await requireUser();
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
+  const t = dict.evolve.devotion;
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -130,40 +136,35 @@ export default async function DevotionPage(
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-6 overflow-hidden px-6 py-10">
       <PatternBorder />
-      <BackLink href="/evolve" label="Evolve" />
+      <BackLink href="/evolve" label={dict.nav.evolve} />
       <div>
         <h1 className="text-2xl font-heading font-semibold">
-          Daily Devotion
+          {t.heading}
         </h1>
-        <p className="text-sm text-muted-foreground">
-          Pause, reflect and encounter God in today&apos;s thought.
-        </p>
+        <p className="text-sm text-muted-foreground">{t.subheading}</p>
       </div>
 
-      <DevotionReminder />
+      <DevotionReminder dict={dict.evolve.reminder} locale={locale} />
 
       {lockedOutUntilTomorrow ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 py-12 text-center">
           <Lock className="size-8 text-muted-foreground/50" />
           <h2 className="text-lg font-heading font-semibold">
-            You&apos;ve already picked one from the archive today
+            {t.lockedHeading}
           </h2>
-          <p className="text-sm text-muted-foreground">
-            You can read one past devotion a day — this one unlocks again
-            tomorrow. Today&apos;s devotion is still open below.
-          </p>
+          <p className="text-sm text-muted-foreground">{t.lockedBody}</p>
           <Link
             href="/evolve/devotion"
             className="text-sm font-medium text-primary underline underline-offset-4"
           >
-            Back to today&apos;s devotion
+            {t.backToToday}
           </Link>
         </div>
       ) : featured ? (
         <div className="space-y-4 rounded-xl border bg-card p-5">
           <div className="space-y-1">
             <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
-              {formatDevotionDate(featured.publish_date)}
+              {formatDevotionDate(locale, featured.publish_date)}
             </p>
             <h2 className="text-xl font-heading font-semibold text-balance">
               {featured.title}
@@ -185,7 +186,7 @@ export default async function DevotionPage(
           {featured.reflection && (
             <div className="space-y-1">
               <p className="text-base font-semibold uppercase tracking-wide text-primary">
-                Reflection
+                {t.reflection}
               </p>
               <p className="whitespace-pre-line text-foreground">
                 {featured.reflection}
@@ -196,7 +197,7 @@ export default async function DevotionPage(
           {featured.prayer && (
             <div className="space-y-1">
               <p className="text-base font-semibold uppercase tracking-wide text-primary">
-                Prayer
+                {t.prayer}
               </p>
               <p className="whitespace-pre-line text-foreground">
                 {featured.prayer}
@@ -207,7 +208,7 @@ export default async function DevotionPage(
           {featured.practice && (
             <div className="space-y-1">
               <p className="text-base font-semibold uppercase tracking-wide text-primary">
-                Practice
+                {t.practice}
               </p>
               <p className="whitespace-pre-line text-foreground">
                 {featured.practice}
@@ -219,7 +220,7 @@ export default async function DevotionPage(
         <div className="flex flex-1 flex-col items-center justify-center gap-3 py-12 text-center">
           <Sparkles className="size-8 text-muted-foreground/50" />
           <p className="text-sm text-muted-foreground">
-            No devotion has been published yet — check back soon.
+            {t.empty}
           </p>
         </div>
       )}
@@ -227,7 +228,7 @@ export default async function DevotionPage(
       {past.length > 0 && (
         <div className="space-y-2">
           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Past Devotions
+            {t.pastDevotions}
           </p>
           <div className="divide-y rounded-xl border bg-card">
             {past.map((d) => {
@@ -244,7 +245,7 @@ export default async function DevotionPage(
                   </span>
                   <span className="flex shrink-0 items-center gap-1 text-[10.5px]">
                     <Lock className="size-3" />
-                    Tomorrow
+                    {t.tomorrow}
                   </span>
                 </div>
               ) : (

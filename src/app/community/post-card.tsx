@@ -2,6 +2,7 @@ import Link from "next/link";
 import { HandHeart, MessageCircle, ThumbsUp } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import type { CommunityMessages } from "@/lib/i18n/messages/en/community";
 import { blockUser, reportPost, toggleReaction } from "./actions";
 
 export type PostRow = {
@@ -17,29 +18,31 @@ export type PostRow = {
   commentCount: number;
 };
 
-function timeAgo(iso: string) {
+function timeAgo(iso: string, t: CommunityMessages["timeAgo"]) {
   const seconds = Math.max(
     0,
     Math.floor((Date.now() - new Date(iso).getTime()) / 1000),
   );
-  if (seconds < 60) return "just now";
+  if (seconds < 60) return t.justNow;
   const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 60) return t.minutes(minutes);
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t.hours(hours);
   const days = Math.floor(hours / 24);
-  return `${days}d ago`;
+  return t.days(days);
 }
 
 export function PostCard({
   post,
   currentUserId,
+  dict,
 }: {
   post: PostRow;
   currentUserId: string;
+  dict: CommunityMessages;
 }) {
   const isOwn = post.user_id === currentUserId;
-  const authorLabel = post.displayName ?? "A member of the community";
+  const authorLabel = post.displayName ?? dict.communityMember;
 
   return (
     <div className="space-y-3 rounded-2xl border bg-card p-4 shadow-sm">
@@ -51,7 +54,7 @@ export function PostCard({
               {authorLabel}
             </span>
             <span className="shrink-0 font-mono text-[10.5px] text-muted-foreground">
-              {timeAgo(post.created_at)}
+              {timeAgo(post.created_at, dict.timeAgo)}
             </span>
           </div>
           <p className="pt-0.5 text-sm">{post.body}</p>
@@ -92,12 +95,12 @@ export function PostCard({
           <div className="ml-auto flex gap-1">
             <form action={reportPost.bind(null, post.id)}>
               <Button type="submit" size="xs" variant="ghost">
-                Report
+                {dict.report}
               </Button>
             </form>
             <form action={blockUser.bind(null, post.user_id)}>
               <Button type="submit" size="xs" variant="ghost">
-                Block
+                {dict.postCard.block}
               </Button>
             </form>
           </div>
