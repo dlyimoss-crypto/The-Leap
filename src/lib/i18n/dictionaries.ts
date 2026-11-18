@@ -2,7 +2,8 @@
 // Deliberately not called "translations": src/lib/content/translations.ts
 // already owns that word for Bible translations (BSB/KJV/ASV).
 //
-// Adding a language: create ./messages/<locale>.ts typed as Dictionary
+// Adding a language: create ./messages/<locale>/ mirroring ./messages/en/
+// (each file typed from its English counterpart)
 // (a missing key is then a compile error, never leaked English) and add
 // it to `dictionaries` below. That alone switches the language on in the
 // picker — see isEnabledLocale.
@@ -13,7 +14,8 @@ import { sw } from "./messages/sw";
 
 export type { Locale };
 
-export type Dictionary = {
+/** The original (pre-split) namespaces, typed explicitly. */
+export type CoreMessages = {
   nav: {
     home: string;
     connect: string;
@@ -157,6 +159,12 @@ export type Dictionary = {
     closing: string;
   };
 };
+
+/**
+ * Every language's full dictionary. Area namespaces (commit, evolve, …)
+ * take their shape from the English files in ./messages/en.
+ */
+export type Dictionary = typeof en;
 
 export const dictionaries: Partial<Record<Locale, Dictionary>> = { en, sw };
 

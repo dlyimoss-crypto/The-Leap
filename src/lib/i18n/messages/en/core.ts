@@ -1,6 +1,6 @@
-import type { Dictionary } from "../dictionaries";
+import type { CoreMessages } from "../../dictionaries";
 
-export const en: Dictionary = {
+export const core: CoreMessages = {
   nav: {
     home: "Home",
     connect: "Connect",
