@@ -76,7 +76,7 @@ export function GospelInviteCard({
           type="button"
           onClick={handleClose}
           aria-label={dict.close}
-          className="absolute top-3 right-3 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+          className="absolute top-3 end-3 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
         >
           <X className="size-4" />
         </button>

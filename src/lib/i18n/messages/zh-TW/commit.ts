@@ -1,0 +1,103 @@
+import type { CommitMessages } from "../en/commit";
+
+export const commit: CommitMessages = {
+  commitPage: {
+    backToHome: "首頁",
+    heading: "委身",
+    subheading: "我選擇基督的道路。",
+    journeyCardTitle: "旅程",
+    journeyCardDescription: "繼續你的旅程，或瀏覽新的旅程。",
+    thisWeeksCommitment: "本週承諾",
+    weekOfProgress: (weekOf: string, done: number, total: number) =>
+      `${weekOf} 當週 — 已持守 ${done}/${total} 項`,
+    markAsKept: "標示為已持守",
+    checkAllToMarkAsKept: (total: number) =>
+      `勾選全部 ${total} 項即可標示為已持守`,
+    intro: "每週三項操練，小到你真的做得到。",
+    commitToThisWeek: "委身這一週",
+    keptCommitments: "已持守的承諾",
+    weekOf: (weekOf: string) => `${weekOf} 當週`,
+  },
+  commitmentItems: {
+    scripture_done: {
+      label: "研讀 5 段聖經",
+      detail: "本週每天",
+    },
+    prayer_done: {
+      label: "禱告 5–15 分鐘",
+      detail: "本週每天",
+    },
+    witness_done: {
+      label: "分享福音",
+      detail: "本週至少一次",
+    },
+  },
+  journeyChooser: {
+    backToCommit: "委身",
+    heading: "旅程",
+    subheading: "一條與基督同行、循序漸進的多日旅程。",
+    continueTitle: "繼續你的旅程",
+    continueDescription: "從上次停下的地方繼續。",
+    browseTitle: "瀏覽旅程",
+    browseDescription: "探索其他可以開始的生命塑造旅程。",
+  },
+  browseJourneys: {
+    backToJourney: "旅程",
+    heading: "瀏覽旅程",
+    intro: "每一段生命塑造旅程都有自己的路徑，選一段最貼近你現況的開始吧。",
+    durationLabel: (days: number) => `${days} 天旅程`,
+    completedReview: "已完成 — 回顧",
+    percentContinue: (pct: number) => `已完成 ${pct}% — 繼續`,
+    start: "開始",
+    empty: "目前還沒有可用的旅程，請稍後再來看看。",
+  },
+  journeyOverview: {
+    durationLabel: (days: number) => `${days} 天生命塑造旅程`,
+    startJourney: "開始旅程",
+  },
+  journeyDay: {
+    dayOf: (day: number, total: number) => `第 ${day} 天（共 ${total} 天）`,
+    gatedHeading: "明天見",
+    gatedBody: "今天就花時間禱告，好好默想你剛讀到的內容。明天回來時，下一步就會開啟。",
+    backToHome: "返回首頁",
+    continue: "繼續",
+    continueTo: (topic: string) => `繼續：${topic}`,
+  },
+  formationLoop: {
+    scripture: "經文",
+    message: "信息",
+    explore: "探索",
+    reflect: "反思",
+    pray: "禱告",
+    nextStep: "下一步",
+    engage: "參與",
+  },
+  connectPage: {
+    backToHome: "首頁",
+    heading: "連結",
+    subheading: "我有歸屬。",
+    prayerRoomTitle: "禱告室",
+    prayerRoomDescription: "禱告、扶持，也讓別人為你禱告。",
+    churchesTitle: "教會",
+    churchesDescription: "尋找當地教會，與教會群體建立連結。",
+    askPdTitle: "Ask PD",
+    askPdDescription: "傳訊息給 Deniss 牧師和團隊，或預約通話。",
+    companionTitle: "Leap 同行者",
+    companionDescription: "尋求幫助、代禱，或找到你的下一步。",
+  },
+  churches: {
+    backToChurches: "返回教會列表",
+    backToConnect: "連結",
+    notFound: "找不到這間教會的資料。",
+    leadPastor: (name: string) => `主任牧師：${name}`,
+    service: (time: string) => `聚會時間：${time}`,
+    members: (n: number) => `約 ${n} 位會友`,
+    heading: "教會",
+    intro: "尋找當地教會，與教會群體建立連結。",
+    empty: "目前還沒有列出任何教會，請稍後再來看看。",
+    serviceTimeNotListed: "未提供聚會時間",
+  },
+  hubCard: {
+    comingSoon: "即將推出",
+  },
+};

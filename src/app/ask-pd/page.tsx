@@ -14,6 +14,7 @@ import {
   type AskPdStatus,
 } from "@/lib/supabase/ask-pd";
 import { getLocale } from "@/lib/i18n/get-locale";
+import { wordSpace } from "@/lib/i18n/format";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { createAskPdRequest } from "./actions";
 
@@ -52,6 +53,7 @@ export default async function AskPdPage(props: PageProps<"/ask-pd">) {
   ]);
 
   const locale = await getLocale();
+  const sp = wordSpace(await getLocale());
   const dict = getDictionary(locale);
   const t = dict.engage.askPd;
   const errors: Record<string, string> = t.errors;
@@ -74,7 +76,7 @@ export default async function AskPdPage(props: PageProps<"/ask-pd">) {
           {t.intro}
         </p>
         <p className="text-xs text-muted-foreground">
-          {t.emergencyBefore}{" "}
+          {t.emergencyBefore}{sp}
           <a
             href="https://findahelpline.com"
             target="_blank"

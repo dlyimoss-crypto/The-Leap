@@ -227,7 +227,7 @@ function ChapterView({
           <p key={verse.number}>
             <Link
               href={bibleHref({ ref: `${book} ${chapter}:${verse.number}` })}
-              className="mr-1 align-super text-xs font-semibold text-primary"
+              className="me-1 align-super text-xs font-semibold text-primary"
             >
               {verse.number}
             </Link>
@@ -280,7 +280,7 @@ function PassageView({
 
   return (
     <div className="space-y-3 rounded-xl border bg-card p-4">
-      <blockquote className="space-y-1 border-l-2 border-primary/30 pl-3">
+      <blockquote className="space-y-1 border-s-2 border-primary/30 ps-3">
         <p className="text-foreground italic">
           {passage.text || dict.verseNotInBsb}
         </p>

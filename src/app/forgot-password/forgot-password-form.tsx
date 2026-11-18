@@ -38,7 +38,7 @@ export function ForgotPasswordForm({
       ) : (
         <>
           <p className="text-sm text-muted-foreground">{dict.resetIntro}</p>
-          <form action={formAction} className="w-full text-left">
+          <form action={formAction} className="w-full text-start">
             <FieldGroup>
               {linkInvalid && !state.error && (
                 <FieldError>{dict.resetLinkInvalid}</FieldError>

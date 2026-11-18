@@ -92,7 +92,7 @@ export function PostCard({
           <MessageCircle className="size-3.5" /> {post.commentCount}
         </Button>
         {!isOwn && (
-          <div className="ml-auto flex gap-1">
+          <div className="ms-auto flex gap-1">
             <form action={reportPost.bind(null, post.id)}>
               <Button type="submit" size="xs" variant="ghost">
                 {dict.report}

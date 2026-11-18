@@ -7,9 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-karla);
+  --font-sans: var(--font-karla), var(--font-cjk, sans-serif);
   --font-mono: var(--font-jetbrains-mono);
-  --font-heading: var(--font-sora);
+  --font-heading: var(--font-sora), var(--font-cjk, sans-serif);
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
   --color-gold: var(--gold);
@@ -176,6 +176,22 @@
 /* For screens that are always dark (welcome), independent of the theme. */
 .leap-backdrop-dark {
   background: var(--leap-backdrop);
+}
+
+/* Chinese: Sora/Karla have no CJK glyphs, so name system fonts with the
+   right glyph forms for each script (no multi-MB web-font download), and
+   drop the negative letter-spacing that crowds Chinese characters. */
+html:lang(zh-CN) {
+  --font-cjk: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    "Noto Sans CJK SC", "Noto Sans SC", sans-serif;
+}
+html:lang(zh-TW) {
+  --font-cjk: "PingFang TC", "Microsoft JhengHei", "Noto Sans CJK TC",
+    "Noto Sans TC", sans-serif;
+}
+html:lang(zh-CN) .tracking-tight,
+html:lang(zh-TW) .tracking-tight {
+  letter-spacing: 0;
 }
 
 @layer base {

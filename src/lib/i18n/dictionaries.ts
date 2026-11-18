@@ -11,6 +11,11 @@
 import { DEFAULT_LOCALE, LOCALES, type Locale } from "./locales";
 import { en } from "./messages/en";
 import { sw } from "./messages/sw";
+import { de } from "./messages/de";
+import { fr } from "./messages/fr";
+import { es } from "./messages/es";
+import { zhCN } from "./messages/zh-CN";
+import { zhTW } from "./messages/zh-TW";
 
 export type { Locale };
 
@@ -166,7 +171,15 @@ export type CoreMessages = {
  */
 export type Dictionary = typeof en;
 
-export const dictionaries: Partial<Record<Locale, Dictionary>> = { en, sw };
+export const dictionaries: Partial<Record<Locale, Dictionary>> = {
+  en,
+  sw,
+  de,
+  fr,
+  es,
+  "zh-CN": zhCN,
+  "zh-TW": zhTW,
+};
 
 /** Languages users can pick today, in registry order. */
 export const ENABLED_LOCALES: readonly Locale[] = LOCALES.filter(

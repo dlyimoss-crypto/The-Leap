@@ -61,7 +61,7 @@ export function CompanionLauncher({
               key={slug}
               href={`/companion?intent=${slug}`}
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-left text-sm hover:bg-muted"
+              className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-start text-sm hover:bg-muted"
             >
               <Icon className="size-4 text-primary" />
               {dict.intents[slug] ?? label}
@@ -74,7 +74,7 @@ export function CompanionLauncher({
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-label={dict.openAriaLabel}
-        className="fixed right-4 bottom-20 z-40 flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg hover:bg-primary/90"
+        className="fixed end-4 bottom-20 z-40 flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg hover:bg-primary/90"
       >
         <Sparkles className="size-4" />
         {dict.button}

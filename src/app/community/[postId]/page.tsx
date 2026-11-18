@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
 import { getLocale } from "@/lib/i18n/get-locale";
+import { wordSpace } from "@/lib/i18n/format";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { addComment } from "../actions";
 
@@ -32,6 +33,7 @@ export default async function PostDetailPage(
 
   const { supabase, user } = await requireUser();
   const t = getDictionary(await getLocale()).community;
+  const sp = wordSpace(await getLocale());
 
   const [{ data: post }, { data: comments }, { data: blocks }] =
     await Promise.all([
@@ -76,7 +78,7 @@ export default async function PostDetailPage(
 
       {showCrisisBanner && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-foreground">
-          {t.crisisBanner.intro}{" "}
+          {t.crisisBanner.intro}{sp}
           <a
             href="https://findahelpline.com"
             target="_blank"
@@ -84,7 +86,7 @@ export default async function PostDetailPage(
             className="font-semibold text-destructive underline"
           >
             {t.crisisBanner.findSupportLink}
-          </a>{" "}
+          </a>{sp}
           {t.crisisBanner.outro}
         </div>
       )}

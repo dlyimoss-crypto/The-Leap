@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 
 function parseCategories(raw: string): string[] {
   return raw
-    .split(",")
+    .split(/[,，、]/)
     .map((c) => c.trim())
     .filter(Boolean);
 }

@@ -7,6 +7,7 @@ import {
   type AskPdRequest,
 } from "@/lib/supabase/ask-pd";
 import { getLocale } from "@/lib/i18n/get-locale";
+import { wordSpace } from "@/lib/i18n/format";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 
 const CONTACT_ICONS = { whatsapp: MessageCircle, phone: Phone, video: Video };
@@ -64,12 +65,12 @@ export async function AskPdMessages({
         return (
           <div
             key={m.id}
-            className={mine ? "ml-auto max-w-[85%] space-y-1" : "mr-auto max-w-[85%] space-y-1"}
+            className={mine ? "ms-auto max-w-[85%] space-y-1" : "me-auto max-w-[85%] space-y-1"}
           >
             <p
               className={
                 mine
-                  ? "text-right text-[11px] text-muted-foreground"
+                  ? "text-end text-[11px] text-muted-foreground"
                   : "text-[11px] text-muted-foreground"
               }
             >
@@ -119,9 +120,10 @@ export async function ReplyForm({
 
 export async function CrisisNotice() {
   const t = getDictionary(await getLocale()).engage.askPd.thread;
+  const sp = wordSpace(await getLocale());
   return (
     <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-foreground">
-      {t.crisisBefore}{" "}
+      {t.crisisBefore}{sp}
       <a
         href="https://findahelpline.com"
         target="_blank"
@@ -129,7 +131,7 @@ export async function CrisisNotice() {
         className="font-semibold text-destructive underline"
       >
         {t.crisisLink}
-      </a>{" "}
+      </a>{sp}
       {t.crisisAfter}
     </div>
   );

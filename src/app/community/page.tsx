@@ -4,6 +4,7 @@ import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
 import { getCommunityPrompt } from "@/lib/content/community-prompt";
 import { getLocale } from "@/lib/i18n/get-locale";
+import { wordSpace } from "@/lib/i18n/format";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { Composer } from "./composer";
 import { PostCard, type PostRow } from "./post-card";
@@ -26,6 +27,7 @@ export default async function CommunityPage(
 
   const { supabase, user } = await requireUser();
   const dict = getDictionary(await getLocale());
+  const sp = wordSpace(await getLocale());
   const t = dict.community;
 
   const today = new Date().toISOString().slice(0, 10);
@@ -96,7 +98,7 @@ export default async function CommunityPage(
 
       {showCrisisBanner && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-foreground">
-          {t.crisisBanner.intro}{" "}
+          {t.crisisBanner.intro}{sp}
           <a
             href="https://findahelpline.com"
             target="_blank"
@@ -104,7 +106,7 @@ export default async function CommunityPage(
             className="font-semibold text-destructive underline"
           >
             {t.crisisBanner.findSupportLink}
-          </a>{" "}
+          </a>{sp}
           {t.crisisBanner.outro}
         </div>
       )}

@@ -12,6 +12,7 @@ import {
 import { requireUser } from "@/lib/supabase/authorize";
 import { askPdStatusLabel, getAskPdThread } from "@/lib/supabase/ask-pd";
 import { getLocale } from "@/lib/i18n/get-locale";
+import { wordSpace } from "@/lib/i18n/format";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { replyAsUser } from "../actions";
 
@@ -38,6 +39,7 @@ export default async function AskPdThreadPage(
   }
 
   const t = getDictionary(await getLocale()).engage.askPd;
+  const sp = wordSpace(await getLocale());
 
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-4 overflow-hidden px-6 py-10">
@@ -70,10 +72,10 @@ export default async function AskPdThreadPage(
 
       {request.status === "closed" ? (
         <p className="rounded-lg bg-muted p-3 text-center text-sm text-muted-foreground">
-          {t.thread.closed}{" "}
+          {t.thread.closed}{sp}
           <Link href="/ask-pd" className="font-medium text-primary underline">
             {t.thread.startNewOne}
-          </Link>{" "}
+          </Link>{sp}
           {t.thread.anyTime}
         </p>
       ) : (

@@ -90,7 +90,7 @@ export function PrayerMovementCard({
         </span>
         <form
           action={joinPrayerMovement.bind(null, movement.id)}
-          className="ml-auto"
+          className="ms-auto"
         >
           <Button
             type="submit"

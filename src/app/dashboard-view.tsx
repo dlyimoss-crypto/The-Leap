@@ -76,7 +76,7 @@ function JourneyProgressBar({
     <div className="space-y-2">
       <div className="relative h-1.5 w-full rounded-full bg-card">
         <div
-          className="absolute inset-y-0 left-0 rounded-full bg-primary transition-[width]"
+          className="absolute inset-y-0 start-0 rounded-full bg-primary transition-[width]"
           style={{ width: `${percentComplete}%` }}
         />
         <div
@@ -281,7 +281,7 @@ export function DashboardView({
 
           <div className="space-y-2">
             <div className="relative h-1.5 w-full rounded-full bg-primary">
-              <div className="absolute top-1/2 right-0 size-3 -translate-y-1/2 translate-x-1/2 rounded-full border-2 border-background bg-primary shadow-sm" />
+              <div className="absolute top-1/2 end-0 size-3 -translate-y-1/2 translate-x-1/2 rounded-full border-2 border-background bg-primary shadow-sm" />
             </div>
             <div className="flex items-center justify-between text-[11px] font-medium text-muted-foreground">
               <span>{dict.dashboard.percentComplete(100)}</span>
@@ -360,7 +360,7 @@ export function DashboardView({
             className="relative flex flex-col items-center gap-1.5 rounded-xl border bg-card p-4 text-center hover:bg-muted/50"
           >
             {devotionUnread && (
-              <span className="absolute top-2 right-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">
+              <span className="absolute top-2 end-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">
                 {dict.dashboard.devotionNew}
               </span>
             )}

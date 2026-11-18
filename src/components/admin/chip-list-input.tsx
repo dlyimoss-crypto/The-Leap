@@ -52,7 +52,7 @@ export function ChipListInput({
           {items.map((item, i) => (
             <li
               key={item}
-              className="flex items-center gap-1 rounded-full bg-muted py-1 pr-1 pl-3 text-xs"
+              className="flex items-center gap-1 rounded-full bg-muted py-1 pe-1 ps-3 text-xs"
             >
               <span>{item}</span>
               <button

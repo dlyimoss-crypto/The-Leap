@@ -7,6 +7,7 @@ import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
 import { getCompanionIntent } from "@/lib/companion-intents";
 import { getLocale } from "@/lib/i18n/get-locale";
+import { wordSpace } from "@/lib/i18n/format";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { clearConversation, sendMessage } from "./actions";
 
@@ -76,6 +77,7 @@ export default async function CompanionPage(
   }
 
   const t = getDictionary(await getLocale()).engage.companion;
+  const sp = wordSpace(await getLocale());
   const intentMessage = intent ? t.intentMessages[intent.slug] : undefined;
 
   return (
@@ -89,17 +91,17 @@ export default async function CompanionPage(
           nativeButton={false}
           size="sm"
           variant="outline"
-          className="ml-auto rounded-full"
+          className="ms-auto rounded-full"
         >
           <UserRound className="size-4" />
           {t.askPd}
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">
-        {t.introBefore}{" "}
+        {t.introBefore}{sp}
         <Link href="/ask-pd?from=companion" className="font-medium text-primary underline">
           {t.askPd}
-        </Link>{" "}
+        </Link>{sp}
         {t.introAfter}
       </p>
 
@@ -138,7 +140,7 @@ export default async function CompanionPage(
 
       {showCrisisBanner && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-foreground">
-          {t.crisisBefore}{" "}
+          {t.crisisBefore}{sp}
           <a
             href="https://findahelpline.com"
             target="_blank"
@@ -146,7 +148,7 @@ export default async function CompanionPage(
             className="font-semibold text-destructive underline"
           >
             {t.crisisLink}
-          </a>{" "}
+          </a>{sp}
           {t.crisisAfter}
         </div>
       )}
@@ -166,7 +168,7 @@ export default async function CompanionPage(
                     <input type="hidden" name="message" value={label} />
                     <button
                       type="submit"
-                      className="flex w-full items-center gap-2 rounded-xl border bg-card px-3 py-2.5 text-left text-sm hover:bg-muted"
+                      className="flex w-full items-center gap-2 rounded-xl border bg-card px-3 py-2.5 text-start text-sm hover:bg-muted"
                     >
                       <Icon className="size-4 text-primary" />
                       {label}
@@ -182,8 +184,8 @@ export default async function CompanionPage(
             key={message.id}
             className={
               message.role === "user"
-                ? "ml-auto max-w-[85%] whitespace-pre-wrap rounded-xl bg-primary px-3 py-2 text-sm text-primary-foreground"
-                : "mr-auto max-w-[85%] whitespace-pre-wrap rounded-xl border bg-card px-3 py-2 text-sm"
+                ? "ms-auto max-w-[85%] whitespace-pre-wrap rounded-xl bg-primary px-3 py-2 text-sm text-primary-foreground"
+                : "me-auto max-w-[85%] whitespace-pre-wrap rounded-xl border bg-card px-3 py-2 text-sm"
             }
           >
             {renderMessageContent(message.content, t.askPd)}

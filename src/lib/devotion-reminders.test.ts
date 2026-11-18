@@ -57,9 +57,14 @@ describe("reminderTitle", () => {
     expect(reminderTitle("sw")).toBe("Ibada ya leo iko tayari");
   });
 
-  it("falls back to English for a missing or not-yet-enabled language", () => {
+  it("falls back to English for a missing or unsupported language", () => {
     expect(reminderTitle(null)).toBe("Today's devotion is ready");
-    expect(reminderTitle("de")).toBe("Today's devotion is ready");
+    expect(reminderTitle("zh")).toBe("Today's devotion is ready");
     expect(reminderTitle("xx")).toBe("Today's devotion is ready");
+  });
+
+  it("uses each enabled language", () => {
+    expect(reminderTitle("de")).not.toBe("Today's devotion is ready");
+    expect(reminderTitle("zh-TW")).not.toBe(reminderTitle("zh-CN"));
   });
 });

@@ -68,3 +68,12 @@ function toDate(date: Date | string | number): Date {
   }
   return new Date(date);
 }
+
+/**
+ * The space between a sentence and a link inside it. Chinese runs words
+ * together, so stitching "intro" + link + "outro" with a hard-coded " "
+ * would leave stray gaps there.
+ */
+export function wordSpace(locale: Locale | string): string {
+  return locale.startsWith("zh") ? "" : " ";
+}

@@ -124,7 +124,7 @@ export function BottomNav({
               <span className="relative inline-flex">
                 <Icon className="size-5" strokeWidth={active ? 2.5 : 2} />
                 {badge > 0 && (
-                  <span className="absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-semibold leading-none text-white">
+                  <span className="absolute -top-1.5 -end-2 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[9px] font-semibold leading-none text-white">
                     {badge > 99 ? "99+" : badge}
                   </span>
                 )}

@@ -645,7 +645,7 @@ async function UsersList() {
       <div className="overflow-hidden rounded-xl border bg-card">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b text-left text-xs text-muted-foreground">
+            <tr className="border-b text-start text-xs text-muted-foreground">
               <th className="p-3 font-normal">{t.users.name}</th>
               <th className="p-3 font-normal">{t.users.status}</th>
               <th className="p-3"></th>
@@ -690,7 +690,7 @@ async function UsersList() {
                     {p.role === "pastor" && <Badge>{t.users.pdTeam}</Badge>}
                   </div>
                 </td>
-                <td className="p-3 text-right">
+                <td className="p-3 text-end">
                   <div className="flex flex-col items-end gap-1.5">
                   {p.role !== "admin" && !p.is_banned && (
                     <form action={setPdTeamMember.bind(null, p.id, p.role !== "pastor")}>

@@ -4,6 +4,7 @@ import { BackLink } from "@/components/back-link";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
 import { getLocale } from "@/lib/i18n/get-locale";
+import { wordSpace } from "@/lib/i18n/format";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import {
   getActiveAnnouncementCached,
@@ -46,6 +47,7 @@ export default async function PrayerRoomPage(
 
   const { supabase, user } = await requireUser();
   const locale = await getLocale();
+  const sp = wordSpace(await getLocale());
   const dict = getDictionary(locale);
   const t = dict.community;
 
@@ -149,7 +151,7 @@ export default async function PrayerRoomPage(
 
       {showCrisisBanner && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-foreground">
-          {t.crisisBanner.intro}{" "}
+          {t.crisisBanner.intro}{sp}
           <a
             href="https://findahelpline.com"
             target="_blank"
@@ -157,7 +159,7 @@ export default async function PrayerRoomPage(
             className="font-semibold text-destructive underline"
           >
             {t.crisisBanner.findSupportLink}
-          </a>{" "}
+          </a>{sp}
           {t.crisisBanner.outro}
         </div>
       )}

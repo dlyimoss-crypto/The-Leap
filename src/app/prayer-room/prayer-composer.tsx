@@ -78,7 +78,7 @@ export function PrayerComposer({
         <Button
           type="submit"
           size="icon"
-          className="ml-auto rounded-full"
+          className="ms-auto rounded-full"
           aria-label={dict.submitAriaLabel}
         >
           <Send className="size-4" />

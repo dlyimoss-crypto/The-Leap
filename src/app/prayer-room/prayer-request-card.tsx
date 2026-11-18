@@ -94,7 +94,7 @@ export function PrayerRequestCard({
           <Heart className="size-4 fill-primary/20 text-primary" />
           {request.prayedCount}
         </span>
-        <form action={prayForRequest.bind(null, request.id)} className="ml-auto">
+        <form action={prayForRequest.bind(null, request.id)} className="ms-auto">
           <Button
             type="submit"
             size="sm"

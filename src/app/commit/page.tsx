@@ -93,7 +93,7 @@ export default async function CommitPage() {
                 >
                   <button
                     type="submit"
-                    className="flex w-full items-center gap-3 p-3 text-left hover:bg-muted/50"
+                    className="flex w-full items-center gap-3 p-3 text-start hover:bg-muted/50"
                   >
                     {checked ? (
                       <CheckCircle2 className="size-5 shrink-0 text-primary" />

@@ -104,7 +104,7 @@ export function EpubFrame({
             variant="ghost"
             size="icon"
             aria-label={dict.previousPage}
-            className="absolute top-1/2 left-1 -translate-y-1/2"
+            className="absolute top-1/2 start-1 -translate-y-1/2"
             onClick={() => renditionRef.current?.prev()}
           >
             <ChevronLeft className="size-5" />
@@ -113,7 +113,7 @@ export function EpubFrame({
             variant="ghost"
             size="icon"
             aria-label={dict.nextPage}
-            className="absolute top-1/2 right-1 -translate-y-1/2"
+            className="absolute top-1/2 end-1 -translate-y-1/2"
             onClick={() => renditionRef.current?.next()}
           >
             <ChevronRight className="size-5" />
