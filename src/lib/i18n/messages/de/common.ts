@@ -1,6 +1,7 @@
 import type { CommonMessages } from "../en/common";
 
 export const common: CommonMessages = {
+  notTranslated: "Noch nicht auf Deutsch verfügbar. Hier ist das englische Original.",
   themeToggle: {
     toLight: "Zum hellen Modus wechseln",
     toDark: "Zum dunklen Modus wechseln",

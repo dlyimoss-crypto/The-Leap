@@ -1,6 +1,7 @@
 import type { CommonMessages } from "../en/common";
 
 export const common: CommonMessages = {
+  notTranslated: "Bado haipatikani kwa Kiswahili. Inaonyeshwa kwa Kiingereza asilia.",
   themeToggle: {
     toLight: "Badili kwenda mwonekano wa mwanga",
     toDark: "Badili kwenda mwonekano wa giza",

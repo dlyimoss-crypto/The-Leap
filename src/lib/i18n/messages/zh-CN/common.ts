@@ -1,6 +1,7 @@
 import type { CommonMessages } from "../en/common";
 
 export const common: CommonMessages = {
+  notTranslated: "暂无中文版本，以下为英文原文。",
   themeToggle: {
     toLight: "切换到浅色模式",
     toDark: "切换到深色模式",

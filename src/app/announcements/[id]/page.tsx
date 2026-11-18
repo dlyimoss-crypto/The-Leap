@@ -13,6 +13,8 @@ import {
 } from "@/lib/supabase/announcements";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { localizeRow } from "@/lib/localization/content";
+import { TranslationNotice } from "@/components/language/translation-notice";
 
 // The full view of a News / Event / Advert / General announcement, opened
 // from its Home banner. RLS only exposes active announcements to members
@@ -23,19 +25,20 @@ export default async function AnnouncementPage(
   const { id } = await props.params;
   const { supabase } = await requireUser();
 
-  const { data: announcement } = await supabase
+  const { data: source } = await supabase
     .from("prayer_movements")
     .select(ANNOUNCEMENT_COLUMNS)
     .eq("id", id)
     .maybeSingle<Announcement>();
 
-  if (announcement?.kind === "prayer") {
+  if (source?.kind === "prayer") {
     redirect("/prayer-room");
   }
 
   const locale = await getLocale();
   const dict = getDictionary(locale);
   const t = dict.community.announcement;
+  const announcement = await localizeRow(supabase, "announcement", source, locale);
 
   if (!announcement) {
     return (
@@ -69,11 +72,13 @@ export default async function AnnouncementPage(
           />
         )}
 
+        <TranslationNotice servedLocale={announcement.servedLocale} />
+
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-wide text-primary">
             {dict.dashboard.announcementKinds[announcement.kind]}
           </p>
-          <h1 className="font-heading text-2xl font-semibold text-balance">
+          <h1 lang={announcement.servedLocale} className="font-heading text-2xl font-semibold text-balance">
             {announcement.title}
           </h1>
         </div>
@@ -86,7 +91,7 @@ export default async function AnnouncementPage(
         )}
 
         {announcement.body && (
-          <p className="whitespace-pre-line leading-relaxed">
+          <p lang={announcement.servedLocale} className="whitespace-pre-line leading-relaxed">
             {announcement.body}
           </p>
         )}

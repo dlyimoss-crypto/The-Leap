@@ -53,7 +53,7 @@ export default async function PrayerRoomPage(
 
   // Only a prayer announcement belongs in the Prayer Room — news, events
   // and adverts show on Home alone.
-  const activeAnnouncement = await getActiveAnnouncementCached();
+  const activeAnnouncement = await getActiveAnnouncementCached(locale);
   const activeMovement =
     activeAnnouncement?.kind === "prayer" ? activeAnnouncement : null;
   const movementParticipation = activeMovement

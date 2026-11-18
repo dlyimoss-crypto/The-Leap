@@ -6,6 +6,8 @@
 // plain strings (see ../../format.ts for interpolate/plural helpers).
 
 export const common = {
+  /** Shown above devotions/journeys/announcements with no published translation yet. */
+  notTranslated: "Not yet translated. Showing the English original.",
   themeToggle: {
     toLight: "Switch to light mode",
     toDark: "Switch to dark mode",

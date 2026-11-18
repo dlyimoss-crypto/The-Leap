@@ -88,13 +88,31 @@ export async function POST(request: Request) {
     (profiles ?? []).map((p) => [p.id, p.preferred_language]),
   );
 
-  // The body is the devotion's own title (content), so it isn't translated.
-  const payloadFor = (userId: string) =>
-    JSON.stringify({
-      title: reminderTitle(languageByUser.get(userId)),
-      body: devotion.title,
+  // The body is the devotion's own title: its published translation in the
+  // recipient's language when there is one, otherwise the English title.
+  // (This is the admin client, so RLS doesn't filter drafts — the explicit
+  // status filter does.)
+  const { data: translatedTitles, error: titlesError } = await supabase
+    .from("devotion_localizations")
+    .select("locale, title")
+    .eq("devotion_id", devotion.id)
+    .eq("status", "published")
+    .returns<{ locale: string; title: string | null }[]>();
+  if (titlesError) {
+    console.error("Failed to load devotion title translations", titlesError);
+  }
+  const titleByLocale = new Map(
+    (translatedTitles ?? []).flatMap((t) => (t.title ? [[t.locale, t.title]] : [])),
+  );
+
+  const payloadFor = (userId: string) => {
+    const language = languageByUser.get(userId);
+    return JSON.stringify({
+      title: reminderTitle(language),
+      body: (language && titleByLocale.get(language)) || devotion.title,
       url: "/evolve/devotion",
     });
+  };
 
   let sent = 0;
   let skipped = 0;

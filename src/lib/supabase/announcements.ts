@@ -9,6 +9,8 @@ import { unstable_cache } from "next/cache";
 // prayer movement.
 import type { AnnouncementKind } from "@/lib/announcement-kinds";
 import { formatDate } from "@/lib/i18n/format";
+import type { Locale } from "@/lib/i18n/locales";
+import { localizeRow } from "@/lib/localization/content";
 
 export {
   ANNOUNCEMENT_KINDS,
@@ -31,6 +33,8 @@ export type Announcement = {
   prayer_points: string[];
   created_at: string;
   active_until: string | null;
+  /** Language the text is in: "en" when no published translation exists. */
+  servedLocale?: Locale;
 };
 
 export const ANNOUNCEMENT_COLUMNS =
@@ -45,6 +49,7 @@ export const ANNOUNCEMENT_IMAGE_BUCKET = "announcement-images";
 // admin has to re-activate it (with a fresh day count) to bring it back.
 export async function getActiveAnnouncement(
   supabase: SupabaseClient,
+  locale: Locale = "en",
 ): Promise<Announcement | null> {
   const today = new Date().toISOString().slice(0, 10);
 
@@ -61,7 +66,7 @@ export async function getActiveAnnouncement(
     console.error("Failed to load active announcement", error);
   }
 
-  return data ?? null;
+  return localizeRow(supabase, "announcement", data ?? null, locale);
 }
 
 // "active prayer movements are publicly readable" (migration 0023) — this
@@ -80,7 +85,8 @@ function publicAnnouncementsClient() {
 }
 
 export const getActiveAnnouncementCached = unstable_cache(
-  async () => getActiveAnnouncement(publicAnnouncementsClient()),
+  async (locale: Locale = "en") =>
+    getActiveAnnouncement(publicAnnouncementsClient(), locale),
   ["active-announcement"],
   { tags: ["announcement"], revalidate: 60 },
 );

@@ -1,3 +1,4 @@
+import { TranslationNotice } from "@/components/language/translation-notice";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -19,13 +20,14 @@ export default async function JourneySessionPage(
   const dayNumber = Number(day);
 
   const { supabase, user } = await requireUser();
-  const dict = getDictionary(await getLocale()).commit;
+  const locale = await getLocale();
+  const dict = getDictionary(locale).commit;
   const t = dict.journeyDay;
   const loop = dict.formationLoop;
 
   const [journey, session] = await Promise.all([
-    findJourneyMeta(supabase, slug),
-    findJourneySession(supabase, slug, dayNumber),
+    findJourneyMeta(supabase, slug, locale),
+    findJourneySession(supabase, slug, dayNumber, locale),
   ]);
 
   if (!journey || !session) {
@@ -65,12 +67,13 @@ export default async function JourneySessionPage(
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-6 overflow-hidden px-6 py-10">
       <PatternBorder />
       <div className="space-y-3">
+        <TranslationNotice servedLocale={session.servedLocale} />
         <Progress value={(dayNumber / journey.durationDays) * 100} />
         <p className="text-sm text-muted-foreground">
           {t.dayOf(session.day, journey.durationDays)} &middot;{" "}
           {journey.title}
         </p>
-        <h1 className="text-2xl font-heading font-semibold text-balance">
+        <h1 lang={session.servedLocale} className="text-2xl font-heading font-semibold text-balance">
           {session.title}
         </h1>
       </div>
@@ -112,10 +115,12 @@ export default async function JourneySessionPage(
             </div>
           )}
         </div>
-        <Step label={loop.message}>{session.message}</Step>
-        <Step label={loop.explore}>{session.explore}</Step>
-        <Step label={loop.reflect}>{session.reflect}</Step>
-        {session.pray && <Step label={loop.pray}>{session.pray}</Step>}
+        <Step label={loop.message} lang={session.servedLocale}>{session.message}</Step>
+        <Step label={loop.explore} lang={session.servedLocale}>{session.explore}</Step>
+        <Step label={loop.reflect} lang={session.servedLocale}>{session.reflect}</Step>
+        {session.pray && (
+          <Step label={loop.pray} lang={session.servedLocale}>{session.pray}</Step>
+        )}
       </div>
 
       {isLastDay && (

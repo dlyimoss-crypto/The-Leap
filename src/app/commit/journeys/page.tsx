@@ -14,10 +14,11 @@ type ProgressBySlugRow = JourneyProgressRow & { journey_slug: string };
 
 export default async function BrowseJourneysPage() {
   const { supabase, user } = await requireUser();
-  const t = getDictionary(await getLocale()).commit.browseJourneys;
+  const locale = await getLocale();
+  const t = getDictionary(locale).commit.browseJourneys;
 
   const [journeys, { data: progressRows }] = await Promise.all([
-    findAvailableJourneys(supabase),
+    findAvailableJourneys(supabase, locale),
     supabase
       .from("journey_progress")
       .select("journey_slug, current_session_number, completed_at")

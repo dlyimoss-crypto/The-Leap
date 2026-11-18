@@ -61,9 +61,10 @@ async function HomeContent({
   // concurrently with those instead of waiting for all of them to finish
   // first. Every serial round trip here is a few hundred ms on top of the
   // two Supabase Auth calls (middleware + getAuthedUser) already paid above.
+  const locale = await getLocale();
   const journeyState = getCurrentJourneyState(supabase, user.id);
   const journeyMeta = journeyState.then(({ journeySlug }) =>
-    findJourneyMetaCached(journeySlug),
+    findJourneyMetaCached(journeySlug, locale),
   );
 
   const [
@@ -82,7 +83,7 @@ async function HomeContent({
         .eq("id", user.id)
         .single(),
       getActiveCommitment(supabase, user.id),
-      getActiveAnnouncementCached(),
+      getActiveAnnouncementCached(locale),
       journeyMeta,
       isTodaysDevotionUnread(supabase),
       countUserUnreadAskPd(supabase, user.id),
@@ -92,7 +93,6 @@ async function HomeContent({
     return <WelcomeView />;
   }
 
-  const locale = await getLocale();
   const dict = getDictionary(locale);
 
   // Only needed to power the completed-state "recommended next journey" card
@@ -104,7 +104,7 @@ async function HomeContent({
     teaser?: string | null;
   } | null = null;
   if (progress?.completed_at) {
-    const available = await findAvailableJourneysCached();
+    const available = await findAvailableJourneysCached(locale);
     const match = available.find((j) => j.slug !== journeySlug) ?? null;
     nextJourney = match
       ? {

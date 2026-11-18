@@ -7,6 +7,8 @@ import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary, type Locale } from "@/lib/i18n/dictionaries";
 import { formatDate } from "@/lib/i18n/format";
 import { DevotionReminder } from "./devotion-reminder";
+import { TranslationNotice } from "@/components/language/translation-notice";
+import { localizeRow, localizeRows } from "@/lib/localization/content";
 
 type DevotionRow = {
   id: string;
@@ -131,7 +133,12 @@ export default async function DevotionPage(
     .limit(10)
     .returns<DevotionRow[]>();
 
-  const past = pastRows ?? [];
+  // Shown in the reader's language when a published translation exists,
+  // otherwise in English with a notice (see TranslationNotice).
+  const [shown, past] = await Promise.all([
+    localizeRow(supabase, "devotion", featured, locale),
+    localizeRows(supabase, "devotion", pastRows ?? [], locale),
+  ]);
 
   return (
     <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col gap-6 overflow-hidden px-6 py-10">
@@ -160,58 +167,59 @@ export default async function DevotionPage(
             {t.backToToday}
           </Link>
         </div>
-      ) : featured ? (
+      ) : shown ? (
         <div className="space-y-4 rounded-xl border bg-card p-5">
+          <TranslationNotice servedLocale={shown.servedLocale} />
           <div className="space-y-1">
             <p className="font-mono text-xs uppercase tracking-wide text-muted-foreground">
-              {formatDevotionDate(locale, featured.publish_date)}
+              {formatDevotionDate(locale, shown.publish_date)}
             </p>
-            <h2 className="text-xl font-heading font-semibold text-balance">
-              {featured.title}
+            <h2 lang={shown.servedLocale} className="text-xl font-heading font-semibold text-balance">
+              {shown.title}
             </h2>
           </div>
 
-          {featured.scripture_reference && (
+          {shown.scripture_reference && (
             <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
               <p className="text-base font-medium text-primary italic">
-                {featured.scripture_reference}
+                {shown.scripture_reference}
               </p>
             </div>
           )}
 
-          <p className="whitespace-pre-line text-foreground">
-            {featured.body}
+          <p lang={shown.servedLocale} className="whitespace-pre-line text-foreground">
+            {shown.body}
           </p>
 
-          {featured.reflection && (
+          {shown.reflection && (
             <div className="space-y-1">
               <p className="text-base font-semibold uppercase tracking-wide text-primary">
                 {t.reflection}
               </p>
-              <p className="whitespace-pre-line text-foreground">
-                {featured.reflection}
+              <p lang={shown.servedLocale} className="whitespace-pre-line text-foreground">
+                {shown.reflection}
               </p>
             </div>
           )}
 
-          {featured.prayer && (
+          {shown.prayer && (
             <div className="space-y-1">
               <p className="text-base font-semibold uppercase tracking-wide text-primary">
                 {t.prayer}
               </p>
-              <p className="whitespace-pre-line text-foreground">
-                {featured.prayer}
+              <p lang={shown.servedLocale} className="whitespace-pre-line text-foreground">
+                {shown.prayer}
               </p>
             </div>
           )}
 
-          {featured.practice && (
+          {shown.practice && (
             <div className="space-y-1">
               <p className="text-base font-semibold uppercase tracking-wide text-primary">
                 {t.practice}
               </p>
-              <p className="whitespace-pre-line text-foreground">
-                {featured.practice}
+              <p lang={shown.servedLocale} className="whitespace-pre-line text-foreground">
+                {shown.practice}
               </p>
             </div>
           )}
@@ -240,7 +248,7 @@ export default async function DevotionPage(
                   key={d.id}
                   className="flex items-center justify-between gap-3 p-3 text-muted-foreground"
                 >
-                  <span className="truncate text-sm font-medium">
+                  <span lang={d.servedLocale} className="truncate text-sm font-medium">
                     {d.title}
                   </span>
                   <span className="flex shrink-0 items-center gap-1 text-[10.5px]">
@@ -254,7 +262,7 @@ export default async function DevotionPage(
                   href={`/evolve/devotion?id=${d.id}`}
                   className="flex items-center justify-between gap-3 p-3 hover:bg-muted/50"
                 >
-                  <span className="truncate text-sm font-medium">
+                  <span lang={d.servedLocale} className="truncate text-sm font-medium">
                     {d.title}
                   </span>
                   <span className="shrink-0 font-mono text-[10.5px] text-muted-foreground">
