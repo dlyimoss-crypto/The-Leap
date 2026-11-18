@@ -393,6 +393,12 @@ export default async function AdminPage(props: PageProps<"/admin">) {
           {t.page.tabs.announcements}
         </Link>
         <Link
+          href="/admin/translations"
+          className="shrink-0 rounded-t-md px-2 -mx-2 pb-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:shadow-sm"
+        >
+          {t.page.tabs.translations}
+        </Link>
+        <Link
           href="/admin?tab=reports"
           className={
             tab === "reports"

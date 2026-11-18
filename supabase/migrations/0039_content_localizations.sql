@@ -109,6 +109,7 @@ create table public.journey_localizations (
   reviewed_by uuid references public.profiles(id) on delete set null,
   reviewed_at timestamptz,
   review_note text,
+  translator_notes text, -- AI's notes for the reviewer (uncertain terms, Bible quotations)
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (journey_id, locale),
@@ -132,6 +133,7 @@ create table public.journey_day_localizations (
   reviewed_by uuid references public.profiles(id) on delete set null,
   reviewed_at timestamptz,
   review_note text,
+  translator_notes text, -- AI's notes for the reviewer (uncertain terms, Bible quotations)
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (journey_day_id, locale),
@@ -154,6 +156,7 @@ create table public.devotion_localizations (
   reviewed_by uuid references public.profiles(id) on delete set null,
   reviewed_at timestamptz,
   review_note text,
+  translator_notes text, -- AI's notes for the reviewer (uncertain terms, Bible quotations)
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (devotion_id, locale),
@@ -174,6 +177,7 @@ create table public.announcement_localizations (
   reviewed_by uuid references public.profiles(id) on delete set null,
   reviewed_at timestamptz,
   review_note text,
+  translator_notes text, -- AI's notes for the reviewer (uncertain terms, Bible quotations)
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (announcement_id, locale),
