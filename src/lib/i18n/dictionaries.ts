@@ -1,8 +1,17 @@
-// UI-chrome dictionaries — English + Swahili. Deliberately not called
-// "translations": src/lib/content/translations.ts already owns that word
-// for Bible translations (WEB/KJV/ASV).
+// UI-chrome dictionaries, one file per language under ./messages.
+// Deliberately not called "translations": src/lib/content/translations.ts
+// already owns that word for Bible translations (BSB/KJV/ASV).
+//
+// Adding a language: create ./messages/<locale>.ts typed as Dictionary
+// (a missing key is then a compile error, never leaked English) and add
+// it to `dictionaries` below. That alone switches the language on in the
+// picker — see isEnabledLocale.
 
-export type Locale = "en" | "sw";
+import { DEFAULT_LOCALE, LOCALES, type Locale } from "./locales";
+import { en } from "./messages/en";
+import { sw } from "./messages/sw";
+
+export type { Locale };
 
 export type Dictionary = {
   nav: {
@@ -28,8 +37,6 @@ export type Dictionary = {
     displayNameLabel: string;
     save: string;
     language: string;
-    english: string;
-    swahili: string;
     changePhoto: string;
     cancel: string;
     savePhoto: string;
@@ -113,6 +120,20 @@ export type Dictionary = {
     community: string;
     joinTheConversation: string;
   };
+  welcome: {
+    title: string;
+    tagline: string;
+    getStarted: string;
+    haveAccount: string;
+  };
+  language: {
+    /** Picker's accessible label, in the current language. */
+    pickerLabel: string;
+    /** The one-time offer, shown in the *offered* language. */
+    suggest: string;
+    accept: string;
+    decline: string;
+  };
   gospelInvite: {
     heading: string;
     jesusSaid: string;
@@ -137,308 +158,17 @@ export type Dictionary = {
   };
 };
 
-const en: Dictionary = {
-  nav: {
-    home: "Home",
-    connect: "Connect",
-    commit: "Commit",
-    evolve: "Evolve",
-    engage: "Engage",
-    admin: "Admin",
-    inbox: "Inbox",
-  },
-  companion: {
-    menuHeading: "What would you like to do?",
-    close: "Close",
-    openAriaLabel: "Open Leap Companion",
-    button: "Companion",
-    intents: {
-      "new-believer": "I just prayed to receive Jesus",
-      scripture: "Help me understand Scripture",
-      devotion: "Reflect on today's devotion",
-      "next-step": "Help me take my next step",
-      materials: "Get Christian materials",
-    },
-  },
-  profile: {
-    backToHome: "Back to Home",
-    heading: "Profile",
-    subheading: "Update your photo and name.",
-    displayNameLabel: "Display name",
-    save: "Save",
-    language: "Language",
-    english: "English",
-    swahili: "Kiswahili",
-    changePhoto: "Change photo",
-    cancel: "Cancel",
-    savePhoto: "Save photo",
-    saving: "Saving…",
-    zoom: "Zoom",
-    viewPhoto: "View larger photo",
-  },
-  signIn: {
-    back: "Back",
-    welcomeBack: "Welcome back",
-    createAccount: "Create your account",
-    newHere: "New here? Create an account",
-    alreadyHaveAccount: "Already have an account? Sign in",
-    name: "Name",
-    nationality: "Nationality",
-    selectNationality: "Select your country",
-    email: "Email",
-    password: "Password",
-    signInButton: "Sign in",
-    createAccountButton: "Create account",
-    forgotPassword: "Forgot my password",
-    resetTitle: "Reset your password",
-    resetIntro:
-      "Enter the email you signed up with and we'll send you a link to choose a new password.",
-    sendResetLink: "Send reset link",
-    resetLinkSent:
-      "If an account exists for that email, a reset link is on its way. Check your inbox (and spam folder).",
-    resetLinkInvalid:
-      "That reset link is invalid or has expired. Please request a new one.",
-    backToSignIn: "Back to sign in",
-    newPasswordTitle: "Choose a new password",
-    newPassword: "New password",
-    saveNewPassword: "Save new password",
-    checkEmailTitle: "Confirm your email",
-    checkEmailSentTo: "We sent a confirmation link to",
-    checkEmailBody:
-      "Open it to finish setting up your account. Check your spam folder if you don't see it.",
-    resendConfirmation: "Resend confirmation email",
-    confirmationResent: "Sent again. Check your inbox.",
-  },
-  dashboard: {
-    goodMorning: "Good morning",
-    goodAfternoon: "Good afternoon",
-    goodEvening: "Good evening",
-    editProfileAriaLabel: "Edit your profile",
-    tagline: "Take the next step. Grow in Christ. Live His purpose.",
-    signOutAriaLabel: "Sign out",
-    welcomeEyebrow: "Welcome",
-    beginJourneyHeading: "Let's begin your journey",
-    beginMyJourney: "Begin my journey",
-    continueYourJourneyEyebrow: "Continue Your Journey",
-    dayOf: (current, total) => `Day ${current} of ${total}`,
-    continueTheJourney: "Continue the journey",
-    nextLeapEyebrow: "Next Leap",
-    journeyCompleteEyebrow: "Journey Complete",
-    welcomeToNextLeap: "Welcome to the Next Leap",
-    onlyBeginning:
-      "You've begun the journey of following Christ. This is only the beginning.",
-    percentComplete: (pct) => `${pct}% complete`,
-    done: "Done",
-    daysLeft: (n) => `${n} day${n === 1 ? "" : "s"} left`,
-    continueButton: "Continue",
-    browseOtherJourneys: "Browse other journeys",
-    prayerDaysLeft: (n) => `${n} day${n === 1 ? "" : "s"} left — tap to pray`,
-    tapToPray: "Tap to pray",
-    tapToRead: "Tap to read more",
-    askPdReplied: "Pastor Deniss replied to you",
-    daysLeftShort: (n) => `${n} day${n === 1 ? "" : "s"} left`,
-    announcementKinds: {
-      prayer: "Prayer",
-      news: "News",
-      event: "Event",
-      advert: "Featured",
-      general: "Announcement",
-    },
-    today: "Today",
-    scripture: "Scripture",
-    readGodsWord: "Read God's Word",
-    devotion: "Devotion",
-    growDaily: "Grow daily",
-    devotionNew: "New today",
-    thisWeeksCommitment: "This week's commitment",
-    makeACommitment: "Make a commitment",
-    keptThisWeek: (done, total) => `${done} of ${total} kept this week`,
-    studyPrayShare: "Study, pray, and share the gospel this week.",
-    community: "Community",
-    joinTheConversation: "Encourage, share, and grow together.",
-  },
-  gospelInvite: {
-    heading: "Do You Know Jesus?",
-    jesusSaid: "Jesus said:",
-    scriptureQuote: "I am the way, the truth, and the life.",
-    scriptureRef: "John 14:6",
-    intro:
-      "If you're ready to begin a relationship with Jesus, you can start with a simple prayer.",
-    prayerLabel: "A Simple Prayer",
-    prayerText:
-      "Lord Jesus, I believe You are the Son of God. I ask You to forgive my sins and come into my heart. I receive You as my Lord and Savior. Thank You for eternal life. In Jesus' name, Amen.",
-    prayedButton: "I Prayed This Prayer",
-    maybeLater: "Maybe Later",
-    close: "Close",
-    beganHeading: "Your Journey Has Begun",
-    beganSubheading: "You have taken an important step today.",
-    whereNext: "Where would you like to go next?",
-    hubJourneyTitle: "Begin Your First Leap",
-    hubJourneyDesc: "Start your first guided formation journey.",
-    hubCompanionTitle: "Meet Your Companion",
-    hubCompanionDesc: "An AI guide who can help you take your next steps.",
-    hubScriptureTitle: "Explore Scripture",
-    hubScriptureDesc: "Begin discovering God's Word.",
-    closing:
-      "Thank you for taking this step. Following Jesus is a journey, and you don't have to walk it alone.",
-  },
-};
+export const dictionaries: Partial<Record<Locale, Dictionary>> = { en, sw };
 
-const sw: Dictionary = {
-  nav: {
-    home: "Nyumbani",
-    connect: "Ungana",
-    commit: "Ahadi",
-    evolve: "Kua",
-    engage: "Shiriki",
-    admin: "Msimamizi",
-    inbox: "Kikasha",
-  },
-  companion: {
-    menuHeading: "Ungependa kufanya nini?",
-    close: "Funga",
-    openAriaLabel: "Fungua Rafiki wa Leap",
-    button: "Rafiki",
-    intents: {
-      "new-believer": "Nimeomba kumpokea Yesu",
-      scripture: "Nisaidie kuelewa Maandiko",
-      devotion: "Tafakari kuhusu ibada ya leo",
-      "next-step": "Nisaidie kuchukua hatua yangu inayofuata",
-      materials: "Pata vitabu vya Kikristo",
-    },
-  },
-  profile: {
-    backToHome: "Rudi Nyumbani",
-    heading: "Wasifu",
-    subheading: "Sasisha picha yako na jina.",
-    displayNameLabel: "Jina la kuonyesha",
-    save: "Hifadhi",
-    language: "Lugha",
-    english: "Kiingereza",
-    swahili: "Kiswahili",
-    changePhoto: "Badilisha picha",
-    cancel: "Ghairi",
-    savePhoto: "Hifadhi picha",
-    saving: "Inahifadhi…",
-    zoom: "Kuza",
-    viewPhoto: "Ona picha kubwa",
-  },
-  signIn: {
-    back: "Rudi",
-    welcomeBack: "Karibu tena",
-    createAccount: "Fungua akaunti yako",
-    newHere: "Mgeni hapa? Fungua akaunti",
-    alreadyHaveAccount: "Una akaunti tayari? Ingia",
-    name: "Jina",
-    nationality: "Uraia",
-    selectNationality: "Chagua nchi yako",
-    email: "Barua pepe",
-    password: "Nywila",
-    signInButton: "Ingia",
-    createAccountButton: "Fungua akaunti",
-    forgotPassword: "Nimesahau nywila yangu",
-    resetTitle: "Badilisha nywila yako",
-    resetIntro:
-      "Weka barua pepe uliyojisajili nayo, tutakutumia kiungo cha kuchagua nywila mpya.",
-    sendResetLink: "Tuma kiungo",
-    resetLinkSent:
-      "Ikiwa akaunti ya barua pepe hiyo ipo, kiungo kimetumwa. Angalia kisanduku chako (na folda ya spam).",
-    resetLinkInvalid:
-      "Kiungo hicho si sahihi au muda wake umeisha. Tafadhali omba kingine.",
-    backToSignIn: "Rudi kuingia",
-    newPasswordTitle: "Chagua nywila mpya",
-    newPassword: "Nywila mpya",
-    saveNewPassword: "Hifadhi nywila mpya",
-    checkEmailTitle: "Thibitisha barua pepe yako",
-    checkEmailSentTo: "Tumetuma kiungo cha uthibitisho kwa",
-    checkEmailBody:
-      "Kifungue ili kukamilisha akaunti yako. Angalia folda ya spam kama hukioni.",
-    resendConfirmation: "Tuma barua ya uthibitisho tena",
-    confirmationResent: "Imetumwa tena. Angalia kisanduku chako.",
-  },
-  dashboard: {
-    goodMorning: "Habari za asubuhi",
-    goodAfternoon: "Habari za mchana",
-    goodEvening: "Habari za jioni",
-    editProfileAriaLabel: "Hariri wasifu wako",
-    tagline: "Chukua hatua inayofuata. Kua katika Kristo. Ishi kusudi Lake.",
-    signOutAriaLabel: "Toka",
-    welcomeEyebrow: "Karibu",
-    beginJourneyHeading: "Hebu tuanze safari yako",
-    beginMyJourney: "Anza safari yangu",
-    continueYourJourneyEyebrow: "Endelea na Safari Yako",
-    dayOf: (current, total) => `Siku ya ${current} kati ya ${total}`,
-    continueTheJourney: "Endelea na safari",
-    nextLeapEyebrow: "Hatua Ifuatayo",
-    journeyCompleteEyebrow: "Safari Imekamilika",
-    welcomeToNextLeap: "Karibu kwenye Hatua Ifuatayo",
-    onlyBeginning: "Umeanza safari ya kumfuata Kristo. Huu ni mwanzo tu.",
-    percentComplete: (pct) => `Asilimia ${pct} imekamilika`,
-    done: "Imekamilika",
-    daysLeft: (n) =>
-      n === 1 ? "Siku 1 imebaki" : `Siku ${n} zimebaki`,
-    continueButton: "Endelea",
-    browseOtherJourneys: "Vinjari safari zingine",
-    prayerDaysLeft: (n) =>
-      n === 1
-        ? "Siku 1 imebaki — gusa kuomba"
-        : `Siku ${n} zimebaki — gusa kuomba`,
-    tapToPray: "Gusa kuomba",
-    tapToRead: "Gusa kusoma zaidi",
-    askPdReplied: "Mchungaji Deniss amekujibu",
-    daysLeftShort: (n) =>
-      n === 1 ? "Siku 1 imebaki" : `Siku ${n} zimebaki`,
-    announcementKinds: {
-      prayer: "Maombi",
-      news: "Habari",
-      event: "Tukio",
-      advert: "Maalum",
-      general: "Tangazo",
-    },
-    today: "Leo",
-    scripture: "Maandiko",
-    readGodsWord: "Soma Neno la Mungu",
-    devotion: "Ibada",
-    growDaily: "Kua kila siku",
-    devotionNew: "Mpya leo",
-    thisWeeksCommitment: "Ahadi ya wiki hii",
-    makeACommitment: "Weka ahadi",
-    keptThisWeek: (done, total) =>
-      `${done} kati ya ${total} zimetimizwa wiki hii`,
-    studyPrayShare: "Jifunze, omba, na shiriki injili wiki hii.",
-    community: "Jumuiya",
-    joinTheConversation: "Tia moyo, shiriki, na kukua pamoja.",
-  },
-  gospelInvite: {
-    heading: "Je, Unamjua Yesu?",
-    jesusSaid: "Yesu alisema:",
-    scriptureQuote: "Mimi ndimi njia, na kweli, na uzima.",
-    scriptureRef: "Yohana 14:6",
-    intro:
-      "Kama uko tayari kuanza uhusiano na Yesu, unaweza kuanza kwa ombi rahisi.",
-    prayerLabel: "Ombi Rahisi",
-    prayerText:
-      "Bwana Yesu, ninaamini Wewe ni Mwana wa Mungu. Nakuomba unisamehe dhambi zangu na uje moyoni mwangu. Ninakupokea kuwa Bwana na Mwokozi wangu. Asante kwa uzima wa milele. Kwa jina la Yesu, Amina.",
-    prayedButton: "Nimeomba Ombi Hili",
-    maybeLater: "Labda Baadaye",
-    close: "Funga",
-    beganHeading: "Safari Yako Imeanza",
-    beganSubheading: "Umechukua hatua muhimu leo.",
-    whereNext: "Ungependa kwenda wapi sasa?",
-    hubJourneyTitle: "Anza Hatua Yako ya Kwanza",
-    hubJourneyDesc: "Anza safari yako ya kwanza ya ukuaji iliyoongozwa.",
-    hubCompanionTitle: "Kutana na Rafiki Yako",
-    hubCompanionDesc:
-      "Kiongozi wa AI anayeweza kukusaidia kuchukua hatua zako zifuatazo.",
-    hubScriptureTitle: "Gundua Maandiko",
-    hubScriptureDesc: "Anza kugundua Neno la Mungu.",
-    closing:
-      "Asante kwa kuchukua hatua hii. Kumfuata Yesu ni safari, na hauhitaji kuitembea peke yako.",
-  },
-};
+/** Languages users can pick today, in registry order. */
+export const ENABLED_LOCALES: readonly Locale[] = LOCALES.filter(
+  (locale) => dictionaries[locale] !== undefined,
+);
 
-export const dictionaries: Record<Locale, Dictionary> = { en, sw };
+export function isEnabledLocale(locale: Locale): boolean {
+  return dictionaries[locale] !== undefined;
+}
 
 export function getDictionary(locale: Locale): Dictionary {
-  return dictionaries[locale];
+  return dictionaries[locale] ?? dictionaries[DEFAULT_LOCALE]!;
 }

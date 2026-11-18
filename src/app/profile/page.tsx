@@ -6,9 +6,11 @@ import { Label } from "@/components/ui/label";
 import { PatternBorder } from "@/components/pattern-bg";
 import { requireUser } from "@/lib/supabase/authorize";
 import { getLocale } from "@/lib/i18n/get-locale";
-import { getDictionary } from "@/lib/i18n/dictionaries";
+import { ENABLED_LOCALES, getDictionary } from "@/lib/i18n/dictionaries";
+import { LOCALE_INFO } from "@/lib/i18n/locales";
+import { setLocale } from "@/lib/i18n/actions";
 import { AvatarCropper } from "./avatar-cropper";
-import { updateDisplayName, updatePreferredLanguage } from "./actions";
+import { updateDisplayName } from "./actions";
 
 export default async function ProfilePage() {
   const { supabase, user } = await requireUser();
@@ -71,27 +73,21 @@ export default async function ProfilePage() {
 
       <div className="space-y-2 rounded-xl border bg-card p-4">
         <p className="text-sm font-medium">{dict.profile.language}</p>
-        <div className="flex gap-2">
-          <form action={updatePreferredLanguage}>
-            <input type="hidden" name="preferred_language" value="en" />
-            <Button
-              type="submit"
-              size="sm"
-              variant={locale === "en" ? "default" : "outline"}
-            >
-              {dict.profile.english}
-            </Button>
-          </form>
-          <form action={updatePreferredLanguage}>
-            <input type="hidden" name="preferred_language" value="sw" />
-            <Button
-              type="submit"
-              size="sm"
-              variant={locale === "sw" ? "default" : "outline"}
-            >
-              {dict.profile.swahili}
-            </Button>
-          </form>
+        <div className="flex flex-wrap gap-2">
+          {ENABLED_LOCALES.map((code) => (
+            <form key={code} action={setLocale}>
+              <input type="hidden" name="locale" value={code} />
+              <Button
+                type="submit"
+                size="sm"
+                lang={code}
+                variant={locale === code ? "default" : "outline"}
+                aria-pressed={locale === code}
+              >
+                {LOCALE_INFO[code].nativeName}
+              </Button>
+            </form>
+          ))}
         </div>
       </div>
     </main>

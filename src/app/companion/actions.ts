@@ -8,6 +8,7 @@ import { checkForCrisisLanguage } from "@/lib/crisis-detection";
 import { findJourneyMeta } from "@/lib/content/journeys-repo";
 import { getCurrentJourneyState } from "@/lib/supabase/journey-progress";
 import { getLocale } from "@/lib/i18n/get-locale";
+import { LOCALE_INFO } from "@/lib/i18n/locales";
 import {
   toAlternatingTurns,
   type ConversationMessage,
@@ -82,9 +83,9 @@ export async function sendMessage(formData: FormData) {
 
   const locale = await getLocale();
   const languageLine =
-    locale === "sw"
-      ? "\n\nRespond in Swahili, unless the user writes in a different language."
-      : "";
+    locale === "en"
+      ? ""
+      : `\n\nRespond in ${LOCALE_INFO[locale].englishName}, unless the user writes in a different language.`;
 
   let replyText =
     "Sorry, I'm having trouble responding right now — please try again in a moment.";

@@ -2,6 +2,9 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { BrandMark } from "@/components/brand-mark";
 import { PatternCorner } from "@/components/pattern-bg";
+import { GuestLanguageControls } from "@/components/language/guest-language-controls";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import { getLocale } from "@/lib/i18n/get-locale";
 
 // Code-composed welcome screen: a real DOM logo + heading instead of a
 // baked photograph, so it stays sharp at every device resolution and loads
@@ -9,7 +12,9 @@ import { PatternCorner } from "@/components/pattern-bg";
 // are hardcoded rather than theme tokens — this screen always renders on
 // the fixed dark background below regardless of the visitor's light/dark
 // system setting.
-export function WelcomeView() {
+export async function WelcomeView() {
+  const { welcome: dict, signIn } = getDictionary(await getLocale());
+
   return (
     <main className="relative flex flex-1 flex-col items-center justify-center overflow-hidden leap-backdrop-dark px-6 py-16 text-center">
       <PatternCorner corner="top-right" />
@@ -19,10 +24,10 @@ export function WelcomeView() {
         <BrandMark className="h-20 w-20" />
         <div className="space-y-2">
           <h1 className="font-heading text-3xl font-bold tracking-tight text-white">
-            Welcome to The Leap
+            {dict.title}
           </h1>
           <p className="max-w-xs text-sm text-white/70">
-            Your Essential Companion in Christ
+            {dict.tagline}
           </p>
         </div>
       </div>
@@ -34,14 +39,14 @@ export function WelcomeView() {
           size="lg"
           className="w-full"
         >
-          Get Started
+          {dict.getStarted}
         </Button>
         <Button
           render={<Link href="/sign-in" />}
           nativeButton={false}
           variant="link"
         >
-          I already have an account
+          {dict.haveAccount}
         </Button>
         <Button
           render={<Link href="/forgot-password" />}
@@ -50,9 +55,11 @@ export function WelcomeView() {
           size="sm"
           className="text-white/70"
         >
-          Forgot my password
+          {signIn.forgotPassword}
         </Button>
       </div>
+
+      <GuestLanguageControls className="mt-8 border-white/20 text-white/80" />
     </main>
   );
 }

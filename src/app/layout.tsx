@@ -16,6 +16,7 @@ import {
   countUserUnreadAskPd,
 } from "@/lib/supabase/ask-pd";
 import { getLocale } from "@/lib/i18n/get-locale";
+import { LOCALE_INFO } from "@/lib/i18n/locales";
 import { getDictionary, type Dictionary } from "@/lib/i18n/dictionaries";
 import "./globals.css";
 
@@ -85,6 +86,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang={locale}
+      dir={LOCALE_INFO[locale].dir}
       className={`${sora.variable} ${karla.variable} ${jetbrainsMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >

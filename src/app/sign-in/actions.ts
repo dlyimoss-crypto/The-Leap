@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { COUNTRIES } from "@/lib/countries";
+import { getLocale } from "@/lib/i18n/get-locale";
 
 const VALID_COUNTRY_CODES = new Set(COUNTRIES.map((c) => c.code));
 
@@ -57,7 +58,13 @@ export async function signUp(
     email,
     password,
     options: {
-      data: { display_name: displayName || null, nationality },
+      // preferred_language: the language picked before signing up, so the
+      // new profile starts in it (read by handle_new_user, migration 0038).
+      data: {
+        display_name: displayName || null,
+        nationality,
+        preferred_language: await getLocale(),
+      },
       emailRedirectTo: await confirmRedirectUrl(),
     },
   });

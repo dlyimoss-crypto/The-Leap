@@ -5,6 +5,7 @@ import { PatternBorder } from "@/components/pattern-bg";
 import { getAuthedUser } from "@/lib/supabase/authorize";
 import { getLocale } from "@/lib/i18n/get-locale";
 import { getDictionary } from "@/lib/i18n/dictionaries";
+import { GuestLanguageControls } from "@/components/language/guest-language-controls";
 import { SignInForm } from "./sign-in-form";
 
 export default async function SignInPage(props: PageProps<"/sign-in">) {
@@ -35,6 +36,7 @@ export default async function SignInPage(props: PageProps<"/sign-in">) {
       >
         {dict.signIn.back}
       </Button>
+      <GuestLanguageControls className="text-muted-foreground" />
     </main>
   );
 }
