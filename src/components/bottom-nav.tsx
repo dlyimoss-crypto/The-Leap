@@ -115,7 +115,10 @@ export function BottomNav({
               key={href}
               href={href}
               className={cn(
-                "flex flex-col items-center gap-0.5 py-2.5 text-[11px] font-medium transition-colors",
+                // Six tabs (team roles) leave ~60px each at 360px wide: a
+                // smaller label keeps "Entscheiden"/"Posteingang" whole.
+                "flex min-w-0 flex-col items-center gap-0.5 py-2.5 font-medium transition-colors",
+                teamItem ? "text-[10px]" : "text-[11px]",
                 active
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground",
@@ -129,7 +132,7 @@ export function BottomNav({
                   </span>
                 )}
               </span>
-              {dict[labelKey]}
+              <span className="block max-w-full truncate">{dict[labelKey]}</span>
             </Link>
           );
         })}

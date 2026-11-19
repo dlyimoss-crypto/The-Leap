@@ -46,7 +46,8 @@ export default async function JourneySessionPage(
       <main className="relative mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-4 overflow-hidden px-6 py-16 text-center">
         <PatternBorder />
         <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-          {t.dayOf(dayNumber, journey.durationDays)} &middot; {journey.title}
+          {t.dayOf(dayNumber, journey.durationDays)} &middot;{" "}
+          <span lang={journey.servedLocale}>{journey.title}</span>
         </p>
         <h1 className="text-2xl font-heading font-semibold text-balance">
           {t.gatedHeading}
@@ -71,7 +72,7 @@ export default async function JourneySessionPage(
         <Progress value={(dayNumber / journey.durationDays) * 100} />
         <p className="text-sm text-muted-foreground">
           {t.dayOf(session.day, journey.durationDays)} &middot;{" "}
-          {journey.title}
+          <span lang={journey.servedLocale}>{journey.title}</span>
         </p>
         <h1 lang={session.servedLocale} className="text-2xl font-heading font-semibold text-balance">
           {session.title}

@@ -47,11 +47,11 @@ export function PrayerMovementCard({
             </p>
           )}
         </div>
-        <h2 className="font-heading text-lg font-semibold text-balance">
+        <h2 lang={movement.servedLocale} className="font-heading text-lg font-semibold text-balance">
           {movement.title}
         </h2>
         {movement.body && (
-          <p className="whitespace-pre-line text-sm">{movement.body}</p>
+          <p lang={movement.servedLocale} className="whitespace-pre-line text-sm">{movement.body}</p>
         )}
         {movement.scripture_reference && (
           <p className="text-sm text-muted-foreground">
@@ -61,7 +61,7 @@ export function PrayerMovementCard({
       </div>
 
       {movement.prayer_points.length > 0 && (
-        <ul className="space-y-1.5">
+        <ul lang={movement.servedLocale} className="space-y-1.5">
           {movement.prayer_points.map((point, i) => (
             <li key={i} className="flex items-start gap-2 text-sm">
               <span className="mt-1.5 size-1 shrink-0 rounded-full bg-primary" />
@@ -79,7 +79,11 @@ export function PrayerMovementCard({
             : {})}
           className="block text-sm font-medium text-primary underline-offset-4 hover:underline"
         >
-          {movement.link_label || dict.learnMore}
+          {movement.link_label ? (
+            <span lang={movement.servedLocale}>{movement.link_label}</span>
+          ) : (
+            dict.learnMore
+          )}
         </a>
       )}
 

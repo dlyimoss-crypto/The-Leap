@@ -92,7 +92,7 @@ export default async function TranslationsPage(props: PageProps<"/admin/translat
         <p className="text-sm text-muted-foreground">
           {interpolate(t.summary, { published, total: items.length })}
         </p>
-        <div className="flex gap-1 text-sm">
+        <div className="flex flex-wrap gap-1 text-sm">
           {FILTERS.map((f) => (
             <Link
               key={f}

@@ -97,6 +97,7 @@ type NextJourney = {
   title: string;
   purpose: string;
   teaser?: string | null;
+  servedLocale?: Locale;
 };
 
 export function DashboardView({
@@ -173,7 +174,7 @@ export function DashboardView({
               <h1 className="font-heading text-2xl font-bold text-foreground text-balance">
                 {dict.dashboard.beginJourneyHeading}
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p lang={journey.servedLocale} className="text-sm text-muted-foreground">
                 {truncate(journey.teaser ?? journey.purpose, 100)}
               </p>
             </div>
@@ -206,7 +207,7 @@ export function DashboardView({
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {dict.dashboard.continueYourJourneyEyebrow}
               </p>
-              <h1 className="font-heading text-2xl font-bold text-foreground text-balance">
+              <h1 lang={journey.servedLocale} className="font-heading text-2xl font-bold text-foreground text-balance">
                 {journey.title}
               </h1>
               <p className="text-sm text-muted-foreground">
@@ -216,7 +217,7 @@ export function DashboardView({
                 )}
               </p>
               {journey.teaser && (
-                <p className="text-sm text-muted-foreground">
+                <p lang={journey.servedLocale} className="text-sm text-muted-foreground">
                   {truncate(journey.teaser, 100)}
                 </p>
               )}
@@ -259,14 +260,20 @@ export function DashboardView({
                   : dict.dashboard.journeyCompleteEyebrow}
               </p>
               <h1 className="font-heading text-2xl font-bold text-foreground text-balance">
-                {nextJourney
-                  ? dict.dashboard.welcomeToNextLeap
-                  : journey.completionTitle}
+                {nextJourney ? (
+                  dict.dashboard.welcomeToNextLeap
+                ) : (
+                  <span lang={journey.servedLocale}>{journey.completionTitle}</span>
+                )}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {nextJourney
-                  ? `${nextJourney.title} — ${truncate(nextJourney.teaser ?? nextJourney.purpose, 100)}`
-                  : dict.dashboard.onlyBeginning}
+                {nextJourney ? (
+                  <span lang={nextJourney.servedLocale}>
+                    {`${nextJourney.title} — ${truncate(nextJourney.teaser ?? nextJourney.purpose, 100)}`}
+                  </span>
+                ) : (
+                  dict.dashboard.onlyBeginning
+                )}
               </p>
             </div>
             <div className="size-20 shrink-0 overflow-hidden rounded-2xl bg-muted">
@@ -471,7 +478,7 @@ function AnnouncementBanner({
         <p className="text-[10px] font-semibold uppercase tracking-wide text-primary">
           {dict.dashboard.announcementKinds[announcement.kind]}
         </p>
-        <p className="text-sm font-semibold">{announcement.title}</p>
+        <p lang={announcement.servedLocale} className="text-sm font-semibold">{announcement.title}</p>
         <p className="truncate text-xs text-muted-foreground">{subtitle}</p>
       </div>
     </Link>

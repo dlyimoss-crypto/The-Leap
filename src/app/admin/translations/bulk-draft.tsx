@@ -59,7 +59,8 @@ export function BulkDraft({
           </Button>
         </div>
       ) : (
-        <Button size="sm" onClick={run}>
+        // Long in some languages (French, Swahili): let it wrap on small screens.
+        <Button size="sm" onClick={run} className="h-auto max-w-full shrink whitespace-normal py-1.5 text-start">
           <Sparkles className="size-4" />
           {interpolate(labels.start, { count: items.length })}
         </Button>

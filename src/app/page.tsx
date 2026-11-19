@@ -13,6 +13,7 @@ import { getActiveAnnouncementCached } from "@/lib/supabase/announcements";
 import { countUserUnreadAskPd } from "@/lib/supabase/ask-pd";
 import { isTodaysDevotionUnread } from "@/lib/supabase/devotion-reads";
 import { getLocale } from "@/lib/i18n/get-locale";
+import type { Locale } from "@/lib/i18n/locales";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { Suspense } from "react";
 import { WelcomeView } from "./welcome-view";
@@ -102,6 +103,7 @@ async function HomeContent({
     title: string;
     purpose: string;
     teaser?: string | null;
+    servedLocale?: Locale;
   } | null = null;
   if (progress?.completed_at) {
     const available = await findAvailableJourneysCached(locale);
@@ -112,6 +114,7 @@ async function HomeContent({
           title: match.title,
           purpose: match.purpose,
           teaser: match.teaser,
+          servedLocale: match.servedLocale,
         }
       : null;
   }

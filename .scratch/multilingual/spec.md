@@ -1,6 +1,6 @@
 # Multilingual support — audit and implementation plan
 
-Status: ready-for-agent (plan approved 2026-11-18; decisions recorded in §K). Done: phases 1–4 and 6 (2026-11-19). Remaining: phase 7 (QA + docs).
+Status: ready-for-agent (plan approved 2026-11-18; decisions recorded in §K). Done: all phases (1–4, 6, 7) as of 2026-11-19. Guide: docs/localization.md; ADR: docs/adr/0002-localization-architecture.md.
 
 Source brief: "The Leap App — Multilingual Support & Global Localisation" (pasted 2026-11-18).
 

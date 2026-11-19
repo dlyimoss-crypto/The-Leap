@@ -197,3 +197,9 @@ html:lang(zh-CN) .tracking-tight {
     @apply font-heading;
   }
 }
+/* Right-to-left readiness: arrows and chevrons that mean "back"/"next"
+   point the other way when the page direction is rtl. (Layout itself uses
+   logical classes — ms-/pe-/start-/end- — so it mirrors on its own.) */
+[dir="rtl"] :is(.lucide-arrow-left, .lucide-arrow-right, .lucide-chevron-left, .lucide-chevron-right) {
+  transform: scaleX(-1);
+}

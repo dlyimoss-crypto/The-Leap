@@ -62,10 +62,10 @@ export default async function BrowseJourneysPage() {
                 <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   {t.durationLabel(journey.durationDays)}
                 </p>
-                <p className="font-heading text-lg font-semibold text-balance">
+                <p lang={journey.servedLocale} className="font-heading text-lg font-semibold text-balance">
                   {journey.title}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p lang={journey.servedLocale} className="text-sm text-muted-foreground">
                   {journey.purpose}
                 </p>
               </div>
