@@ -74,6 +74,10 @@ import {
   updateJourney,
 } from "./journeys-actions";
 
+// Saving journeys, devotions and announcements translates them into every
+// language in the background (after()), which runs within this limit.
+export const maxDuration = 300;
+
 type Tab =
   | "queue"
   | "users"

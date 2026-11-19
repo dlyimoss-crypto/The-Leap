@@ -122,7 +122,6 @@ export default async function TranslationEditorPage(
           draftWithAI: t.draftWithAI,
           redraftWithAI: t.redraftWithAI,
           drafting: t.drafting,
-          draftFilledForm: t.draftFilledForm,
           saveDraft: t.saveDraft,
           publish: t.publish,
           publishUpdate: t.publishUpdate,

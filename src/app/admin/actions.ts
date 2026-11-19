@@ -3,6 +3,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { parsePriceCents } from "@/lib/book-price";
 import { requireAdmin } from "@/lib/supabase/authorize";
+import { translateInBackground } from "@/lib/localization/auto-translate";
 import {
   ANNOUNCEMENT_IMAGE_BUCKET,
   isAnnouncementKind,
@@ -119,13 +120,16 @@ function devotionFields(formData: FormData) {
 export async function createDevotion(formData: FormData) {
   const { supabase, user } = await requireAdmin();
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("devotions")
-    .insert({ ...devotionFields(formData), author_id: user.id });
+    .insert({ ...devotionFields(formData), author_id: user.id })
+    .select("id")
+    .single();
 
   if (error) {
     console.error("Failed to create devotion", error);
   }
+  translateInBackground(supabase, "devotion", data?.id);
 
   revalidatePath("/admin");
 }
@@ -140,6 +144,8 @@ export async function updateDevotion(id: string, formData: FormData) {
 
   if (error) {
     console.error("Failed to update devotion", error);
+  } else {
+    translateInBackground(supabase, "devotion", id);
   }
 
   revalidatePath("/admin");
@@ -228,13 +234,16 @@ export async function createAnnouncement(formData: FormData) {
 
   const image_path = await announcementImageUpdate(supabase, formData);
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("prayer_movements")
-    .insert({ ...announcementFields(formData), image_path: image_path ?? null });
+    .insert({ ...announcementFields(formData), image_path: image_path ?? null })
+    .select("id")
+    .single();
 
   if (error) {
     console.error("Failed to create announcement", error);
   }
+  translateInBackground(supabase, "announcement", data?.id);
 
   revalidateAnnouncement();
 }
@@ -254,6 +263,8 @@ export async function updateAnnouncement(id: string, formData: FormData) {
 
   if (error) {
     console.error("Failed to update announcement", error);
+  } else {
+    translateInBackground(supabase, "announcement", id);
   }
 
   revalidateAnnouncement();

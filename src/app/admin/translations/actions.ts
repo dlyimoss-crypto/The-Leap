@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/supabase/authorize";
 import { CONTENT_TYPES, type ContentType } from "@/lib/localization/content";
@@ -8,14 +8,14 @@ import {
   isContentType,
   isTranslationLocale,
   loadEditor,
-  loadGlossary,
   type TranslationLocale,
 } from "@/lib/localization/admin-data";
+import type { TranslatableValue } from "@/lib/localization/translate";
 import {
-  draftTranslation,
-  TranslationError,
-  type TranslatableValue,
-} from "@/lib/localization/translate";
+  isComplete,
+  revalidateReaders,
+  translateAndPublish,
+} from "@/lib/localization/auto-translate";
 
 // The translation workflow. Every action is admin-only (requireAdmin + RLS)
 // and only ever writes the *_localizations tables — never the English
@@ -25,93 +25,25 @@ function editorPath(type: ContentType, id: string, locale: string) {
   return `/admin/translations/${type}/${id}?locale=${locale}`;
 }
 
-/** Readers' caches that hold translated content. */
-function revalidateReaders(type: ContentType) {
-  if (type === "journey") revalidateTag("journeys", { expire: 0 });
-  if (type === "announcement") revalidateTag("announcement", { expire: 0 });
-  revalidatePath("/", "layout");
-}
-
-function isFilled(value: TranslatableValue | undefined) {
-  return Array.isArray(value) ? value.length > 0 : value != null && value.trim() !== "";
-}
-
-/** Same all-or-nothing rule readers get (overlay.ts): every part the English has. */
-function isComplete(
-  source: Record<string, TranslatableValue>,
-  fields: Record<string, TranslatableValue>,
-) {
-  return Object.entries(source).every(([field, english]) => {
-    if (!isFilled(english)) return true;
-    const value = fields[field];
-    if (!isFilled(value)) return false;
-    return !Array.isArray(english) || (Array.isArray(value) && value.length >= english.length);
-  });
-}
-
-export type DraftActionResult =
-  | { ok: true; saved: true }
-  | { ok: true; saved: false; fields: Record<string, TranslatableValue>; notes: string }
-  | { ok: false; error: string };
+export type DraftActionResult = { ok: true } | { ok: false; error: string };
 
 /**
- * Drafts a translation with AI. If nothing is published yet, the draft is
- * saved straight into review (`awaiting_review`). If a translation is
- * already published, the draft is only returned to the editor form, so
- * readers keep the published text until an admin publishes the update.
+ * Translates one item with AI and publishes it straight away (automatic
+ * publishing). From the editor `force` re-translates even an up-to-date
+ * item; the bulk button only does what's missing or out of date.
  */
 export async function draftWithAI(
   type: string,
   id: string,
   locale: string,
+  { force = true }: { force?: boolean } = {},
 ): Promise<DraftActionResult> {
   const { supabase } = await requireAdmin("/");
   if (!isContentType(type) || !isTranslationLocale(locale)) {
     return { ok: false, error: "Invalid request." };
   }
-
-  const editor = await loadEditor(supabase, type, id, locale);
-  if (!editor) return { ok: false, error: "This item no longer exists." };
-
-  let result;
-  try {
-    result = await draftTranslation({
-      type,
-      locale,
-      source: editor.sourceFields,
-      glossary: await loadGlossary(supabase, locale),
-    });
-  } catch (error) {
-    if (error instanceof TranslationError) return { ok: false, error: error.message };
-    console.error("AI translation failed", error);
-    return { ok: false, error: "The AI translation failed. Please try again." };
-  }
-
-  if (editor.translation?.status === "published") {
-    return { ok: true, saved: false, fields: result.fields, notes: result.notes };
-  }
-
-  const { table, sourceColumn } = CONTENT_TYPES[type];
-  const { error } = await supabase.from(table).upsert(
-    {
-      [sourceColumn]: id,
-      locale,
-      ...result.fields,
-      translator_notes: result.notes || null,
-      status: "awaiting_review",
-      origin: "ai",
-      source_version: editor.source.content_version,
-      review_note: null,
-    },
-    { onConflict: `${sourceColumn},locale` },
-  );
-  if (error) {
-    console.error("Failed to save AI draft", error);
-    return { ok: false, error: "The draft couldn't be saved." };
-  }
-
-  revalidatePath("/admin/translations");
-  return { ok: true, saved: true };
+  const result = await translateAndPublish(supabase, type, id, locale, { force });
+  return result.status === "failed" ? { ok: false, error: result.error } : { ok: true };
 }
 
 function readFields(

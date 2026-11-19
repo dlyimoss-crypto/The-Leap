@@ -8,9 +8,9 @@ import { interpolate } from "@/lib/i18n/format";
 import { draftWithAI } from "./actions";
 
 /**
- * Drafts every not-started item for one language, one AI call at a time
- * (each call is its own short server request, so none runs into a time
- * limit). Drafts land in review; nothing is published.
+ * Translates and publishes everything missing or out of date in one
+ * language, one AI call at a time (each call is its own short server
+ * request, so none runs into a time limit).
  */
 export function BulkDraft({
   locale,
@@ -37,7 +37,7 @@ export function BulkDraft({
     const failed: string[] = [];
     for (const item of items) {
       if (stopRequested.current) break;
-      const res = await draftWithAI(item.type, item.id, locale);
+      const res = await draftWithAI(item.type, item.id, locale, { force: false });
       if (res.ok) ok++;
       else failed.push(res.error);
       setDone((d) => d + 1);

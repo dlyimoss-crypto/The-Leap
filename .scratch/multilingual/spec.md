@@ -182,6 +182,7 @@ Network-first rather than stale-while-revalidate, so pages never show stale prog
 1. **Reviewers: keep it simple.** No per-language reviewer table. Any `admin` can approve and publish translations from the admin area. Drop `translation_reviewers` from §D.
 2. **Outdated translations: keep serving.** Readers keep seeing the last published translation. Admins see it flagged `outdated` in the review queue.
 3. **Interface strings ship without approval.** AI-drafted UI text (buttons, labels) goes live directly and is corrected later as needed. Devotions, journeys and other teaching content always need admin approval.
+   **Revised 2026-11-19:** teaching content also publishes automatically. Saving English content translates it into every language in the background and publishes it; admins correct afterwards. When the English changes, it's translated afresh (hand corrections are replaced).
 4. **Bible: unchanged.** No Bible translations, no Swahili Bible, no localized book names. Scripture stays the BSB (English) in every language. §C5 is out of scope; Phase 5 is dropped.
 5. **Offline reading: in scope now** (Phase 6 stays).
 6. **Books: unchanged.** No translation of book metadata or files.

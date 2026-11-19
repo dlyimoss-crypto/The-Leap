@@ -7,8 +7,8 @@ Two kinds of text are translated differently:
 | | Interface text (buttons, labels, headings, errors) | Teaching content (journeys, journey days, devotions, announcements) |
 |---|---|---|
 | Lives in | `src/lib/i18n/messages/<locale>/*.ts` | `*_localizations` tables in Supabase (migration 0039) |
-| Written by | Developers (AI-drafted, checked by native speakers) | AI draft in **Admin → Translations**, then an admin |
-| Goes live | When deployed, without formal approval | Only when an admin clicks **Approve & publish** |
+| Written by | Developers (AI-drafted, checked by native speakers) | AI, automatically, whenever the English is saved |
+| Goes live | When deployed, without formal approval | Immediately (automatic publishing); admins correct afterwards |
 | If missing | Compile error (can't happen in production) | The English original, with a "Not yet translated" notice |
 
 Not translated: anything people write themselves (posts, comments, prayer requests, reflections, Ask PD), the Bible (always the Berean Standard Bible), and books.
@@ -42,23 +42,24 @@ Changing language anywhere (welcome screen, sign-in, Profile, the suggestion) go
 
 ## Translating and publishing content (admins)
 
-Everything happens in **Admin → Translations** (`/admin/translations`).
+Translation is automatic. Saving a journey, journey day, devotion or announcement in the admin translates it into every language in the background, and each translation is published straight away. Saving never waits for this; it takes about a minute.
 
-1. **Pick a language.** The overview lists every journey, journey day, devotion and announcement with its status in that language: not started, awaiting review, needs revision, approved, published. Items whose English has changed since they were translated are marked **outdated**.
-2. **Draft with AI.** Either draft one item from its editor, or use **Draft all not-started with AI**. Drafts use the language's glossary and keep Scripture references unchanged. They always arrive as *awaiting review*, never published.
-3. **Review.** The editor shows the English beside the translation. Read the whole item and fix anything off, especially theology, tone and the terms in the glossary. The AI's notes, such as uncertain terms or Bible quotations, appear above the form.
-4. **Then choose one of:**
-   - **Approve & publish:** readers in that language see it right away.
-   - **Save draft:** keep your edits for later.
-   - **Send back for revision:** mark it *needs revision*, with a note.
-   - **Unpublish:** take a published translation down. Readers get the English original again.
-5. **When the English changes,** the translation is flagged *outdated*, but readers keep seeing the last published version until an updated translation is approved. Redrafting an outdated item only fills the form. Nothing changes for readers until you publish.
+- **Unchanged text costs nothing.** A language whose published translation already matches the current English is skipped.
+- **When the English changes,** the item is translated afresh on save. This replaces any hand correction in that language, so re-apply important corrections after big edits, or put the term in the glossary.
+- **If the AI leaves out part of an item,** that language is saved as *awaiting review* instead of published, and readers keep the English until an admin completes it.
+- **If translation fails** (for example the Anthropic account is out of credit), readers see the English original with a "not yet translated" notice. Failures are logged on Vercel.
+
+**Admin → Translations** (`/admin/translations`) is for catching up and correcting:
+
+1. **Pick a language.** The overview lists every item with its status in that language. Items whose English has changed since they were translated are marked **outdated**.
+2. **Translate and publish everything missing or out of date** catches up after a failure, and is how the content that existed before automatic publishing was translated.
+3. **Correct a translation.** Open an item to see the English beside the translation. Fix the text and click **Approve & publish**. **Translate again with AI and publish** replaces it with a fresh AI translation. **Unpublish** takes a translation down, and readers get the English original again.
 
 Every status change is recorded, with who made it and when, in the item's **History**. A database trigger writes this, so it can't be skipped.
 
 **Glossary.** Admin → Translations → Glossary lists the approved term for each key word in each language (grace, salvation, repentance, the movement names…). The AI follows it in every draft. Fix a term there once rather than in every item.
 
-Any admin can approve and publish. There is no separate reviewer role, so ideally the person who approves is a native speaker.
+Any admin can correct and publish translations. Native speakers reporting problems is the main safeguard now that translations publish without review.
 
 ## Offline reading
 

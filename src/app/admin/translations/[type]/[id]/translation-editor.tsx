@@ -21,7 +21,6 @@ type Labels = {
   draftWithAI: string;
   redraftWithAI: string;
   drafting: string;
-  draftFilledForm: string;
   saveDraft: string;
   publish: string;
   publishUpdate: string;
@@ -62,24 +61,16 @@ export function TranslationEditor({
   const [values, setValues] = useState(() =>
     Object.fromEntries(fields.map((f) => [f.name, toText(initial[f.name])])),
   );
-  const [aiNotes, setAiNotes] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
-  const [filledFromAI, setFilledFromAI] = useState(false);
   const [drafting, startDrafting] = useTransition();
 
   function draft() {
     setAiError(null);
     startDrafting(async () => {
+      // Translates and publishes; the page then reloads with the result.
       const result = await draftWithAI(type, id, locale);
-      if (!result.ok) {
-        setAiError(result.error);
-      } else if (result.saved) {
-        router.refresh();
-      } else {
-        setValues(Object.fromEntries(fields.map((f) => [f.name, toText(result.fields[f.name])])));
-        setAiNotes(result.notes || null);
-        setFilledFromAI(true);
-      }
+      if (!result.ok) setAiError(result.error);
+      else router.refresh();
     });
   }
 
@@ -104,17 +95,6 @@ export function TranslationEditor({
         <p role="alert" className="text-sm text-destructive">
           {aiError}
         </p>
-      )}
-      {filledFromAI && (
-        <p className="rounded-lg bg-muted p-3 text-sm" aria-live="polite">
-          {labels.draftFilledForm}
-        </p>
-      )}
-      {aiNotes && (
-        <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
-          <p className="font-medium">{labels.translatorNotes}</p>
-          <p className="whitespace-pre-line text-muted-foreground">{aiNotes}</p>
-        </div>
       )}
 
       {fields.map((field) => (

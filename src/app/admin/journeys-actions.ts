@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin } from "@/lib/supabase/authorize";
+import { translateInBackground } from "@/lib/localization/auto-translate";
 
 function journeyFields(formData: FormData) {
   return {
@@ -21,11 +22,16 @@ function journeyFields(formData: FormData) {
 export async function createJourney(formData: FormData) {
   const { supabase } = await requireAdmin();
 
-  const { error } = await supabase.from("journeys").insert(journeyFields(formData));
+  const { data, error } = await supabase
+    .from("journeys")
+    .insert(journeyFields(formData))
+    .select("id")
+    .single();
 
   if (error) {
     console.error("Failed to create journey", error);
   }
+  translateInBackground(supabase, "journey", data?.id);
 
   revalidatePath("/admin");
 }
@@ -40,6 +46,8 @@ export async function updateJourney(id: string, formData: FormData) {
 
   if (error) {
     console.error("Failed to update journey", error);
+  } else {
+    translateInBackground(supabase, "journey", id);
   }
 
   revalidatePath("/admin");
@@ -134,7 +142,7 @@ export async function saveJourneyDay(
 ) {
   const { supabase } = await requireAdmin();
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("journey_days")
     .upsert(
       {
@@ -143,11 +151,14 @@ export async function saveJourneyDay(
         ...journeyDayFields(formData),
       },
       { onConflict: "journey_id,day_number" },
-    );
+    )
+    .select("id")
+    .single();
 
   if (error) {
     console.error("Failed to save journey day", error);
   }
+  translateInBackground(supabase, "journey_day", data?.id);
 
   revalidatePath("/admin");
 }

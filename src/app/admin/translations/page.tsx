@@ -43,7 +43,9 @@ export default async function TranslationsPage(props: PageProps<"/admin/translat
   const shown = items.filter((i) =>
     filter === "all" ? true : filter === "published" ? i.state === "published" : needsAttention(i),
   );
-  const notStarted = items.filter((i) => i.state === "missing").map((i) => ({ type: i.type, id: i.id }));
+  // Everything readers don't yet get in this language: never translated,
+  // unfinished, or older than its English.
+  const notStarted = items.filter(needsAttention).map((i) => ({ type: i.type, id: i.id }));
   const href = (params: { locale?: string; filter?: string }) =>
     `/admin/translations?locale=${params.locale ?? locale}&filter=${params.filter ?? filter}`;
 
