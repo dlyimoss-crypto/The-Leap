@@ -2,6 +2,14 @@ import type { CommonMessages } from "../en/common";
 
 export const common: CommonMessages = {
   notTranslated: "Noch nicht auf Deutsch verfügbar. Hier ist das englische Original.",
+  offline: {
+    banner: "Du bist offline. Bereits geöffnete Seiten funktionieren weiter; Änderungen brauchen eine Verbindung.",
+    title: "Du bist offline",
+    body: "Diese Seite ist auf diesem Gerät noch nicht gespeichert. Seiten, die du online geöffnet hast, kannst du weiterhin lesen.",
+    savedHeading: "Auf diesem Gerät gespeichert",
+    nothingSaved: "Noch nichts gespeichert. Andachten, Tage deiner Glaubensreise und Bibeltexte, die du online öffnest, werden hier zum Offline-Lesen aufbewahrt.",
+    retry: "Erneut versuchen",
+  },
   themeToggle: {
     toLight: "Zum hellen Modus wechseln",
     toDark: "Zum dunklen Modus wechseln",

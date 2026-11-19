@@ -2,6 +2,14 @@ import type { CommonMessages } from "../en/common";
 
 export const common: CommonMessages = {
   notTranslated: "Bado haipatikani kwa Kiswahili. Inaonyeshwa kwa Kiingereza asilia.",
+  offline: {
+    banner: "Hauko mtandaoni. Kurasa ulizowahi kufungua bado zinafanya kazi; mabadiliko yanahitaji mtandao.",
+    title: "Hauko mtandaoni",
+    body: "Ukurasa huu bado haujahifadhiwa kwenye kifaa hiki. Bado unaweza kusoma kurasa ulizofungua ukiwa mtandaoni.",
+    savedHeading: "Vilivyohifadhiwa kwenye kifaa hiki",
+    nothingSaved: "Bado hakuna kilichohifadhiwa. Ibada, siku za safari na Maandiko unayofungua ukiwa mtandaoni huhifadhiwa hapa ili usome bila mtandao.",
+    retry: "Jaribu tena",
+  },
   themeToggle: {
     toLight: "Badili kwenda mwonekano wa mwanga",
     toDark: "Badili kwenda mwonekano wa giza",

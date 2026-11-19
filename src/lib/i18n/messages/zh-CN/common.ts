@@ -2,6 +2,14 @@ import type { CommonMessages } from "../en/common";
 
 export const common: CommonMessages = {
   notTranslated: "暂无中文版本，以下为英文原文。",
+  offline: {
+    banner: "你目前处于离线状态。之前打开过的页面仍可使用；更改内容需要联网。",
+    title: "你目前处于离线状态",
+    body: "此页面尚未保存在这台设备上。你仍可阅读联网时打开过的页面。",
+    savedHeading: "已保存在此设备上",
+    nothingSaved: "尚未保存任何内容。联网时打开的灵修、旅程日和经文会保存在这里，供离线阅读。",
+    retry: "重试",
+  },
   themeToggle: {
     toLight: "切换到浅色模式",
     toDark: "切换到深色模式",

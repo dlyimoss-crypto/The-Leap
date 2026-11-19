@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { BottomNav } from "@/components/bottom-nav";
 import { CompanionLauncher } from "@/components/companion-launcher";
+import { OfflineSupport } from "@/components/offline/offline-support";
 import { getAuthedUser, getProfile } from "@/lib/supabase/authorize";
 import {
   getAdminNotificationCounts,
@@ -92,6 +93,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <OfflineSupport
+            userId={user?.id ?? null}
+            locale={locale}
+            bannerText={dict.common.offline.banner}
+          />
           <div className="fixed top-3 end-3 z-50">
             <ThemeToggle dict={dict.common.themeToggle} />
           </div>

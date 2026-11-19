@@ -2,6 +2,14 @@ import type { CommonMessages } from "../en/common";
 
 export const common: CommonMessages = {
   notTranslated: "Aún no está disponible en español. Aquí tienes el original en inglés.",
+  offline: {
+    banner: "Estás sin conexión. Las páginas que ya abriste siguen funcionando; los cambios necesitan conexión.",
+    title: "Estás sin conexión",
+    body: "Esta página aún no está guardada en este dispositivo. Todavía puedes leer las páginas que abriste con conexión.",
+    savedHeading: "Guardado en este dispositivo",
+    nothingSaved: "Aún no hay nada guardado. Los devocionales, los días de tus recorridos y los pasajes bíblicos que abras con conexión se guardan aquí para leerlos sin conexión.",
+    retry: "Reintentar",
+  },
   themeToggle: {
     toLight: "Cambiar a modo claro",
     toDark: "Cambiar a modo oscuro",

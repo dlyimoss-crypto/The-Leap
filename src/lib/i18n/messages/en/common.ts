@@ -8,6 +8,15 @@
 export const common = {
   /** Shown above devotions/journeys/announcements with no published translation yet. */
   notTranslated: "Not yet translated. Showing the English original.",
+  /** Offline banner and the /offline page (shown by the service worker). */
+  offline: {
+    banner: "You're offline. Pages you've opened before still work; changes need a connection.",
+    title: "You're offline",
+    body: "This page isn't saved on this device yet. You can still read pages you opened while online.",
+    savedHeading: "Saved on this device",
+    nothingSaved: "Nothing saved yet. Devotions, journey days and Scripture you open while online are kept here for offline reading.",
+    retry: "Try again",
+  },
   themeToggle: {
     toLight: "Switch to light mode",
     toDark: "Switch to dark mode",

@@ -1,6 +1,6 @@
 # Multilingual support — audit and implementation plan
 
-Status: ready-for-agent (plan approved 2026-11-18; decisions recorded in §K)
+Status: ready-for-agent (plan approved 2026-11-18; decisions recorded in §K). Done: phases 1–4 and 6 (2026-11-19). Remaining: phase 7 (QA + docs).
 
 Source brief: "The Leap App — Multilingual Support & Global Localisation" (pasted 2026-11-18).
 
@@ -157,6 +157,9 @@ None required. `Intl` covers plurals, dates and numbers; the Anthropic SDK and w
 7. **QA + docs:** test matrix (§J), `docs/localization.md` (adding a language, translating, approving), ADR for the architecture.
 
 Each phase ends typechecked, linted, tested, built and verified in the running app before the next starts.
+
+### C7 as built (2026-11-19)
+Network-first rather than stale-while-revalidate, so pages never show stale progress while online; the saved copy is used offline or after 6 s on a slow connection. Saved pages belong to one signed-in reader and language: the root layout tells the worker who's signed in, and a sign-out, account switch or language change discards them (no keying per locale needed). Nothing is saved while signed out. Rules in `public/sw-rules.js` (unit-tested), worker in `public/sw.js`, fallback page `/offline` (static, all languages, lists saved pages). Service workers are disabled in Safari Lockdown Mode, so offline reading (and push) won't work there.
 
 ## H. Risks to existing functionality
 - Phase 2 touches nearly every screen. Mitigation: English output must be byte-identical before and after extraction (snapshot tests on key screens), and the work ships in small per-area commits.
