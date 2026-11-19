@@ -26,12 +26,13 @@ export default async function CommunityPage(
   const showCrisisBanner = searchParams.crisis === "1";
 
   const { supabase, user } = await requireUser();
-  const dict = getDictionary(await getLocale());
-  const sp = wordSpace(await getLocale());
+  const locale = await getLocale();
+  const dict = getDictionary(locale);
+  const sp = wordSpace(locale);
   const t = dict.community;
 
   const today = new Date().toISOString().slice(0, 10);
-  const prompt = getCommunityPrompt(today);
+  const prompt = getCommunityPrompt(today, locale);
 
   const [{ data: blocks }, { data: rawPosts, error }] = await Promise.all([
     supabase.from("blocks").select("blocked_id").eq("blocker_id", user.id),
@@ -94,7 +95,7 @@ export default async function CommunityPage(
         {t.communityPage.heading}
       </h1>
 
-      <Composer prompt={prompt} dict={t.composer} />
+      <Composer prompt={prompt?.prompt ?? null} dict={t.composer} />
 
       {showCrisisBanner && (
         <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-xs text-foreground">
