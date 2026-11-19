@@ -140,6 +140,11 @@ export async function draftTranslation({
     }
     if (error instanceof Anthropic.APIError) {
       console.error("Translation request failed", error.status, error.message);
+      if (/credit balance/i.test(error.message)) {
+        throw new TranslationError(
+          "The Anthropic account is out of credit. Top it up at console.anthropic.com (Plans & Billing), then try again.",
+        );
+      }
       throw new TranslationError(`The AI service returned an error (${error.status ?? "network"}).`);
     }
     throw error;
